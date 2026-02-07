@@ -1,26 +1,56 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* 1. Import DaisyUI v5 sebagai plugin */
+@plugin "daisyui" {
+  /* 2. Daftarkan tema yang ingin Anda aktifkan */
+  themes: light;
+  
+  /* Opsional: Jika ingin tema default mengikuti sistem OS user */
+  /* darkTheme: "dark"; */
 }
+@plugin "@tailwindcss/typography";
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+/* 3. Pengaturan Dasar (Reset & Utility) */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Anda bisa menambahkan variabel CSS kustom di sini jika perlu */
+  }
+
+  body {
+    @apply bg-base-100 text-base-content antialiased;
+    /* Memastikan warna background dan teks mengikuti tema DaisyUI */
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* 4. KUSTOMISASI ANIMASI (KHUSUS UNTUK LANDING PAGE) */
+@layer utilities {
+  /* Definisi Keyframes untuk efek muncul dari bawah */
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(1.5rem); /* Bergerak dari 24px ke bawah */
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0); /* Posisi asli */
+    }
+  }
+
+  /* Class yang akan dipanggil di TSX */
+  .animate-fade-in-up {
+    animation: fade-in-up 1s ease-out forwards; /* Durasi 1 detik, efek halus */
+  }
+}
+
+/* 5. Kustomisasi Komponen (Opsional) */
+@layer components {
+  /* Class tombol gradasi kustom jika Anda ingin menggunakannya di lain waktu */
+  .btn-gradient {
+    @apply btn bg-gradient-to-r from-primary to-secondary text-white border-none hover:opacity-90 transition-opacity;
+  }
+}
+
+/* 6. Perbaikan untuk elemen HTML spesifik */
+html {
+  scroll-behavior: smooth;
 }
