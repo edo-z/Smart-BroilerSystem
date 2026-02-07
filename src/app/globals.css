@@ -17,8 +17,7 @@
   }
 
   body {
-    @apply bg-base-100 text-base-content antialiased;
-    /* Memastikan warna background dan teks mengikuti tema DaisyUI */
+    @apply bg-slate-50 text-slate-700 font-sans antialiased;
   }
 }
 
@@ -39,6 +38,15 @@
   /* Class yang akan dipanggil di TSX */
   .animate-fade-in-up {
     animation: fade-in-up 1s ease-out forwards; /* Durasi 1 detik, efek halus */
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  /* Class yang dipanggil di TSX */
+  
+  .animate-fade-in {
+    animation: fade-in 1.2s ease-out forwards;
   }
 }
 
