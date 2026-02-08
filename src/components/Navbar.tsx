@@ -41,7 +41,7 @@ export default function Navbar() {
       <div className="flex-none hidden lg:block">
         <ul className="menu menu-horizontal px-1 gap-8 font-medium text-secondary-600">
           <li>
-            <Link href="/soon" className="hover:text-secondary hover:bg-transparent transition-all text-sm">
+            <Link href="/features" className="hover:text-secondary hover:bg-transparent transition-all text-sm">
               Fitur & Spesifikasi
             </Link>
           </li>
