@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { FaFacebook, FaInstagram, FaLinkedin, FaYoutube, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
+import Image from 'next/image';
+import heroImg from '../../public/logo.png'; // Import langsung untuk gambar lokal
 
 export const metadata: Metadata = {
   title: "BroilerSmart - Monitoring Suhu Kandang Ayam IoT",
@@ -16,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="id" data-theme="light">
       <body className="min-h-screen flex flex-col font-sans bg-base-100 text-base-content">
-        
+
         {/* 1. Navbar (Global) */}
         <Navbar />
 
@@ -29,18 +31,15 @@ export default function RootLayout({
         <footer className="bg-slate-900 text-slate-300 py-16 border-t border-slate-800">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-              
+
               {/* Kolom 1: Brand & Identitas */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-2xl font-bold text-white">
                   {/* Icon representasi alat/IoT */}
-                  <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white">
-                    <FaPhone className="text-lg" />
-                  </div>
                   BroilerSmart
                 </div>
                 <p className="text-sm leading-relaxed text-slate-400">
-                  Solusi cerdas monitoring lingkungan kandang ayam broiler. 
+                  Solusi cerdas monitoring lingkungan kandang ayam broiler.
                   Menjaga suhu dan kelembapan optimal untuk hasil ternak yang maksimal dan berkelanjutan.
                 </p>
               </div>
@@ -60,15 +59,15 @@ export default function RootLayout({
                 <h3 className="text-white text-lg font-bold mb-6">Hubungi Kami</h3>
                 <ul className="space-y-4 text-sm">
                   <li className="flex items-start gap-3">
-                    <FaMapMarkerAlt className="mt-1 text-primary"/>
-                    <span>Jl. Teknologi Peternakan No. 88, <br/>Jawa Barat, Indonesia</span>
+                    <FaMapMarkerAlt className="mt-1 text-info" />
+                    <span>Jl. Teknologi Peternakan No. 88, <br />Jawa Barat, Indonesia</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <FaPhone className="text-primary"/>
+                    <FaPhone className="text-info" />
                     <span>+62 812-3456-7890</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <FaEnvelope className="text-primary"/>
+                    <FaEnvelope className="text-info" />
                     <span>support@broilersmart.id</span>
                   </li>
                 </ul>
