@@ -18,7 +18,7 @@ export default function SidebarDocs() {
 
   return (
     <aside className="w-full lg:w-72 flex-shrink-0">
-      <div className="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto pr-2 hidden lg:block space-y-8 pb-4">
+      <div className="sticky top-24 h-[calc(100vh-5rem)] overflow-y-auto pr-2 hidden lg:block space-y-8 pb-20">
         
         {/* Group 1: Panduan Pengguna */}
         <div>

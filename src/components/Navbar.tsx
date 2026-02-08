@@ -46,7 +46,7 @@ export default function Navbar() {
             </Link>
           </li>
           <li>
-            <Link href="/docs/overview" className="hover:text-secondary hover:bg-transparent transition-all text-sm">
+            <Link href="/docs/welcome" className="hover:text-secondary hover:bg-transparent transition-all text-sm">
               Documentations
             </Link>
           </li>

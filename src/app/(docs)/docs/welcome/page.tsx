@@ -89,7 +89,7 @@ const OverviewPage = () => {
 
   return (
     <div className="min-h-screen bg-white text-[#1E293B] font-sans selection:bg-emerald-100 pb-auto">
-      <div className="h-1.5 bg-emerald-600 w-full sticky top-0 z-50" />
+      <div className="h-1.5 bg-emerald-600 w-full sticky top-20 z-50" />
       
       <main className="max-w-6xl mx-auto px-6 py-12">
         

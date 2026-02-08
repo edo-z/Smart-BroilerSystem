@@ -281,8 +281,8 @@ const LogicPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FCFCFC] text-[#1E293B] font-sans selection:bg-emerald-100 selection:text-emerald-900 pb-32">
-      <div className="h-1.5 bg-gradient-to-r from-emerald-600 to-teal-500 w-full sticky top-0 z-50 shadow-sm" />
+    <div className="min-h-screen bg-[#FCFCFC] text-[#1E293B] font-sans selection:bg-emerald-100 selection:text-emerald-900 pb-auto">
+      <div className="h-1.5 bg-gradient-to-r from-emerald-600 to-teal-500 w-full sticky top-20 z-50 shadow-sm" />
       
       <main className="max-w-6xl mx-auto px-6 lg:px-12 py-16">
         
