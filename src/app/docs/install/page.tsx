@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { 
-  FaBook, 
-  FaCogs, 
-  FaWifi, 
-  FaServer, 
-  FaInfoCircle, 
+import {
+  FaBook,
+  FaCogs,
+  FaWifi,
+  FaServer,
+  FaInfoCircle,
   FaExclamationTriangle,
   FaChevronRight,
   FaChevronLeft,
@@ -19,68 +19,46 @@ export default function InstallPage() {
     <div className="bg-slate-50 min-h-screen pt-20">
       <div className="container mx-auto px-4 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          
+
           {/* ========================================= */}
-          {/* 1. SIDEBAR NAVIGATION                    */}
+          {/* 1. SIDEBAR NAVIGATION (Sticky Perfect)   */}
           {/* ========================================= */}
           <aside className="w-full lg:w-72 flex-shrink-0">
             <div className="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto pr-2 hidden lg:block space-y-8 pb-4">
-              
               <div>
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4">
                   Panduan Pengguna
                 </h3>
                 <ul className="menu bg-white rounded-xl shadow-sm border border-slate-200 w-full text-sm font-medium">
-                  <li>
-                    <Link href="/docs/overview" className="hover:text-slate-600">
-                      Overview Produk
-                    </Link>
-                  </li>
+                  <li><Link href="/docs/overview" className="hover:text-slate-600">Overview Produk</Link></li>
                   <li>
                     <Link href="/docs/cara-kerja" className="hover:text-slate-600">
                       Cara Kerja
                     </Link>
                   </li>
-                  {/* Install Active Link */}
-                  <li>
-                    <Link href="#" className="text-primary bg-blue-50/50 border-r-4 border-primary font-semibold">
-                      Instalasi Hardware
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/docs/config" className="hover:text-slate-600">
-                      Konfigurasi App
-                    </Link>
-                  </li>
+                  <li><Link href="/docs/install" className="text-primary bg-blue-50/50 border-r-4 border-primary font-semibold">Instalasi Hardware</Link></li>
+                  <li><Link href="/docs/config" className="hover:text-slate-600">Konfigurasi App</Link></li>
                 </ul>
               </div>
-</div>
-            
-            {/* Mobile Dropdown */}
-            <div className="lg:hidden mb-8">
-               <div className="collapse collapse-arrow bg-base-100 shadow-sm border border-slate-200">
-                 <input type="radio" name="docs-accordion" defaultChecked /> 
-                 <div className="collapse-title font-medium text-sm py-4">
-                   Daftar Isi Dokumentasi
-                 </div>
-                 <div className="collapse-content text-sm bg-white border-t border-slate-100"> 
-                   <ul className="menu w-full">
-                     <li><Link href="/docs/overview">Overview Produk</Link></li>
-                     <li><Link href="/docs/cara-kerja">Cara Kerja</Link></li>
-                     <li><Link href="#" className="active">Instalasi Hardware</Link></li>
-                     <li><Link href="/docs/config">Konfigurasi</Link></li>
-                   </ul>
-                 </div>
-               </div>
+              <div>
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4">
+                  Referensi Teknis
+                </h3>
+                <ul className="menu bg-white rounded-xl shadow-sm border border-slate-200 w-full text-sm font-medium">
+                  <li><Link href="/docs/hardware" className="hover:text-slate-600">Spesifikasi Hardware</Link></li>
+                  <li><Link href="/docs/software" className="hover:text-slate-600">Stack Software</Link></li>
+                </ul>
+              </div>
             </div>
           </aside>
+
 
           {/* ========================================= */}
           {/* 2. KONTEN UTAMA (Panduan Step-by-Step)   */}
           {/* ========================================= */}
           <main className="flex-1 min-w-0">
             <article className="bg-white p-6 md:p-12 rounded-2xl shadow-sm border border-slate-200">
-              
+
               {/* Header */}
               <div className="border-b border-slate-100 pb-8 mb-8">
                 <span className="badge badge-secondary badge-outline p-3 mb-4">Hardware Guide</span>
@@ -93,7 +71,7 @@ export default function InstallPage() {
               </div>
 
               <div className="prose prose-slate prose-lg max-w-none prose-headings:font-bold prose-a:text-primary">
-                
+
                 {/* 1. PERALATAN & PERSIAPAN */}
                 <div className="alert alert-info mb-8 not-prose">
                   <FaTools className="text-xl shrink-0" />
@@ -109,19 +87,19 @@ export default function InstallPage() {
                 <p>Sebelum memulai, pastikan kotak paket berisi komponen berikut:</p>
                 <ul className="checklist bg-slate-50 p-4 rounded-lg border border-slate-100 not-prose">
                   <li className="flex items-center gap-3 mb-2">
-                    <FaCheck className="text-green-500"/>
+                    <FaCheck className="text-green-500" />
                     <span>1 Unit Modul BroilerSmart (Sensor + MCU)</span>
                   </li>
                   <li className="flex items-center gap-3 mb-2">
-                    <FaCheck className="text-green-500"/>
+                    <FaCheck className="text-green-500" />
                     <span>1 Unit Adaptor Daya 12V 2A (Kabel 3 meter)</span>
                   </li>
                   <li className="flex items-center gap-3 mb-2">
-                    <FaCheck className="text-green-500"/>
+                    <FaCheck className="text-green-500" />
                     <span>Sekrup & Baut pemasangan dinding (4 pcs)</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <FaCheck className="text-green-500"/>
+                    <FaCheck className="text-green-500" />
                     <span>Buku Panduan Cepat</span>
                   </li>
                 </ul>
@@ -162,11 +140,11 @@ export default function InstallPage() {
                 {/* 3. DETAIL LANGKAH */}
                 <h3 id="lokasi">Langkah 1: Tentukan Lokasi Penempatan</h3>
                 <p>Penempatan sensor sangat krusial untuk mendapatkan data yang representatif.</p>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
                   <div className="card bg-green-50 border border-green-100">
                     <div className="card-body p-4">
-                      <h4 className="card-title text-sm text-green-800"><FaCheck className="text-lg"/> DOs (Dianjurkan)</h4>
+                      <h4 className="card-title text-sm text-green-800"><FaCheck className="text-lg" /> DOs (Dianjurkan)</h4>
                       <ul className="text-xs text-green-700 list-disc pl-4 mt-2 space-y-1">
                         <li>Tinggi <strong>30-40 cm</strong> dari lantai kandang (sejajar kepala ayam).</li>
                         <li>Titik tengah kandang (bukan di pinggir tembok dingin).</li>
@@ -176,7 +154,7 @@ export default function InstallPage() {
                   </div>
                   <div className="card bg-red-50 border border-red-100">
                     <div className="card-body p-4">
-                      <h4 className="card-title text-sm text-red-800"><FaExclamationTriangle className="text-lg"/> DON'Ts (Dilarang)</h4>
+                      <h4 className="card-title text-sm text-red-800"><FaExclamationTriangle className="text-lg" /> DON'Ts (Dilarang)</h4>
                       <ul className="text-xs text-red-700 list-disc pl-4 mt-2 space-y-1">
                         <li>Jangan pasang di dekat pintu masuk (angin masuk/keluar).</li>
                         <li>Jangan pasang di lantai (terinjak air tahi/air).</li>
@@ -195,7 +173,7 @@ export default function InstallPage() {
 
                 <h3 id="daya">Langkah 3: Sambungkan Sumber Daya</h3>
                 <p>Sambungkan kabel adaptor DC 12V ke port power di bagian belakang alat, lalu sambungkan colokan ke sumber listrik.</p>
-                
+
                 <div className="flex gap-4 items-start bg-slate-800 text-white p-6 rounded-xl my-6 not-prose shadow-lg">
                   <div className="text-4xl animate-pulse">💡</div>
                   <div>
@@ -208,7 +186,7 @@ export default function InstallPage() {
 
                 <h3 id="wifi">Langkah 4: Hubungkan ke WiFi</h3>
                 <p>
-                  Buka aplikasi BroilerSmart di smartphone Anda. Masuk ke menu <strong>"Tambah Perangkat"</strong>. 
+                  Buka aplikasi BroilerSmart di smartphone Anda. Masuk ke menu <strong>"Tambah Perangkat"</strong>.
                   Pilih SSID WiFi kandang Anda dan masukkan password. Status LED akan berubah menjadi <span className="text-green-400 font-bold">Hijau</span> jika koneksi berhasil.
                 </p>
 

@@ -1,240 +1,266 @@
 import Link from "next/link";
-import { 
-  FaBook, 
-  FaCogs, 
-  FaWifi, 
-  FaServer, 
-  FaInfoCircle, 
-  FaExclamationTriangle,
-  FaChevronRight,
-  FaChevronLeft,
-  FaMicrochip,
-  FaProjectDiagram,
-  FaBrain
+import {
+    FaBook,
+    FaCogs,
+    FaWifi,
+    FaServer,
+    FaInfoCircle,
+    FaExclamationTriangle,
+    FaChevronRight,
+    FaChevronLeft,
+    FaCheck,
+    FaLessThan
 } from "react-icons/fa";
+import { HiCheckCircle, HiExclamation, HiBell } from "react-icons/hi";
 
-export default function CaraKerjaPage() {
-  return (
-    <div className="bg-slate-50 min-h-screen pt-20">
-      <div className="container mx-auto px-4 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          
-          {/* Sidebar (Sama seperti sebelumnya) */}
-          <aside className="w-full lg:w-72 flex-shrink-0">
-            <div className="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto pr-2 hidden lg:block space-y-8 pb-4">
-              <div>
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4">
-                  Panduan Pengguna
-                </h3>
-                <ul className="menu bg-white rounded-xl shadow-sm border border-slate-200 w-full text-sm font-medium">
-                  <li><Link href="/docs/overview" className="hover:text-slate-600">Overview Produk</Link></li>
-                  <li>
-                    <Link href="#" className="text-primary bg-blue-50/50 border-r-4 border-primary font-semibold">
-                      Cara Kerja
-                    </Link>
-                  </li>
-                  <li><Link href="/docs/install" className="hover:text-slate-600">Instalasi Hardware</Link></li>
-                  <li><Link href="/docs/config" className="hover:text-slate-600">Konfigurasi App</Link></li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4">
-                  Referensi Teknis
-                </h3>
-                <ul className="menu bg-white rounded-xl shadow-sm border border-slate-200 w-full text-sm font-medium">
-                  <li><Link href="/docs/hardware" className="hover:text-slate-600">Spesifikasi Hardware</Link></li>
-                  <li><Link href="/docs/software" className="hover:text-slate-600">Stack Software</Link></li>
-                </ul>
-              </div>
-            </div>
-          </aside>
+export default function DocsPage() {
+    return (
+        <div className="bg-slate-50 min-h-screen pt-20">
+            <div className="container mx-auto px-4 lg:px-8 py-8">
+                <div className="flex flex-col lg:flex-row gap-8">
 
-          {/* KONTEN UTAMA */}
-          <main className="flex-1 min-w-0">
-            <article className="bg-white p-6 md:p-12 rounded-2xl shadow-sm border border-slate-200">
-              
-              <div className="border-b border-slate-100 pb-8 mb-8">
-                <span className="badge badge-primary badge-outline p-3 mb-4">Teknis Sistem</span>
-                <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
-                  Alur Kerja & Algoritma Kontrol
-                </h1>
-                <p className="text-slate-500 text-lg leading-relaxed">
-                  Penjelasan mendalam mengenai arsitektur perangkat keras, proses logika fuzzy, dan protokol komunikasi data pada sistem BroilerSmart.
-                </p>
-              </div>
+                    {/* ========================================= */}
+                    {/* 1. SIDEBAR NAVIGATION (Sticky Perfect)   */}
+                    {/* ========================================= */}
+                    <aside className="w-full lg:w-72 flex-shrink-0">
+                        <div className="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto pr-2 hidden lg:block space-y-8 pb-4">
+                            <div>
+                                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4">
+                                    Panduan Pengguna
+                                </h3>
+                                <ul className="menu bg-white rounded-xl shadow-sm border border-slate-200 w-full text-sm font-medium">
+                                    <li><Link href="/docs/overview" className="text-primary bg-blue-50/50 border-r-4 border-primary font-semibold">Overview Produk</Link></li>
+                                    <li>
+                                        <Link href="/docs/cara-kerja" className="hover:text-slate-600">
+                                            Cara Kerja
+                                        </Link>
+                                    </li>
+                                    <li><Link href="/docs/install" className="hover:text-slate-600">Instalasi Hardware</Link></li>
+                                    <li><Link href="/docs/config" className="hover:text-slate-600">Konfigurasi App</Link></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4">
+                                    Referensi Teknis
+                                </h3>
+                                <ul className="menu bg-white rounded-xl shadow-sm border border-slate-200 w-full text-sm font-medium">
+                                    <li><Link href="/docs/hardware" className="hover:text-slate-600">Spesifikasi Hardware</Link></li>
+                                    <li><Link href="/docs/software" className="hover:text-slate-600">Stack Software</Link></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </aside>
 
-              <div className="prose prose-slate prose-lg max-w-none prose-headings:font-bold prose-a:text-primary prose-pre:bg-[#0f172a]">
-                
-                {/* 1. ARSITEKTUR BLOK */}
-                <h2 id="architecture">1. Arsitektur Sistem</h2>
-                <p>
-                  Sistem dibangun dengan pendekatan <strong>Embedded System</strong> terpusat. Unit Mikrokontroler (ESP32) bertindak sebagai otak utama yang mengambil keputusan lokal (Edge Computing) dan mengirim data ke server (Cloud IoT).
-                </p>
+                    {/* ========================================= */}
+                    {/* 2. KONTEN UTAMA (Typography & Component)  */}
+                    {/* ========================================= */}
+                    <main className="flex-1 min-w-0">
+                        <article className="bg-white p-6 md:p-12 rounded-2xl shadow-sm border border-slate-200">
 
-                <div role="alert" className="alert alert-info mb-8 not-prose">
-                  <FaProjectDiagram className="text-xl shrink-0" />
-                  <div>
-                    <h3 className="font-bold">Diagram Alur Data</h3>
-                    <div className="text-xs mt-1 font-mono">
-                      Sensor (SHT40) &rarr; ESP32 (Fuzzy Logic) &rarr; Aktuator (Kipas/Heater) <br/>
-                      &uarr; &uarr; <br/>
-                      Cloud (MQTT & Database)
-                    </div>
-                  </div>
-                </div>
+                            {/* Header Artikel */}
+                            <div className="border-b border-slate-100 pb-8 mb-8">
+                                <span className="badge badge-secondary badge-outline p-3 mb-4">Overview Produk</span>
+                                <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
+                                    Overview Produk BroilerSmart
+                                </h1>
+                                <p className="text-slate-500 text-lg leading-relaxed">
+                                    Panduan lengkap memahami alur data sensor IoT dari kandang ayam hingga dashboard monitoring real-time Anda.
+                                </p>
+                            </div>
 
-                <p>Sistem terdiri dari 4 komponen utama yang berinteraksi secara berkelanjutan:</p>
-                
-                {/* CARA KERJA LIST DENGAN ICON */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8 not-prose">
-                  
-                  {/* Blok 1 */}
-                  <div className="flex gap-4 items-start">
-                    <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 border border-blue-200">
-                      <FaMicrochip className="text-xl" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-800">1. Perolehan Data</h4>
-                      <p className="text-sm text-slate-500">
-                        Sensor <strong>SHT40</strong> membaca suhu dan kelembapan kandang. Data dikirim ke ESP32 melalui protokol I2C secara berkala.
-                      </p>
-                    </div>
-                  </div>
+                            {/* Typography Plugin Wrapper: prose prose-slate */}
+                            <div className="prose prose-slate prose-lg max-w-none prose-headings:font-bold prose-a:text-primary prose-pre:bg-[#0f172a]">
 
-                  {/* Blok 2 */}
-                  <div className="flex gap-4 items-start">
-                    <div className="flex-shrink-0 w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 border border-purple-200">
-                      <FaBrain className="text-xl" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-800">2. Evaluasi Fuzzy</h4>
-                      <p className="text-sm text-slate-500">
-                        ESP32 menghitung Error antara bacaan sensor dan <strong>Setpoint Dinamis</strong> (berdasarkan umur ayam). Hasilnya diproses dengan Fuzzy Logic Mamdani.
-                      </p>
-                    </div>
-                  </div>
+                                {/* Paragraf Pendahuluan */}
+                                <p>
+                                    Sistem BroilerSmart dirancang dengan arsitektur <strong>Edge Computing</strong> dan <strong>Cloud Monitoring</strong>. Ini memastikan data lingkungan (suhu & kelembapan) tidak hanya dibaca, tetapi juga diproses secara cerdas untuk memberikan peringatan dini sebelum kualitas kandang turun.
+                                </p>
 
-                  {/* Blok 3 */}
-                  <div className="flex gap-4 items-start">
-                    <div className="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 border border-orange-200">
-                      <FaCogs className="text-xl" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-800">3. Kontrol Aktuator</h4>
-                      <p className="text-sm text-slate-500">
-                        Output Fuzzy berupa tingkat koreksi. Sistem mengatur <strong>PWM Kipas</strong> dan <strong>Dimmer Heater</strong> untuk mengembalikan kondisi ideal.
-                      </p>
-                    </div>
-                  </div>
+                                {/* COMPONENT: ALERT INFO */}
+                                <div role="alert" className="alert alert-info mb-8 not-prose">
+                                    <FaInfoCircle className="text-xl shrink-0" />
+                                    <div>
+                                        <h3 className="font-bold">Fitur Utama: Mode Hybrid</h3>
+                                        <div className="text-xs">
+                                            Alat ini bekerja dalam mode hybrid. Data dikirim ke cloud, namun sistem kontrol (aktifkan kipas/alat pemanas) tetap berjalan lokal di perangkat untuk mencegah risiko mati total saat koneksi internet putus.
+                                        </div>
+                                    </div>
+                                </div>
 
-                  {/* Blok 4 */}
-                  <div className="flex gap-4 items-start">
-                    <div className="flex-shrink-0 w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 border border-green-200">
-                      <FaWifi className="text-xl" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-800">4. Komunikasi IoT</h4>
-                      <p className="text-sm text-slate-500">
-                        Data (Suhu, Kelembapan, Status Aktuator) dikirim ke Cloud via <strong>MQTT</strong>. Dashboard Web memvisualisasikan data historis.
-                      </p>
-                    </div>
-                  </div>
+                                {/* Bagian 1: Hardware Level */}
+                                <h2 id="hardware">1. Deteksi Lingkungan (Hardware Level)</h2>
+                                <p>
+                                    Perangkat sensor dipasang pada ketinggian standar ayam broiler (±30 cm dari lantai). Kami menggunakan sensor <strong>DHT22 (AM2302)</strong> yang terkenal akurasinya.
+                                </p>
 
-                </div>
+                                {/* List dengan Check Icon Custom (Melakukan override style prose) */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-6">
+                                    <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-lg border border-slate-100">
+                                        <FaCheck className="text-green-500 mt-1" />
+                                        <div>
+                                            <h4 className="font-bold text-sm text-slate-700">Sensor Suhu</h4>
+                                            <p className="text-sm text-slate-500">Range: -40°C s/d 80°C</p>
+                                            <p className="text-sm text-slate-500">Akurasi: ±0.5°C</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-lg border border-slate-100">
+                                        <FaCheck className="text-blue-500 mt-1" />
+                                        <div>
+                                            <h4 className="font-bold text-sm text-slate-700">Sensor Kelembapan</h4>
+                                            <p className="text-sm text-slate-500">Range: 0% s/d 100% RH</p>
+                                            <p className="text-sm text-slate-500">Akurasi: ±2-5% RH</p>
+                                        </div>
+                                    </div>
+                                </div>
 
-                {/* 2. ALGORITMA FUZZY MAMDANI */}
-                <h2 id="fuzzy">2. Algoritma Fuzzy Logic Mamdani</h2>
-                <p>
-                  Metode Fuzzy Logic Mamdani digunakan sebagai evaluator keputusan karena ketidakpastian lingkungan kandang yang bersifat non-linear. Berikut adalah langkah-langkahnya:
-                </p>
+                                <p>
+                                    Data mentah dari sensor ini dibaca oleh mikrokontroler (ESP8266 / ESP32) setiap <code className="bg-slate-100 text-red-500">1000ms</code>.
+                                </p>
 
-                {/* Code Block for Logic */}
-                <div className="my-8 not-prose">
-                  <div className="mockup-code bg-[#1e293b] text-slate-300 shadow-xl border border-slate-700">
-                    <pre data-prefix="$"><code>// 1. Perhitungan Error</code></pre> 
-                    <pre data-prefix=">"><code>{`// Error = Setpoint (Umur) - Nilai Sensor`}</code></pre>
-                    <pre data-prefix=">"><code>error_suhu = suhu_setpoint - suhu_aktual;
-error_humid = kelembapan_setpoint - kelembapan_aktual;
+                                {/* Bagian 2: Transmisi Data */}
+                                <h2 id="transmission">2. Transmisi Data (IoT Layer)</h2>
+                                <p>
+                                    Setelah pembacaan berhasil, data dikemas menjadi format JSON Payload dan dikirim ke Server Broker MQTT (Message Queuing Telemetry Transport).
+                                </p>
 
-// 2. Fuzzifikasi (Input jadi fuzzy set)
-// 3. Inferensi (Rule Base Jika... Maka...)
-// 4. Defuzzifikasi (Fuzzy set jadi crisp value) -{">"} Koreksi`{"}"}</code></pre> 
-                  </div>
-                </div>
-
-                <h3>Proses Detail:</h3>
-                <ol>
-                  <li>
-                    <strong>Fuzzifikasi:</strong> Mengubah nilai input (Error Suhu & Error Kelembapan) menjadi nilai linguistik (contoh: <em>Suhu "Sedikit Tinggi"</em>, <em>Kelembapan "Rendah"</em>).
-                  </li>
-                  <li>
-                    <strong>Inferensi:</strong> Menerapkan basis aturan (Rule Base). Contoh aturan:
-                    <ul className="bg-slate-50 p-4 rounded border border-slate-200 text-sm my-4">
-                      <li className="mb-2">IF <em>Error Suhu Negatif (Suhu Terlalu Panas)</em> AND <em>Error Humid Normal</em> THEN <em>Nyalakan Kipas Kencang</em>, <em>Matikan Heater</em>.</li>
-                      <li className="mb-2">IF <em>Error Suhu Positif (Suhu Terlalu Dingin)</em> THEN <em>Matikan Kipas</em>, <em>Nyalakan Heater Penuh</em>.</li>
-                    </ul>
-                  </li>
-                  <li>
-                    <strong>Defuzzifikasi:</strong> Menghasilkan nilai output "Crisp" (angka tunggal) yang merepresentasikan tingkat koreksi (0-100%).
-                  </li>
-                </ol>
-
-                {/* 3. SETPOINT DINAMIS */}
-                <div role="alert" className="alert alert-warning mb-8 not-prose">
-                  <FaExclamationTriangle className="text-xl shrink-0" />
-                  <div>
-                    <h3 className="font-bold">Penting: Setpoint Dinamis</h3>
-                    <div className="text-xs">
-                      Nilai <code>Setpoint</code> tidak statis. Dikontrol oleh modul <strong>RTC (Real Time Clock)</strong>. Sistem menurunkan target suhu setiap 1-2 hari mengikuti kurva biologis broiler (34°C turun menjadi 24°C).
-                    </div>
-                  </div>
-                </div>
-
-                <h2 id="mqtt">4. Format Data Payload (MQTT)</h2>
-                <p>
-                  Data dikirim ke broker MQTT dalam format JSON. Berikut adalah struktur payload aktual yang digunakan sistem:
-                </p>
-
-                <div className="my-8 not-prose">
-                  <div className="mockup-code bg-[#1e293b] text-slate-300 shadow-xl border border-slate-700">
-                    <pre data-prefix="$"><code>topic: broiler/sensor/data</code></pre> 
-                    <pre data-prefix=">"><code>{`{
-  "device_id": "BS-ESP32-01",
-  "timestamp": "2023-10-27T10:00:00Z",
-  "age_days": 14,
+                                {/* COMPONENT: MOCKUP CODE (Terminal Style) */}
+                                <div className="my-8 not-prose">
+                                    <div className="mockup-code bg-[#1e293b] text-slate-300 shadow-xl border border-slate-700">
+                                        <pre data-prefix="$"><code>curl -X POST https://api.broilersmart.id/v1/feed</code></pre>
+                                        <pre data-prefix=">"><code>{`{
+  "device_id": "BS-8829-X",
+  "timestamp": "2023-11-15T14:30:00Z",
+  "location": "Kandang A - Zona 2",
   "readings": {
     "temp_celsius": 29.5,
-    "humidity_percent": 65.0
+    "humidity_percent": 64.2,
+    "heat_index": 31.1
   },
-  "setpoint": {
-    "target_temp": 28.0,
-    "target_humid": 65.0
-  },
-  "actuators": {
-    "fan_speed_pwm": 180,   // 0-255
-    "heater_dimmer": 0,     // 0-100
-    "mode": "Cooling"
-  }
-}`}</code></pre> 
-                  </div>
+  "status": "normal"
+}`}</code></pre>
+                                    </div>
+                                    <p className="text-xs text-center text-slate-400 mt-2 font-mono">
+                                        Contoh Payload JSON: /v1/feed
+                                    </p>
+                                </div>
+
+                                {/* COMPONENT: ALERT WARNING */}
+                                <div role="alert" className="alert alert-warning mb-8 not-prose">
+                                    <FaExclamationTriangle className="text-xl shrink-0" />
+                                    <div>
+                                        <h3 className="font-bold">Penting: Koneksi Wi-Fi</h3>
+                                        <div className="text-xs">
+                                            Perangkat mendukung 2.4GHz. Pastikan sinyal Wi-Fi stabil di area kandang. Jika sinyal lemah (RSSI Tidak boleh lebih -80dBm), data mungkin tertunda (Buffer Mode).
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Bagian 3: Visualisasi & User */}
+                                <h2 id="dashboard" className="text-2xl font-bold mb-4 flex items-center gap-2">
+                                    <span className="bg-primary text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm">3</span>
+                                    Visualisasi & Monitoring (User Interface)
+                                </h2>
+                                <p className="text-gray-600 mb-6">
+                                    Data yang masuk ke server diproses oleh algoritma prediktif kami. Selain ditampilkan di grafik, sistem juga melakukan validasi terhadap ambang batas (Threshold) yang telah Anda set.
+                                </p>
+
+                                <div className="alert bg-blue-50 border-blue-200 shadow-sm mb-8">
+                                    <HiBell className="text-blue-600 text-2xl" />
+                                    <span className="text-sm">
+                                        Jika suhu kandang melampaui <strong className="text-blue-800">32°C</strong> selama 5 menit berturut-turut, sistem akan otomatis mengirimkan Notifikasi Push ke smartphone pengelola peternakan.
+                                    </span>
+                                </div>
+
+                                <div className="overflow-hidden rounded-xl bg-base-100">
+                                    <table className="table table-lg">
+                                        {/* head */}
+                                        <thead className="bg-base-200/50">
+                                            <tr className="text-base-content/70">
+                                                <th>Kondisi</th>
+                                                <th>Ambang Batas</th>
+                                                <th>Aksi Sistem</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {/* row 1 */}
+                                            <tr className="hover:bg-base-200/30 transition-colors">
+                                                <td>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2 bg-green-100 text-green-600 rounded-lg">
+                                                            <HiCheckCircle className="text-xl" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-bold">Normal</div>
+                                                            <div className="text-xs opacity-50">Sistem Stabil</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="font-mono text-sm">24.0°C - 28.0°C</td>
+                                                <td>
+                                                    <span className="badge badge-ghost badge-sm py-3 px-4">Monitoring Pasif</span>
+                                                </td>
+                                            </tr>
+
+                                            {/* row 2 */}
+                                            <tr className="hover:bg-base-200/30 transition-colors">
+                                                <td>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
+                                                            <HiExclamation className="text-xl" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-bold">Warning</div>
+                                                            <div className="text-xs opacity-50">Perlu Pantauan</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="font-mono text-sm">29.0°C - 32.0°C</td>
+                                                <td>
+                                                    <span className="badge badge-warning badge-outline badge-sm py-3 px-4">Log App Notification</span>
+                                                </td>
+                                            </tr>
+
+                                            {/* row 3 */}
+                                            <tr className="hover:bg-base-200/30 transition-colors">
+                                                <td>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2 bg-red-100 text-red-600 rounded-lg animate-pulse">
+                                                            <HiBell className="text-xl" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-bold text-red-600">Critical</div>
+                                                            <div className="text-xs text-red-400">Tindakan Segera!</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="font-mono text-sm font-bold text-red-600 font-bold">+32.0°C</td>
+                                                <td>
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="badge badge-error text-white badge-sm py-3 px-4">Push Notification</span>
+                                                        <span className="badge badge-error badge-outline badge-xs">Local Alarm Active</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* Footer Artikel (Navigasi Halaman) */}
+                            <div className="mt-16 pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                                
+                                <div className="text-sm text-slate-400 italic">
+                                    Terakhir diupdate: 15 Nov 2023
+                                </div>
+                                <Link href="/docs/cara-kerja" className="btn btn-sm btn-primary w-full md:w-auto justify-end">
+                                    Cara Kerja <FaChevronRight />
+                                </Link>
+                            </div>
+
+                        </article>
+                    </main>
                 </div>
-
-              </div>
-
-              {/* Footer Navigasi */}
-              <div className="mt-16 pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-                <Link href="/docs/overview" className="btn btn-sm btn-ghost text-slate-500 hover:bg-slate-50 w-full md:w-auto justify-start">
-                  <FaChevronLeft /> Overview Produk
-                </Link>
-                <Link href="/docs/install" className="btn btn-sm btn-primary w-full md:w-auto justify-end">
-                  Panduan Instalasi <FaChevronRight />
-                </Link>
-              </div>
-
-            </article>
-          </main>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

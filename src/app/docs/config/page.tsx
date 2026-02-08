@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { 
-  FaBook, 
-  FaCogs, 
-  FaWifi, 
-  FaServer, 
-  FaInfoCircle, 
+import {
+  FaBook,
+  FaCogs,
+  FaWifi,
+  FaServer,
+  FaInfoCircle,
   FaExclamationTriangle,
   FaChevronRight,
   FaChevronLeft,
@@ -20,52 +20,36 @@ export default function ConfigPage() {
     <div className="bg-slate-50 min-h-screen pt-20">
       <div className="container mx-auto px-4 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          
+
           {/* ========================================= */}
-          {/* 1. SIDEBAR NAVIGATION                    */}
+          {/* 1. SIDEBAR NAVIGATION (Sticky Perfect)   */}
           {/* ========================================= */}
           <aside className="w-full lg:w-72 flex-shrink-0">
             <div className="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto pr-2 hidden lg:block space-y-8 pb-4">
-              
               <div>
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4">
                   Panduan Pengguna
                 </h3>
                 <ul className="menu bg-white rounded-xl shadow-sm border border-slate-200 w-full text-sm font-medium">
+                  <li><Link href="/docs/overview" className="hover:text-slate-600">Overview Produk</Link></li>
                   <li>
-                    <Link href="/docs/overview" className="hover:text-slate-600">Overview Produk</Link>
-                  </li>
-                  <li>
-                    <Link href="/docs/cara-kerja" className="hover:text-slate-600">Cara Kerja</Link>
-                  </li>
-                  <li>
-                    <Link href="/docs/install" className="hover:text-slate-600">Instalasi Hardware</Link>
-                  </li>
-                  {/* Config Active Link */}
-                  <li>
-                    <Link href="#" className="text-primary bg-blue-50/50 border-r-4 border-primary font-semibold">
-                      Konfigurasi App
+                    <Link href="/docs/cara-kerja" className="hover:text-slate-600">
+                      Cara Kerja
                     </Link>
                   </li>
+                  <li><Link href="/docs/install" className="hover:text-slate-600">Instalasi Hardware</Link></li>
+                  <li><Link href="/docs/config" className="text-primary bg-blue-50/50 border-r-4 border-primary font-semibold">Konfigurasi App</Link></li>
                 </ul>
               </div>
-            </div>
-            
-            {/* Mobile Dropdown */}
-            <div className="lg:hidden mb-8">
-               <div className="collapse collapse-arrow bg-base-100 shadow-sm border border-slate-200">
-                 <input type="radio" name="docs-accordion" defaultChecked /> 
-                 <div className="collapse-title font-medium text-sm py-4">
-                   Daftar Isi Dokumentasi
-                 </div>
-                 <div className="collapse-content text-sm bg-white border-t border-slate-100"> 
-                   <ul className="menu w-full">
-                     <li><Link href="/docs/overview">Overview Produk</Link></li>
-                     <li><Link href="/docs/install">Instalasi Hardware</Link></li>
-                     <li><Link href="#" className="active">Konfigurasi App</Link></li>
-                   </ul>
-                 </div>
-               </div>
+              <div>
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4">
+                  Referensi Teknis
+                </h3>
+                <ul className="menu bg-white rounded-xl shadow-sm border border-slate-200 w-full text-sm font-medium">
+                  <li><Link href="/docs/hardware" className="hover:text-slate-600">Spesifikasi Hardware</Link></li>
+                  <li><Link href="/docs/software" className="hover:text-slate-600">Stack Software</Link></li>
+                </ul>
+              </div>
             </div>
           </aside>
 
@@ -74,7 +58,7 @@ export default function ConfigPage() {
           {/* ========================================= */}
           <main className="flex-1 min-w-0">
             <article className="bg-white p-6 md:p-12 rounded-2xl shadow-sm border border-slate-200">
-              
+
               {/* Header */}
               <div className="border-b border-slate-100 pb-8 mb-8">
                 <span className="badge badge-secondary badge-outline p-3 mb-4">Software Guide</span>
@@ -87,7 +71,7 @@ export default function ConfigPage() {
               </div>
 
               <div className="prose prose-slate prose-lg max-w-none prose-headings:font-bold prose-a:text-primary">
-                
+
                 {/* 1. PENGENALAN */}
                 <div className="alert alert-info mb-8 not-prose">
                   <FaMobileAlt className="text-xl shrink-0" />
@@ -117,7 +101,7 @@ export default function ConfigPage() {
 
                 {/* SIMULASI UI APP (VISUALISASI) */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 my-8 not-prose">
-                  
+
                   {/* Kiri: Instruksi Teks */}
                   <div className="space-y-4">
                     <div className="card bg-blue-50 border border-blue-100 p-4">
@@ -149,14 +133,14 @@ export default function ConfigPage() {
                       <div className="w-16 h-1 bg-slate-300 rounded-full"></div>
                     </div>
                     <h4 className="font-bold text-sm text-slate-400 mb-6 mt-4 uppercase tracking-widest">App Interface</h4>
-                    
+
                     <div className="w-full px-2">
                       <label className="label">
                         <span className="label-text text-xs font-bold text-red-500">Batas Atas Suhu</span>
                         <span className="label-text-alt text-red-500">32°C</span>
                       </label>
                       <input type="range" min="0" max="100" value="32" className="range range-error range-xs" disabled />
-                      
+
                       <div className="divider my-4"></div>
 
                       <label className="label">
@@ -176,7 +160,7 @@ export default function ConfigPage() {
                 </p>
 
                 <div className="tabs tabs-boxed my-4 not-prose">
-                  <a className="tab tab-active">Pemberitahuan Real-time</a> 
+                  <a className="tab tab-active">Pemberitahuan Real-time</a>
                   <a className="tab">Laporan Harian</a>
                 </div>
 
@@ -259,7 +243,7 @@ export default function ConfigPage() {
                   Config Ver: 1.2
                 </div>
                 <Link href="/dashboard" className="btn btn-sm btn-primary w-full md:w-auto justify-end">
-                  Akses Aplikasi <FaChevronRight /> 
+                  Akses Aplikasi <FaChevronRight />
                 </Link>
               </div>
 
