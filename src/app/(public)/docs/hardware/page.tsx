@@ -40,7 +40,7 @@ export default function HardwarePage() {
                                     Referensi Teknis
                                 </h3>
                                 <ul className="menu bg-white rounded-xl shadow-sm border border-slate-200 w-full text-sm font-medium">
-                                    <li><Link href="/docs/hardware" className="text-primary bg-blue-50/50 border-r-4 border-primary font-semibold">Spesifikasi Hardware</Link></li>
+                                    <li><Link href="/docs/hardware" className="text-primary bg-blue-50/50 border-r-4 border-primary font-semibold">Stack Hardware</Link></li>
                                     <li><Link href="/docs/software" className="hover:text-slate-600">Stack Software</Link></li>
                                 </ul>
                             </div>
@@ -51,9 +51,9 @@ export default function HardwarePage() {
                         <article className="bg-white p-6 md:p-12 rounded-2xl shadow-sm border border-slate-200">
 
                             <div className="border-b border-slate-100 pb-8 mb-8">
-                                <span className="badge badge-secondary badge-outline p-3 mb-4">Bill of Materials</span>
+                                <span className="badge badge-secondary badge-outline p-3 mb-4">Hardware Stack</span>
                                 <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
-                                    Spesifikasi Hardware
+                                   Aristektur Hardware
                                 </h1>
                                 <p className="text-slate-500 text-lg leading-relaxed">
                                     Daftar komponen perangkat keras yang digunakan dalam pembuatan prototipe sistem monitoring kandang ayam BroilerSmart.

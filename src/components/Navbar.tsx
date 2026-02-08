@@ -1,3 +1,4 @@
+"use client"; 
 import Link from 'next/link';
 import { HiMenuAlt3 } from "react-icons/hi";
 import { FaMicrochip } from "react-icons/fa";

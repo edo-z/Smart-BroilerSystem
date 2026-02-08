@@ -142,7 +142,7 @@ export default function LandingPage() {
             </p>
             
             <div className="flex gap-4 pt-2">
-              <Link href="/soon" className="btn btn-primary bg-slate-900 hover:bg-slate-800 border-none text-white px-8 h-12 rounded-lg shadow-xl transition-shadow">
+              <Link href="/login" className="btn btn-primary bg-slate-900 hover:bg-slate-800 border-none text-white px-8 h-12 rounded-lg shadow-xl transition-shadow">
                 Mulai Sekarang
               </Link>
               <Link href="/docs/overview" className="btn btn-outline border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 px-8 h-12 rounded-lg">

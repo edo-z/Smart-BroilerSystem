@@ -44,7 +44,7 @@ export default function SoftwarePage() {
                                     Referensi Teknis
                                 </h3>
                                 <ul className="menu bg-white rounded-xl shadow-sm border border-slate-200 w-full text-sm font-medium">
-                                    <li><Link href="/docs/hardware" className="hover:text-slate-600">Spesifikasi Hardware</Link></li>
+                                    <li><Link href="/docs/hardware" className="hover:text-slate-600">Stack Hardware</Link></li>
                                     <li><Link href="/docs/software" className="text-primary bg-blue-50/50 border-r-4 border-primary font-semibold">Stack Software</Link></li>
                                 </ul>
                             </div>

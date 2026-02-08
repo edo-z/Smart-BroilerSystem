@@ -35,7 +35,7 @@ export default function DocsPage() {
                                             Cara Kerja
                                         </Link>
                                     </li>
-                                    <li><Link href="/docs/install" className="hover:text-slate-600">Instalasi Hardware</Link></li>
+                                    <li><Link href="/docs/install" className="hover:text-slate-600">Stack Hardware</Link></li>
                                     <li><Link href="/docs/config" className="hover:text-slate-600">Konfigurasi App</Link></li>
                                 </ul>
                             </div>
@@ -44,7 +44,7 @@ export default function DocsPage() {
                                     Referensi Teknis
                                 </h3>
                                 <ul className="menu bg-white rounded-xl shadow-sm border border-slate-200 w-full text-sm font-medium">
-                                    <li><Link href="/docs/hardware" className="hover:text-slate-600">Spesifikasi Hardware</Link></li>
+                                    <li><Link href="/docs/hardware" className="hover:text-slate-600">Stack Hardware</Link></li>
                                     <li><Link href="/docs/software" className="hover:text-slate-600">Stack Software</Link></li>
                                 </ul>
                             </div>
