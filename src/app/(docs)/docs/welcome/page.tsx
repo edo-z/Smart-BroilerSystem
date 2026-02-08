@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
+import Link from "next/link";
 import Chart from 'chart.js/auto';
 import type { Chart as ChartJS } from 'chart.js';
 import { 
@@ -21,7 +22,8 @@ import {
   HardDrive,
   CheckCircle2,
   Info,
-  Wrench
+  Wrench,
+  ArrowRight
 } from 'lucide-react';
 
 const OverviewPage = () => {
@@ -317,9 +319,9 @@ const OverviewPage = () => {
             </div>
           </div>
           <div className="flex gap-4">
-            <button className="flex items-center justify-center gap-4 bg-slate-900 text-white px-10 py-5 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200 group">
-              Hubungi Pengembang <ArrowUpRight className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" size={18} />
-            </button>
+            <Link href="/soon" className="flex items-center justify-center gap-4 bg-slate-900 text-white px-10 py-5 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200 group">
+              Hubungi Pengembang <ArrowRight className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" size={18} />
+            </Link>
           </div>
         </footer>
 

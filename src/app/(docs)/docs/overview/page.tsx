@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
 import type { Chart as ChartJS } from 'chart.js';
+import Link from "next/link";
 import { 
   BookOpen, 
   FileText, 
@@ -20,7 +21,8 @@ import {
   Layers,
   Gauge,
   Microchip,
-  Radio
+  Radio,
+  ArrowRight
 } from 'lucide-react';
 
 const OverviewPage = () => {
@@ -406,9 +408,9 @@ const OverviewPage = () => {
               <div className="text-[10px] font-mono text-slate-400 mt-1">ID: BR-TECH-ARC-01 // REV: 2026.02</div>
             </div>
           </div>
-          <button className="flex items-center gap-3 bg-emerald-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-200 hover:shadow-emerald-300 group">
-            Proceed to Implementation Details <ArrowUpRight className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" size={16} />
-          </button>
+          <Link href="/docs" className="flex items-center gap-3 bg-emerald-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-200 hover:shadow-emerald-300 group">
+           System Architecture <ArrowRight className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" size={16} />
+          </Link>
         </footer>
 
       </main>

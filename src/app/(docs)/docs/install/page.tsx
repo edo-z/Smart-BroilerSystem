@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from "next/link";
 import { 
   BookOpen, 
   Wrench,
@@ -355,9 +356,9 @@ const InstallationUsagePage = () => {
           <div className="text-sm text-slate-500">
             <span className="font-bold text-slate-900">BAB 5 Selesai.</span> Sistem siap untuk operasional penuh.
           </div>
-          <button className="flex items-center gap-3 bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-800 transition-all shadow-xl group">
-            Back to Overview <ArrowRight className="group-hover:translate-x-1 transition-transform" size={16} />
-          </button>
+          <Link href="/soon" className="flex items-center gap-3 bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-800 transition-all shadow-xl group">
+            Hubungi Pengembang <ArrowRight className="group-hover:translate-x-1 transition-transform" size={16} />
+          </Link>
         </footer>
 
       </main>

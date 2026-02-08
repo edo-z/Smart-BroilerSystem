@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto'; // Untuk grafik Aktuator (Bagian 3.3)
 import type { Chart as ChartJS } from 'chart.js';
+import Link from "next/link";
 import { Line } from 'react-chartjs-2'; // Untuk grafik Suhu (Bagian 3.1)
 import { 
   BookOpen, 
@@ -503,9 +504,9 @@ const LogicPage = () => {
           <div className="text-sm text-slate-500">
             <span className="font-bold text-slate-900">BAB 3 Selesai.</span> Algoritma siap diimplementasikan ke dalam kode Embedded C++.
           </div>
-          <button className="flex items-center gap-3 bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-800 transition-all shadow-xl group">
-            Next: Implementation <ArrowRight className="group-hover:translate-x-1 transition-transform" size={16} />
-          </button>
+          <Link href="/docs/software" className="flex items-center gap-3 bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-800 transition-all shadow-xl group">
+            Software Architecture<ArrowRight className="group-hover:translate-x-1 transition-transform" size={16} />
+          </Link>
         </footer>
 
       </main>
