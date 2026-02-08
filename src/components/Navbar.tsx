@@ -6,7 +6,7 @@ import heroImg from '../../public/logo.png'; // Import langsung untuk gambar lok
 
 export default function Navbar() {
   return (
-    <div className="navbar bg-base-100/95 backdrop-blur-md fixed top-0 z-50 px-6 md:px-12 transition-all duration-300 shadow-sm h-20 border-b border-secondary-100">
+    <div className="navbar bg-base-100/65 backdrop-blur-md fixed top-0 z-50 px-6 md:px-12 transition-all duration-300 shadow-sm h-20">
 
       {/* 1. BRANDING (Modern Logo Style) */}
       <div className="flex-1">
