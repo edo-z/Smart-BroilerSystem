@@ -12,7 +12,9 @@ import {
   FaFire,
   FaAdjust,
   FaFan,
-  FaCheck
+  FaCheck,
+  FaReact,
+  FaBrain
 } from "react-icons/fa";
 import {
   Chart as ChartJS,
@@ -415,6 +417,40 @@ export default function LandingPage() {
             </div>
 
           </div>
+          {/* (Di dalam section Tips, di bawah CTA Card) */}
+
+{/* ========================= */}
+{/* TECH STACK STRIP (OPSIONAL) */}
+{/* Menunjukkan kredibilitas teknis */}
+{/* ========================= */}
+<div className="mt-12 pt-8 border-t border-slate-200">
+  <div className="text-center">
+    <p className="text-xs text-slate-400 uppercase tracking-widest font-bold mb-6">
+      Powered By Modern Technology
+    </p>
+    <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-slate-600 text-sm font-medium">
+      {/* Link ke docs/hardware */}
+      <Link href="/docs/hardware" className="flex items-center gap-2 hover:text-primary transition-colors">
+        <FaMicrochip /> <span>ESP32S3 N16R8</span>
+      </Link>
+      
+      {/* Link ke docs/cara-kerja */}
+      <Link href="/docs/cara-kerja" className="flex items-center gap-2 hover:text-primary transition-colors">
+        <FaBrain /> <span>Fuzzy Logic</span>
+      </Link>
+      
+      {/* Link ke docs/software */}
+      <Link href="/docs/software" className="flex items-center gap-2 hover:text-primary transition-colors">
+        <FaWifi /> <span>MQTT IoT</span>
+      </Link>
+      
+      {/* Link ke docs/software */}
+      <Link href="/docs/software" className="flex items-center gap-2 hover:text-primary transition-colors">
+        <FaReact /> <span>Next.js</span>
+      </Link>
+    </div>
+  </div>
+</div>
         </div>
       </section>
 
