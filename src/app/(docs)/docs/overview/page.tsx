@@ -150,12 +150,8 @@ const OverviewPage = () => {
               <BookOpen size={16} /> Technical Archive // Vol. 01 // System Overview
             </div>
             <div className="flex items-center gap-3">
-                <span className="flex h-2 w-2 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
                 <div className="text-[10px] font-mono text-slate-500 bg-slate-100 px-3 py-1.5 rounded border border-slate-200">
-                  STATUS: FINAL_RELEASE_V4.2
+                   System Overview
                 </div>
             </div>
           </div>

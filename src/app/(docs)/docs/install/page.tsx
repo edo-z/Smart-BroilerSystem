@@ -40,7 +40,7 @@ const InstallationUsagePage = () => {
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
                 <div className="text-[10px] font-mono text-slate-500 bg-slate-100 px-3 py-1.5 rounded border border-slate-200">
-                  STATUS: USER_GUIDE_V1.0
+                  nstallation & Usage
                 </div>
             </div>
           </div>

@@ -313,7 +313,7 @@ const OverviewPage = () => {
             </div>
             <div>
                <div className="text-xs font-black text-slate-900 uppercase mb-1">ID Dokumen: TA-0922040012</div>
-               <div className="text-xs font-mono text-slate-500 tracking-wider uppercase">Versi 1.0.4 // Stabil</div>
+               <div className="text-xs font-mono text-slate-500 tracking-wider uppercase">Dokumen Tugas Akhir</div>
             </div>
           </div>
           <div className="flex gap-4">
