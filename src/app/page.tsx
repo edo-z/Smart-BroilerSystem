@@ -184,7 +184,7 @@ export default function LandingPage() {
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                   <div className="text-xs text-slate-400 uppercase font-bold mb-1">Kelembapan</div>
                   <div className="text-3xl font-bold text-slate-800">64<span className="text-sm text-slate-500 ml-1">%</span></div>
-                  <div className="text-xs text-slate-400 mt-1 font-medium">Rentang Normal</div>
+                  <div className="text-xs text-blue-400 mt-1 font-medium">Rentang Normal</div>
                 </div>
               </div>
 
@@ -430,22 +430,22 @@ export default function LandingPage() {
     </p>
     <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-slate-600 text-sm font-medium">
       {/* Link ke docs/hardware */}
-      <Link href="/docs/hardware" className="flex items-center gap-2 hover:text-primary transition-colors">
+      <Link href="/docs/hardware" className="flex items-center gap-2 hover:text-secondary transition-colors">
         <FaMicrochip /> <span>ESP32S3 N16R8</span>
       </Link>
       
       {/* Link ke docs/cara-kerja */}
-      <Link href="/docs/cara-kerja" className="flex items-center gap-2 hover:text-primary transition-colors">
+      <Link href="/docs/cara-kerja" className="flex items-center gap-2 hover:text-secondary transition-colors">
         <FaBrain /> <span>Fuzzy Logic</span>
       </Link>
       
       {/* Link ke docs/software */}
-      <Link href="/docs/software" className="flex items-center gap-2 hover:text-primary transition-colors">
+      <Link href="/docs/software" className="flex items-center gap-2 hover:text-secondary transition-colors">
         <FaWifi /> <span>MQTT IoT</span>
       </Link>
       
       {/* Link ke docs/software */}
-      <Link href="/docs/software" className="flex items-center gap-2 hover:text-primary transition-colors">
+      <Link href="/docs/software" className="flex items-center gap-2 hover:text-secondary transition-colors">
         <FaReact /> <span>Next.js</span>
       </Link>
     </div>

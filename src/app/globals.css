@@ -3,10 +3,8 @@
 /* 1. Import DaisyUI v5 sebagai plugin */
 @plugin "daisyui" {
   /* 2. Daftarkan tema yang ingin Anda aktifkan */
-  themes: light;
-  
-  /* Opsional: Jika ingin tema default mengikuti sistem OS user */
-  /* darkTheme: "dark"; */
+  themes: emerald,light, dark, cupcake, corporate, synthwave, retro, cyberpunk, valentine, halloween, garden, forest, aqua, lofi, pastel, fantasy, wireframe, black, luxury, dracula, cmyk, autumn, business, acid, lemonade, night, coffee, winter;
+
 }
 @plugin "@tailwindcss/typography";
 

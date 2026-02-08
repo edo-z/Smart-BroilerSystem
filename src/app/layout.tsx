@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" data-theme="light">
+    <html lang="id" data-theme="emerald">
       <body className="min-h-screen flex flex-col font-sans bg-base-100 text-base-content">
 
         {/* 1. Navbar (Global) */}
@@ -48,9 +48,9 @@ export default function RootLayout({
               <div>
                 <h3 className="text-white text-lg font-bold mb-6">Produk</h3>
                 <ul className="space-y-3 text-sm">
-                  <li><a href="/soon" className="hover:text-primary transition-colors">Fitur & Keunggulan</a></li>
-                  <li><a href="/docs/overview" className="hover:text-primary transition-colors">Cara Kerja Alat</a></li>
-                  <li><a href="/soon" className="hover:text-primary transition-colors">Akses Aplikasi</a></li>
+                  <li><a href="/soon" className="hover:text-secondary transition-colors">Fitur & Keunggulan</a></li>
+                  <li><a href="/docs/overview" className="hover:text-secondary transition-colors">Cara Kerja Alat</a></li>
+                  <li><a href="/soon" className="hover:text-secondary transition-colors">Akses Aplikasi</a></li>
                 </ul>
               </div>
 
@@ -59,15 +59,15 @@ export default function RootLayout({
                 <h3 className="text-white text-lg font-bold mb-6">Hubungi Kami</h3>
                 <ul className="space-y-4 text-sm">
                   <li className="flex items-start gap-3">
-                    <FaMapMarkerAlt className="mt-1 text-info" />
+                    <FaMapMarkerAlt className="mt-1 text-secondary" />
                     <span>Jl. Teknologi Peternakan No. 88, <br />Jawa Barat, Indonesia</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <FaPhone className="text-info" />
+                    <FaPhone className="text-secondary" />
                     <span>+62 812-3456-7890</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <FaEnvelope className="text-info" />
+                    <FaEnvelope className="text-secondary" />
                     <span>support@broilersmart.id</span>
                   </li>
                 </ul>
@@ -77,16 +77,16 @@ export default function RootLayout({
               <div>
                 <h3 className="text-white text-lg font-bold mb-6">Sosial Media</h3>
                 <div className="flex gap-4 mb-6">
-                  <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary hover:text-white transition-all">
+                  <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-secondary hover:text-white transition-all">
                     <FaFacebook />
                   </a>
-                  <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary hover:text-white transition-all">
+                  <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-secondary hover:text-white transition-all">
                     <FaInstagram />
                   </a>
-                  <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary hover:text-white transition-all">
+                  <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-secondary hover:text-white transition-all">
                     <FaYoutube />
                   </a>
-                  <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary hover:text-white transition-all">
+                  <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-secondary hover:text-white transition-all">
                     <FaLinkedin />
                   </a>
                 </div>
