@@ -3,6 +3,8 @@ import Google from "next-auth/providers/google";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import clientPromise from "@/lib/db";
 import authConfig from "./auth.config";
+import bcrypt from "bcryptjs";
+import Credentials from "next-auth/providers/credentials";
 
 declare module "next-auth" {
   interface Session {
@@ -18,6 +20,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: MongoDBAdapter(clientPromise),
   session: { strategy: "jwt" },
   providers: [
+    Credentials({
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+
+        const client = await clientPromise;
+        const user = await client.db().collection("users").findOne({ email: credentials.email });
+
+        if (user && user.password) {
+          const isMatch = await bcrypt.compare(credentials.password as string, user.password);
+          if (isMatch) {
+            return {
+              id: user._id.toString(),
+              email: user.email,
+              name: user.name,
+            };
+          }
+        }
+        return null;
+      },
+    }),
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
@@ -36,7 +58,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      if (session.user && token.id) {
+      if (session.user) {
         session.user.id = token.id as string;
       }
       return session;

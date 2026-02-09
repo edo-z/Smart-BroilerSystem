@@ -3,26 +3,29 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { FaRocket, FaEnvelope, FaLock, FaArrowRight, FaGoogle } from "react-icons/fa";
-// Import action yang Anda sebutkan
-import { loginWithGoogle } from "@/actions/auth-actions";
+import { loginWithCredentials, loginWithGoogle } from "@/actions/auth-actions";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   // State khusus untuk loading Google
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   // 1. Handler Login Email Manual
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    // Logika login manual (Email & Password) di sini
-    console.log("Email login clicked");
-    
-    // Simulasi loading
-    setTimeout(() => {
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const result = await loginWithCredentials(formData);
+
+    if (result) {
+      // Jika ada string yang kembali, berarti itu error message
+      setError(result);
       setIsLoading(false);
-      // window.location.href = "/dashboard"; // Redirect disini jika login sukses
-    }, 2000);
+    }
+    // Jika sukses, Next.js otomatis redirect ke /dashboard via Server Action
   };
 
   // 2. Handler Khusus Google Login
@@ -40,7 +43,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-slate-50">
-      
+
       {/* ========================================= */}
       {/* 1. BAGIAN KIRI (BRANDING)                 */}
       {/* ========================================= */}
@@ -86,7 +89,7 @@ export default function LoginPage() {
 
           {/* Login Card */}
           <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-8 md:p-10">
-            
+
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-slate-900">Selamat Datang Kembali</h2>
               <p className="text-slate-500 text-sm mt-2">
@@ -94,9 +97,16 @@ export default function LoginPage() {
               </p>
             </div>
 
+            {/* Alert Error */}
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 text-red-500 border border-red-100 rounded-lg text-sm text-center">
+                {error}
+              </div>
+            )}
+
             {/* FORM EMAIL MANUAL */}
-            <form onSubmit={handleLogin} className="space-y-6">
-              
+            <form onSubmit={handleLogin} className="space-y-6 mt-6">
+
               {/* Input Email */}
               <div className="form-control">
                 <label className="label">
@@ -104,7 +114,7 @@ export default function LoginPage() {
                 </label>
                 <label className="input input-bordered flex items-center gap-3 bg-slate-50 focus:bg-white transition-colors">
                   <FaEnvelope className="text-slate-400 text-lg" />
-                  <input type="email" placeholder="email@contoh.com" className="grow" required />
+                  <input name="email" type="email" placeholder="email@contoh.com" className="grow" required />
                 </label>
               </div>
 
@@ -118,7 +128,7 @@ export default function LoginPage() {
                 </label>
                 <label className="input input-bordered flex items-center gap-3 bg-slate-50 focus:bg-white transition-colors">
                   <FaLock className="text-slate-400 text-lg" />
-                  <input type="password" placeholder="Masukkan kata sandi" className="grow" required />
+                  <input name="password" type="password" placeholder="Masukkan kata sandi" className="grow" required />
                 </label>
               </div>
 
@@ -132,12 +142,12 @@ export default function LoginPage() {
 
               {/* Tombol Login Email */}
               {/* Disabled jika sedang loading Email ATAU Google */}
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={isLoading || isGoogleLoading}
                 className={`btn btn-primary w-full bg-slate-900 hover:bg-slate-800 text-white border-none h-12 shadow-lg hover:shadow-xl transition-all ${isLoading ? 'loading' : ''}`}
               >
-                {!isLoading && <span className="flex items-center gap-2">Masuk ke Dashboard <FaArrowRight className="text-xs" /></span>}
+                {isLoading ? "Memverifikasi..." : <span className="flex items-center gap-2">Masuk ke Dashboard <FaArrowRight /></span>}
               </button>
             </form>
 
@@ -148,7 +158,7 @@ export default function LoginPage() {
 
             {/* BUTTON GOOGLE (SUDAH DIPERBAIKI) */}
             <div className="grid grid-cols-1 gap-4">
-              <button 
+              <button
                 type="button" // PENTING: type="button" agar tidak submit form email
                 onClick={handleGoogleLogin}
                 disabled={isGoogleLoading || isLoading}
@@ -173,7 +183,7 @@ export default function LoginPage() {
             </div>
 
           </div>
-          
+
           {/* Footer Mobile */}
           <p className="text-center text-xs text-slate-400 mt-8 lg:hidden">
             &copy; {new Date().getFullYear()} BroilerSmart Technologies

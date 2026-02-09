@@ -3,23 +3,40 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { FaRocket, FaUser, FaIndustry, FaEnvelope, FaLock, FaArrowRight, FaCheck } from "react-icons/fa";
-
+import { registerUser } from "@/actions/auth-actions";
+import { useRouter } from "next/navigation";
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulasi proses register
-    setTimeout(() => {
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+
+    // Validasi kecocokan password di client dulu
+    if (formData.get("password") !== formData.get("confirmPassword")) {
+      setError("Konfirmasi sandi tidak cocok");
       setIsLoading(false);
-      console.log("Register clicked");
-    }, 2000);
+      return;
+    }
+
+    const result = await registerUser(formData);
+
+    if (result?.error) {
+      setError(result.error);
+      setIsLoading(false);
+    } else {
+      router.push("/login");
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-slate-50">
-      
+
       {/* ========================================= */}
       {/* 1. BAGIAN KIRI (BRANDING)                */}
       {/* Sama persis dengan Login Page             */}
@@ -64,16 +81,21 @@ export default function RegisterPage() {
         <div className="w-full max-w-md">
           {/* Register Card */}
           <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-8 md:p-10">
-            
+
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-slate-900">Buat Akun Baru</h2>
+             {error && (
+                <div className="mt-4 p-3 bg-red-50 text-red-500 border border-red-100 rounded-lg text-sm text-center">
+                  {error}
+                </div>
+              )}
               <p className="text-slate-500 text-sm mt-2">
                 Lengkapi formulir di bawah untuk mendaftarkan peternakan Anda.
               </p>
             </div>
 
             <form onSubmit={handleRegister} className="space-y-4">
-              
+
               {/* Input Nama Lengkap */}
               <div className="form-control">
                 <label className="label">
@@ -81,7 +103,7 @@ export default function RegisterPage() {
                 </label>
                 <label className="input input-bordered flex items-center gap-3 bg-slate-50 focus:bg-white transition-colors">
                   <FaUser className="text-slate-400 text-lg" />
-                  <input type="text" placeholder="Contoh: Budi Santoso" className="grow" required />
+                  <input name="name" type="text" placeholder="Contoh: Budi Santoso" className="grow" required />
                 </label>
               </div>
 
@@ -92,7 +114,7 @@ export default function RegisterPage() {
                 </label>
                 <label className="input input-bordered flex items-center gap-3 bg-slate-50 focus:bg-white transition-colors">
                   <FaIndustry className="text-slate-400 text-lg" />
-                  <input type="text" placeholder="Contoh: UD. Berkah Tani" className="grow" required />
+                  <input name="farmName" type="text" placeholder="Contoh: UD. Berkah Tani" className="grow" required />
                 </label>
               </div>
 
@@ -103,7 +125,7 @@ export default function RegisterPage() {
                 </label>
                 <label className="input input-bordered flex items-center gap-3 bg-slate-50 focus:bg-white transition-colors">
                   <FaEnvelope className="text-slate-400 text-lg" />
-                  <input type="email" placeholder="email@contoh.com" className="grow" required />
+                  <input name="email" type="email" placeholder="email@contoh.com" className="grow" required />
                 </label>
               </div>
 
@@ -115,7 +137,7 @@ export default function RegisterPage() {
                 </label>
                 <label className="input input-bordered flex items-center gap-3 bg-slate-50 focus:bg-white transition-colors">
                   <FaLock className="text-slate-400 text-lg" />
-                  <input type="password" placeholder="Buat kata sandi kuat" className="grow" required minLength={8} />
+                  <input name="password" type="password" placeholder="Buat kata sandi kuat" className="grow" required minLength={8} />
                 </label>
               </div>
 
@@ -126,7 +148,7 @@ export default function RegisterPage() {
                 </label>
                 <label className="input input-bordered flex items-center gap-3 bg-slate-50 focus:bg-white transition-colors">
                   <FaCheck className="text-slate-400 text-lg" />
-                  <input type="password" placeholder="Ketik ulang kata sandi" className="grow" required />
+                  <input name="confirmPassword" type="password" placeholder="Ketik ulang kata sandi" className="grow" required />
                 </label>
               </div>
 
@@ -141,11 +163,11 @@ export default function RegisterPage() {
               </div>
 
               {/* Tombol Register */}
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className={`btn btn-primary w-full bg-slate-900 hover:bg-slate-800 text-white border-none h-12 shadow-lg hover:shadow-xl transition-all ${isLoading ? 'loading' : ''}`}
               >
-                {!isLoading && <span className="flex items-center gap-2">Daftar Akun <FaArrowRight className="text-xs" /></span>}
+                {isLoading ? "Mendaftarkan..." : <span className="flex items-center gap-2">Daftar Akun <FaArrowRight /></span>}
               </button>
 
             </form>
@@ -159,7 +181,7 @@ export default function RegisterPage() {
             </div>
 
           </div>
-          
+
           {/* Footer Mobile */}
           <p className="text-center text-xs text-slate-400 mt-8 lg:hidden">
             &copy; {new Date().getFullYear()} BroilerSmart Technologies
