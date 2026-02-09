@@ -122,7 +122,7 @@ export default function LandingPage() {
       {/* 1. HERO SECTION (FIXED LAYOUT)           */}
       {/* ========================================= */}
       {/* Perbaikan: Menambahkan 'relative' pada parent Hero */}
-      <div id="home" className="hero min-h-[90vh] bg-white pb-20 py-24 relative">
+      <div id="home" className="hero min-h-[100vh] bg-white pb-20 py-24 relative">
         <div className="hero-content text-center max-w-6xl flex-col lg:flex-row gap-16 px-4">
           
           {/* Left Content */}
