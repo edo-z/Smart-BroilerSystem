@@ -430,7 +430,7 @@ export default function LandingPage() {
     </p>
     <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-slate-600 text-sm font-medium">
       {/* Link ke docs/hardware */}
-      <Link href="/docs/hardware" className="flex items-center gap-2 hover:text-secondary transition-colors">
+      <Link href="/docs" className="flex items-center gap-2 hover:text-secondary transition-colors">
         <FaMicrochip /> <span>ESP32S3 N16R8</span>
       </Link>
       

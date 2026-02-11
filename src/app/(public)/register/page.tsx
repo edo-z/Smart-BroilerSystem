@@ -41,7 +41,7 @@ export default function RegisterPage() {
       {/* 1. BAGIAN KIRI (BRANDING)                */}
       {/* Sama persis dengan Login Page             */}
       {/* ========================================= */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-900 to-slate-800 text-white relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-slate-900 to-slate-800 text-white relative overflow-hidden">
         {/* Background Decoration */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-2000"></div>
@@ -51,7 +51,7 @@ export default function RegisterPage() {
           {/* Tagline */}
           <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
             Bergabunglah Bersama <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-cyan-400">
               Peternak Modern.
             </span>
           </h1>
