@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo, useRef, useEffect, useContext } from "react";
 import {
   FaHome,
   FaThermometerHalf,
@@ -20,10 +20,11 @@ import {
   Legend,
   Filler,
   ChartOptions,
+  ChartData,
 } from "chart.js";
-import { useSession } from "next-auth/react";
+import type { ScriptableContext } from "chart.js";
 
-// Register Chart.js
+// Register Chart.js modules
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -34,80 +35,306 @@ ChartJS.register(
   Filler
 );
 
+// ─────────────────────────────────────────────
+// TYPES
+// ─────────────────────────────────────────────
+type KandangStatus = "warning" | "normal" | "kosong";
+
+interface KandangRow {
+  id: string;
+  umur: string;
+  suhu: number | null;
+  kelembapan: number | null;
+  status: KandangStatus;
+}
+
+interface AlertItem {
+  id: number;
+  icon: React.ReactNode;
+  title: string;
+  time: string;
+  message: string;
+  variant: "red" | "blue" | "slate";
+}
+
+// ─────────────────────────────────────────────
+// STATIC DATA (move outside component to avoid re-creation)
+// ─────────────────────────────────────────────
+const CHART_LABELS = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "23:59"];
+
+const KANDANG_DATA: KandangRow[] = [
+  { id: "Kandang A1", umur: "14 Hari",  suhu: 32.0, kelembapan: 65, status: "warning" },
+  { id: "Kandang A2", umur: "21 Hari",  suhu: 28.5, kelembapan: 64, status: "normal"  },
+  { id: "Kandang B1", umur: "-",        suhu: null,  kelembapan: null, status: "kosong" },
+];
+
+const ALERT_DATA: AlertItem[] = [
+  {
+    id: 1,
+    icon: <FaExclamationTriangle className="text-red-500 mt-1 flex-shrink-0" />,
+    title: "Suhu Tinggi",
+    time: "10m lalu",
+    message: "Kandang A1 mencapai 32°C. Kipas aktif pendinginkan.",
+    variant: "red",
+  },
+  {
+    id: 2,
+    icon: <FaBell className="text-blue-500 mt-1 flex-shrink-0" />,
+    title: "Target Suhu Turun",
+    time: "1j lalu",
+    message: "Ayam fase 2. Target suhu menurun ke 28°C.",
+    variant: "blue",
+  },
+  {
+    id: 3,
+    icon: <FaCog className="text-slate-500 mt-1 flex-shrink-0" />,
+    title: "Maintenance",
+    time: "3j lalu",
+    message: "Sensor Kandang B perlu dikalibrasi ulang.",
+    variant: "slate",
+  },
+];
+
+const ALERT_VARIANT_CLASSES: Record<AlertItem["variant"], string> = {
+  red:   "bg-red-50 border border-red-100",
+  blue:  "bg-blue-50 border border-blue-100",
+  slate: "bg-slate-50 border border-slate-100",
+};
+
+const ALERT_TITLE_CLASSES: Record<AlertItem["variant"], string> = {
+  red:   "text-red-700",
+  blue:  "text-blue-700",
+  slate: "text-slate-700",
+};
+
+// ─────────────────────────────────────────────
+// SUB-COMPONENTS
+// ─────────────────────────────────────────────
+
+/** Skeleton loader untuk stat card */
+function StatCardSkeleton() {
+  return (
+    <div className="stat bg-white p-5 rounded-2xl border border-slate-200 shadow-sm animate-pulse">
+      <div className="h-8 w-8 bg-slate-100 rounded-lg mb-3" />
+      <div className="h-3 w-24 bg-slate-100 rounded mb-2" />
+      <div className="h-8 w-16 bg-slate-100 rounded mb-2" />
+      <div className="h-3 w-28 bg-slate-100 rounded" />
+    </div>
+  );
+}
+
+/** Stat card siap pakai */
+function StatCard({
+  icon,
+  iconBg,
+  title,
+  value,
+  unit,
+  desc,
+  descColor = "text-slate-400",
+}: {
+  icon: React.ReactNode;
+  iconBg: string;
+  title: string;
+  value: string | number;
+  unit?: string;
+  desc: string;
+  descColor?: string;
+}) {
+  return (
+    <div className="stat bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+      <div className="stat-figure">
+        <div className={`p-3 ${iconBg} rounded-lg`}>{icon}</div>
+      </div>
+      <div className="stat-title text-xs font-bold uppercase text-slate-500">{title}</div>
+      <div className="stat-value text-3xl text-slate-900 mt-2">
+        {value}
+        {unit && <span className="text-lg text-slate-500 font-normal">{unit}</span>}
+      </div>
+      <div className={`stat-desc text-xs font-medium mt-1 ${descColor}`}>{desc}</div>
+    </div>
+  );
+}
+
+/** Baris alert */
+function AlertCard({ item }: { item: AlertItem }) {
+  return (
+    <div className={`p-4 rounded-xl ${ALERT_VARIANT_CLASSES[item.variant]} transition-transform hover:scale-[1.02]`}>
+      <div className="flex items-start gap-3">
+        {item.icon}
+        <div className="flex-1">
+          <div className="flex justify-between items-start">
+            <h4 className={`text-xs font-bold ${ALERT_TITLE_CLASSES[item.variant]}`}>{item.title}</h4>
+            <span className="text-[10px] text-slate-400 font-mono">{item.time}</span>
+          </div>
+          <p className="text-xs text-slate-600 mt-1 leading-relaxed">{item.message}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Badge status kandang */
+function StatusBadge({ status }: { status: KandangStatus }) {
+  const config = {
+    warning: "bg-orange-100 text-orange-700",
+    normal:  "bg-green-100 text-green-700",
+    kosong:  "bg-slate-100 text-slate-500",
+  };
+  const label = { warning: "Warning", normal: "Normal", kosong: "Kosong" };
+  return (
+    <div className={`badge badge-sm border-none gap-1 text-[10px] px-2 py-3 ${config[status]}`}>
+      {label[status]}
+    </div>
+  );
+}
+
+/** Tabel status kandang */
+function KandangTable({ data }: { data: KandangRow[] }) {
+  return (
+    <div className="mt-8 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h3 className="font-bold text-slate-800">Status Kandang</h3>
+        <button className="btn btn-sm btn-primary bg-slate-900 hover:bg-slate-800 border-none text-white rounded-lg h-9 min-h-0 px-4">
+          + Tambah Kandang
+        </button>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="table w-full">
+          <thead className="bg-slate-50 text-slate-500 font-medium text-xs uppercase tracking-wider">
+            <tr>
+              <th>ID Kandang</th>
+              <th>Umur Ayam</th>
+              <th>Suhu (°C)</th>
+              <th>Kelembapan (%)</th>
+              <th>Status</th>
+              <th className="text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody className="text-sm text-slate-700 divide-y divide-slate-50">
+            {data.map((row) => (
+              <tr key={row.id} className="hover:bg-slate-50/50">
+                <td className="font-bold text-slate-900">{row.id}</td>
+                <td>{row.umur}</td>
+                <td className={row.suhu !== null ? (row.status === "warning" ? "text-red-600 font-semibold" : "text-green-600 font-semibold") : "text-slate-400 font-medium"}>
+                  {row.suhu !== null ? row.suhu.toFixed(1) : "--"}
+                </td>
+                <td>{row.kelembapan ?? "-"}</td>
+                <td><StatusBadge status={row.status} /></td>
+                <td className="text-right">
+                  <button className="btn btn-ghost btn-xs text-primary font-bold hover:bg-primary/10">
+                    Detail
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// CHART OPTIONS (stable reference, outside component)
+// ─────────────────────────────────────────────
+const chartOptions: ChartOptions<"line"> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: "top",
+      align: "end",
+      labels: { boxWidth: 10, usePointStyle: true },
+    },
+    tooltip: {
+      backgroundColor: "rgba(15, 23, 42, 0.9)",
+      padding: 10,
+      cornerRadius: 8,
+    },
+  },
+  scales: {
+    y: {
+      grid: { color: "#f1f5f9" },
+      border: { display: false },
+      ticks: { color: "#64748b", font: { size: 11 } },
+      beginAtZero: false,
+    },
+    x: {
+      grid: { display: false },
+      border: { display: false },
+      ticks: { color: "#64748b", font: { size: 11 } },
+    },
+  },
+};
+
+// ─────────────────────────────────────────────
+// MAIN PAGE
+// ─────────────────────────────────────────────
 export default function DashboardPage() {
-  // === DATA GRAFIK SIMULASI ===
-  const chartData = {
-    labels: ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "23:59"],
+  /**
+   * FIX 1 & 4: Gradient dibuat lewat plugin di dalam Chart.js lifecycle,
+   * bukan di dalam backgroundColor callback — menghindari null ctx & any type.
+   * FIX 2: useMemo agar chartData tidak dibuat ulang setiap render.
+   */
+  const chartData = useMemo<ChartData<"line">>(() => ({
+    labels: CHART_LABELS,
     datasets: [
       {
         label: "Suhu (°C)",
         data: [28, 27.5, 29, 31, 30.5, 29.5, 28.5],
-        borderColor: "#ef4444", // Red-500
-        backgroundColor: (context: any) => {
-          const ctx = context.chart?.ctx;
-          if (!ctx) return "rgba(239, 68, 68, 0.1)";
-          const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-          gradient.addColorStop(0, "rgba(239, 68, 68, 0.4)");
-          gradient.addColorStop(1, "rgba(239, 68, 68, 0)");
-          return gradient;
-        },
+        borderColor: "#ef4444",
+        // Gradient dibuat via plugin afterLayout di bawah — lihat gradientPlugin
+        backgroundColor: "rgba(239, 68, 68, 0.15)",
         tension: 0.4,
         fill: true,
+        pointRadius: 4,
+        pointHoverRadius: 6,
       },
       {
         label: "Kelembapan (%)",
         data: [60, 62, 65, 58, 62, 65, 63],
-        borderColor: "#3b82f6", // Blue-500
+        borderColor: "#3b82f6",
         borderDash: [5, 5],
+        backgroundColor: "transparent",
         tension: 0.4,
         fill: false,
         pointRadius: 0,
         pointHoverRadius: 4,
       },
     ],
-  };
+  }), []);
 
-  const chartOptions: ChartOptions<"line"> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: "top" as const,
-        align: "end" as const,
-        labels: { boxWidth: 10, usePointStyle: true },
-      },
-      tooltip: {
-        backgroundColor: "rgba(15, 23, 42, 0.9)",
-        padding: 10,
-        cornerRadius: 8,
-      },
+  /**
+   * FIX 2 lanjutan: Plugin gradient yang bekerja SETELAH canvas siap,
+   * sehingga ctx tidak pernah null.
+   */
+  const gradientPlugin = useMemo(() => ({
+    id: "customGradient",
+    afterLayout(chart: ChartJS) {
+      const dataset = chart.data.datasets[0] as ChartData<"line">["datasets"][0] & { backgroundColor: unknown };
+      const ctx = chart.ctx;
+      const { top, bottom } = chart.chartArea ?? {};
+      if (!ctx || top == null) return;
+      const gradient = ctx.createLinearGradient(0, top, 0, bottom);
+      gradient.addColorStop(0, "rgba(239, 68, 68, 0.4)");
+      gradient.addColorStop(1, "rgba(239, 68, 68, 0)");
+      dataset.backgroundColor = gradient;
     },
-    scales: {
-      y: {
-        grid: { color: "#f1f5f9" },
-        // Fix untuk error Chart.js v4 terbaru:
-        border: { display: false }, 
-        ticks: { color: "#64748b", font: { size: 11 } },
-        beginAtZero: false,
-      },
-      x: {
-        grid: { display: false },
-        border: { display: false },
-        ticks: { color: "#64748b", font: { size: 11 } },
-      },
-    },
-  };
+  }), []);
 
-  // Karena user data sudah diambil di Layout (Server Side),
-  // kita tidak perlu 'useSession' lagi di sini kecuali untuk data real-time.
-  // Tapi untuk greeting sederhana, kita pakai dummy string dulu atau ambil dari Client State.
-  const { data: session } = useSession();
-  const userName = session?.user?.name?.split(" ")[0] || "Peternak Cerdas";
+  /**
+   * FIX 3: Tidak menggunakan useSession() di sini.
+   * Nama user diambil dari props/context layout (server-side).
+   * Ganti dengan useUserContext() atau props sesuai arsitektur proyek.
+   * Contoh: const userName = useUserContext()?.name?.split(" ")[0] ?? "Peternak Cerdas";
+   */
+  const userName = "Peternak Cerdas"; // ← ganti dengan context/props dari layout
 
   return (
     <div className="max-w-7xl mx-auto w-full">
-      
-      {/* HEADER / GREETING */}
+
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">
@@ -118,64 +345,50 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="badge badge-success badge-outline gap-2 px-4 py-3 font-medium border-green-200 text-green-700 bg-green-50">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           Sistem Normal
         </div>
       </div>
 
-      {/* STATS GRID */}
+      {/* STATS GRID — FIX 5: skeleton siap dipakai saat loading data async */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {/* Kandang */}
-        <div className="stat bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-          <div className="stat-figure text-slate-400">
-            <div className="p-3 bg-slate-100 rounded-lg"><FaHome className="text-xl" /></div>
-          </div>
-          <div className="stat-title text-xs font-bold uppercase text-slate-500">Total Kandang</div>
-          <div className="stat-value text-3xl text-slate-900 mt-2">3</div>
-          <div className="stat-desc text-xs text-slate-400 mt-1">1 Aktif, 2 Standby</div>
-        </div>
-
-        {/* Suhu */}
-        <div className="stat bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-          <div className="stat-figure text-red-500">
-            <div className="p-3 bg-red-50 rounded-lg"><FaThermometerHalf className="text-xl" /></div>
-          </div>
-          <div className="stat-title text-xs font-bold uppercase text-slate-500">Rata-rata Suhu</div>
-          <div className="stat-value text-3xl text-slate-900 mt-2">
-            29<span className="text-lg text-slate-500 font-normal">°C</span>
-          </div>
-          <div className="stat-desc text-xs text-green-500 font-medium mt-1 flex items-center gap-1">
-            <span>▲</span> Normal (Target 28°C)
-          </div>
-        </div>
-
-        {/* Kelembapan */}
-        <div className="stat bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-          <div className="stat-figure text-blue-500">
-            <div className="p-3 bg-blue-50 rounded-lg"><FaTint className="text-xl" /></div>
-          </div>
-          <div className="stat-title text-xs font-bold uppercase text-slate-500">Kelembapan</div>
-          <div className="stat-value text-3xl text-slate-900 mt-2">
-            62<span className="text-lg text-slate-500 font-normal">%</span>
-          </div>
-          <div className="stat-desc text-xs text-slate-400 mt-1">Rentang Ideal 60-70%</div>
-        </div>
-
-        {/* Alerts */}
-        <div className="stat bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-          <div className="stat-figure text-orange-500">
-            <div className="p-3 bg-orange-50 rounded-lg"><FaExclamationTriangle className="text-xl" /></div>
-          </div>
-          <div className="stat-title text-xs font-bold uppercase text-slate-500">Alerts</div>
-          <div className="stat-value text-3xl text-slate-900 mt-2">1</div>
-          <div className="stat-desc text-xs text-red-500 font-medium mt-1">1 Critical Alert</div>
-        </div>
+        <StatCard
+          icon={<FaHome className="text-xl text-slate-400" />}
+          iconBg="bg-slate-100"
+          title="Total Kandang"
+          value={3}
+          desc="1 Aktif, 2 Standby"
+        />
+        <StatCard
+          icon={<FaThermometerHalf className="text-xl text-red-500" />}
+          iconBg="bg-red-50"
+          title="Rata-rata Suhu"
+          value={29}
+          unit="°C"
+          desc="▲ Normal (Target 28°C)"
+          descColor="text-green-500"
+        />
+        <StatCard
+          icon={<FaTint className="text-xl text-blue-500" />}
+          iconBg="bg-blue-50"
+          title="Kelembapan"
+          value={62}
+          unit="%"
+          desc="Rentang Ideal 60-70%"
+        />
+        <StatCard
+          icon={<FaExclamationTriangle className="text-xl text-orange-500" />}
+          iconBg="bg-orange-50"
+          title="Alerts"
+          value={1}
+          desc="1 Critical Alert"
+          descColor="text-red-500"
+        />
       </div>
 
-      {/* CHART & ALERTS SECTION */}
+      {/* CHART & ALERTS — FIX 1+2: gradient plugin & useMemo */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Chart Area */}
+
         <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h3 className="font-bold text-slate-800">Monitoring 24 Jam Terakhir</h3>
@@ -186,140 +399,31 @@ export default function DashboardPage() {
             </select>
           </div>
           <div className="relative h-[350px] w-full">
-            <Line data={chartData} options={chartOptions} />
+            <Line
+              data={chartData}
+              options={chartOptions}
+              plugins={[gradientPlugin]}
+            />
           </div>
         </div>
 
-        {/* Recent Alerts List */}
+        {/* FIX 6: AlertList sebagai komponen terpisah */}
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
           <h3 className="font-bold text-slate-800 mb-6">Peringatan Terkini</h3>
-          
           <div className="flex flex-col gap-4 flex-1">
-            <div className="p-4 rounded-xl bg-red-50 border border-red-100 transition-transform hover:scale-[1.02]">
-              <div className="flex items-start gap-3">
-                <FaExclamationTriangle className="text-red-500 mt-1 flex-shrink-0" />
-                <div className="flex-1">
-                  <div className="flex justify-between items-start">
-                    <h4 className="text-xs font-bold text-red-700">Suhu Tinggi</h4>
-                    <span className="text-[10px] text-slate-400 font-mono">10m lalu</span>
-                  </div>
-                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                    Kandang A1 mencapai 32°C. Kipas aktif pendinginkan.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-blue-50 border border-blue-100 transition-transform hover:scale-[1.02]">
-              <div className="flex items-start gap-3">
-                <FaBell className="text-blue-500 mt-1 flex-shrink-0" />
-                <div className="flex-1">
-                  <div className="flex justify-between items-start">
-                    <h4 className="text-xs font-bold text-blue-700">Target Suhu Turun</h4>
-                    <span className="text-[10px] text-slate-400 font-mono">1j lalu</span>
-                  </div>
-                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                    Ayam fase 2. Target suhu menurun ke 28°C.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 transition-transform hover:scale-[1.02]">
-              <div className="flex items-start gap-3">
-                <FaCog className="text-slate-500 mt-1 flex-shrink-0" />
-                <div className="flex-1">
-                  <div className="flex justify-between items-start">
-                    <h4 className="text-xs font-bold text-slate-700">Maintenance</h4>
-                    <span className="text-[10px] text-slate-400 font-mono">3j lalu</span>
-                  </div>
-                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                    Sensor Kandang B perlu dikalibrasi ulang.
-                  </p>
-                </div>
-              </div>
-            </div>
+            {ALERT_DATA.map((item) => (
+              <AlertCard key={item.id} item={item} />
+            ))}
           </div>
-
           <button className="btn btn-sm btn-outline w-full mt-6 text-xs font-bold border-slate-300 text-slate-600 hover:bg-slate-50 hover:border-slate-300">
             Lihat Semua Log
           </button>
         </div>
+
       </div>
 
-      {/* TABLE STATUS KANDANG */}
-      <div className="mt-8 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h3 className="font-bold text-slate-800">Status Kandang</h3>
-          <button className="btn btn-sm btn-primary bg-slate-900 hover:bg-slate-800 border-none text-white rounded-lg h-9 min-h-0 px-4">
-            + Tambah Kandang
-          </button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="table w-full">
-            <thead className="bg-slate-50 text-slate-500 font-medium text-xs uppercase tracking-wider">
-              <tr>
-                <th>ID Kandang</th>
-                <th>Umur Ayam</th>
-                <th>Suhu (°C)</th>
-                <th>Kelembapan (%)</th>
-                <th>Status</th>
-                <th className="text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm text-slate-700 divide-y divide-slate-50">
-              <tr className="hover:bg-slate-50/50">
-                <td className="font-bold text-slate-900">Kandang A1</td>
-                <td>14 Hari</td>
-                <td className="text-red-600 font-semibold">32.0</td>
-                <td>65</td>
-                <td>
-                  <div className="badge badge-sm badge-warning bg-orange-100 text-orange-700 border-none gap-1 text-[10px] px-2 py-3">
-                    Warning
-                  </div>
-                </td>
-                <td className="text-right">
-                  <button className="btn btn-ghost btn-xs text-primary font-bold hover:bg-primary/10">
-                    Detail
-                  </button>
-                </td>
-              </tr>
-              <tr className="hover:bg-slate-50/50">
-                <td className="font-bold text-slate-900">Kandang A2</td>
-                <td>21 Hari</td>
-                <td className="text-green-600 font-semibold">28.5</td>
-                <td>64</td>
-                <td>
-                  <div className="badge badge-sm badge-success bg-green-100 text-green-700 border-none gap-1 text-[10px] px-2 py-3">
-                    Normal
-                  </div>
-                </td>
-                <td className="text-right">
-                  <button className="btn btn-ghost btn-xs text-primary font-bold hover:bg-primary/10">
-                    Detail
-                  </button>
-                </td>
-              </tr>
-              <tr className="hover:bg-slate-50/50">
-                <td className="font-bold text-slate-900">Kandang B1</td>
-                <td>-</td>
-                <td className="text-slate-400 font-medium">--</td>
-                <td>-</td>
-                <td>
-                  <div className="badge badge-sm badge-ghost bg-slate-100 text-slate-500 border-none gap-1 text-[10px] px-2 py-3">
-                    Kosong
-                  </div>
-                </td>
-                <td className="text-right">
-                  <button className="btn btn-ghost btn-xs text-primary font-bold hover:bg-primary/10">
-                    Detail
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* FIX 6: KandangTable sebagai komponen terpisah */}
+      <KandangTable data={KANDANG_DATA} />
 
     </div>
   );

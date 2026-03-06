@@ -3,15 +3,29 @@ import React from "react";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { 
-  FaHome, 
-  FaCog, 
-  FaThermometerHalf, 
-  FaBars, 
-  FaChartBar, 
-  FaHistory 
+import Image from "next/image";
+import {
+  FaHome,
+  FaCog,
+  FaThermometerHalf,
+  FaBars,
+  FaHistory,
 } from "react-icons/fa";
-import LogoutButton from "@/components/auth/LogoutButton"; 
+import LogoutButton from "@/components/auth/LogoutButton";
+import { headers } from "next/headers";
+
+// ─────────────────────────────────────────────
+// Active state ditangani via CSS data-attribute
+// yang di-set dari pathname server-side,
+// sehingga layout tetap murni Server Component
+// tanpa perlu memisahkan ke Client Component.
+// ─────────────────────────────────────────────
+
+const NAV_ITEMS = [
+  { href: "/dashboard",             label: "Dashboard",  icon: <FaHome className="w-4" /> },
+  { href: "/dashboard/riwayat",     label: "Riwayat",    icon: <FaHistory className="w-4" /> },
+  { href: "/dashboard/pengaturan",  label: "Pengaturan", icon: <FaCog className="w-4" /> },
+];
 
 export default async function DashboardLayout({
   children,
@@ -21,90 +35,109 @@ export default async function DashboardLayout({
   // 1. Ambil session di Server Side
   const session = await auth();
 
-  // 2. Redirect jika tidak ada session (Ganda layer security bersama middleware)
+  // 2. Redirect jika tidak ada session
   if (!session) {
     redirect("/login");
   }
 
   const user = session.user;
 
+  // 3. Ambil pathname dari headers untuk active state sidebar
+  //    tanpa perlu usePathname() (Client Component)
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") ?? "";
+  // Catatan: pastikan middleware Anda meneruskan header ini:
+  //   response.headers.set("x-pathname", request.nextUrl.pathname)
+
   return (
     <div className="drawer lg:drawer-open bg-slate-50 min-h-screen">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
 
-      {/* --- SIDEBAR --- */}
+      {/* ─── SIDEBAR ─── */}
       <div className="drawer-side z-40 border-r border-slate-200 bg-white">
-        <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
-        
-        <div className="flex flex-col h-full w-auto relative p-4 bg-white">
+        <label
+          htmlFor="my-drawer-2"
+          aria-label="close sidebar"
+          className="drawer-overlay"
+        />
+
+        <div className="flex flex-col h-full w-64 relative p-4 bg-white">
+
           {/* Logo */}
           <div className="flex items-center gap-3 px-2 mb-8 mt-2">
-            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg">
+            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0">
               <FaThermometerHalf />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 leading-none">BroilerSmart</h1>
-              <span className="text-xs text-slate-400 font-medium">Dashboard v2.0</span>
+              <h1 className="text-xl font-bold text-slate-900 leading-none">
+                BroilerSmart
+              </h1>
+              <span className="text-xs text-slate-400 font-medium">Dashboard</span>
             </div>
           </div>
 
-          {/* Navigasi */}
-          <ul className="menu flex-1 gap-2 px-2 text-slate-600">
-            <li>
-              <Link href="/dashboard" className="hover:bg-slate-100 rounded-lg">
-                <FaHome className="w-5" /> Overview
-              </Link>
-            </li>
-            <li>
-              <Link href="#" className="hover:bg-slate-100 rounded-lg">
-                <FaChartBar className="w-5" /> Data Real-time
-              </Link>
-            </li>
-            <li>
-              <Link href="#" className="hover:bg-slate-100 rounded-lg">
-                <FaHistory className="w-5" /> Riwayat
-              </Link>
-            </li>
-            <li>
-              <Link href="#" className="hover:bg-slate-100 rounded-lg">
-                <FaCog className="w-5" /> Pengaturan
-              </Link>
-            </li>
+          {/* Navigasi dengan active state server-side */}
+          <ul className="menu flex-1 gap-1 px-0 text-slate-600">
+            {NAV_ITEMS.map(({ href, label, icon }) => {
+              // exact match untuk /dashboard, prefix match untuk sub-halaman
+              const isActive =
+                href === "/dashboard"
+                  ? pathname === "/dashboard"
+                  : pathname.startsWith(href);
+
+              return (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-slate-900 text-white hover:bg-slate-800"
+                        : "text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    {icon}
+                    {label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
 
-          {/* Profil User di Bawah */}
+          {/* Profil User */}
           <div className="border-t border-slate-200 pt-4 mt-4">
             <div className="flex items-center gap-3 px-2 mb-4">
-              <div className="avatar online">
-                <div className="w-10 rounded-full ring ring-primary ring-offset-base-100">
-                  {/* 
-                     TAMBAHKAN referrerPolicy="no-referrer" 
-                     Agar gambar dari Google (NextAuth) bisa muncul tanpa error 403
-                  */}
-                  <img 
-                    src={user?.image ?? "https://via.placeholder.com/150"} 
-                    alt="Profile" 
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
+              {/* FIX 1 & 2: Gunakan next/image + avatar lokal sebagai fallback */}
+              <div className="relative w-10 h-10 rounded-full ring-2 ring-slate-900 ring-offset-2 flex-shrink-0 overflow-hidden">
+                <Image
+                  src={user?.image ?? "/default-avatar.png"}
+                  alt={user?.name ?? "Profile"}
+                  fill
+                  sizes="40px"
+                  className="object-cover"
+                  referrerPolicy="no-referrer"
+                />
               </div>
               <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-bold text-slate-900 truncate">{user?.name}</p>
+                <p className="text-sm font-bold text-slate-900 truncate">
+                  {user?.name}
+                </p>
                 <p className="text-xs text-slate-500 truncate">{user?.email}</p>
               </div>
             </div>
-            
-            {/* Tombol Logout (Client Component) */}
+
             <LogoutButton />
           </div>
         </div>
       </div>
 
-      {/* --- MAIN CONTENT --- */}
+      {/* ─── MAIN CONTENT ─── */}
       <div className="drawer-content flex flex-col">
-        {/* Navbar Mobile (Hanya muncul di layar kecil) */}
+        {/* Navbar Mobile */}
         <div className="navbar bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-slate-200 px-6 lg:hidden">
-          <label htmlFor="my-drawer-2" className="btn btn-square btn-ghost text-slate-600">
+          <label
+            htmlFor="my-drawer-2"
+            className="btn btn-square btn-ghost text-slate-600"
+          >
             <FaBars className="text-xl" />
           </label>
           <div className="flex-1 px-2 font-bold text-slate-900 uppercase text-sm tracking-widest">
@@ -112,10 +145,8 @@ export default async function DashboardLayout({
           </div>
         </div>
 
-        {/* Content Area (Halaman page.tsx akan muncul di sini) */}
-        <main className="p-6 md:p-8">
-          {children}
-        </main>
+        {/* Page content */}
+        <main className="p-6 md:p-8">{children}</main>
       </div>
     </div>
   );
