@@ -155,7 +155,7 @@ export default function LogHistoryPage() {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <FaFilter className="text-slate-400 text-xs flex-shrink-0" />
+            <FaFilter className="text-slate-400 text-xs shrink-0" />
             {[
               { value: filterType,     options: ["all","critical","warning","info","normal"], labels: ["Semua Tipe","Critical","Warning","Info","Normal"],       setter: (v: string) => { setFilterType(v); setPage(1); } },
               { value: filterKandang,  options: ["all","A1","A2","B1"],                       labels: ["Semua Kandang","Kandang A1","Kandang A2","Kandang B1"],  setter: (v: string) => { setFilterKandang(v); setPage(1); } },

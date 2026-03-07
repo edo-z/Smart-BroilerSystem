@@ -71,7 +71,7 @@ const KANDANG_DATA: KandangRow[] = [
 const ALERT_DATA: AlertItem[] = [
   {
     id: 1,
-    icon: <FaExclamationTriangle className="text-red-500 mt-1 flex-shrink-0" />,
+    icon: <FaExclamationTriangle className="text-red-500 mt-1 shrink-0" />,
     title: "Suhu Tinggi",
     time: "10m lalu",
     message: "Kandang A1 mencapai 32°C. Kipas aktif pendinginkan.",
@@ -79,7 +79,7 @@ const ALERT_DATA: AlertItem[] = [
   },
   {
     id: 2,
-    icon: <FaBell className="text-blue-500 mt-1 flex-shrink-0" />,
+    icon: <FaBell className="text-blue-500 mt-1 shrink-0" />,
     title: "Target Suhu Turun",
     time: "1j lalu",
     message: "Ayam fase 2. Target suhu menurun ke 28°C.",
@@ -87,7 +87,7 @@ const ALERT_DATA: AlertItem[] = [
   },
   {
     id: 3,
-    icon: <FaCog className="text-slate-500 mt-1 flex-shrink-0" />,
+    icon: <FaCog className="text-slate-500 mt-1 shrink-0" />,
     title: "Maintenance",
     time: "3j lalu",
     message: "Sensor Kandang B perlu dikalibrasi ulang.",
@@ -398,7 +398,7 @@ export default function DashboardPage() {
               <option>7 Hari</option>
             </select>
           </div>
-          <div className="relative h-[350px] w-full">
+          <div className="relative h-87.5 w-full">
             <Line
               data={chartData}
               options={chartOptions}
