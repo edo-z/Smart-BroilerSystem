@@ -13,7 +13,7 @@ import {
 } from "react-icons/fa";
 import LogoutButton from "@/components/auth/LogoutButton";
 import SidebarNav from "@/components/dashboard/SidebarNav";
-
+export const dynamic = "force-dynamic";
 // ─────────────────────────────────────────────
 // Active state ditangani via CSS data-attribute
 // yang di-set dari pathname server-side,
