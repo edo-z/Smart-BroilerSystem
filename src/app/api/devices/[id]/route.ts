@@ -6,24 +6,23 @@ import { ObjectId } from "mongodb";
 import { IDevice } from "@/models/Device";
 
 // ── PATCH /api/devices/[id] ───────────────────────────────
-// Edit nama, kapasitas, atau status aktif device
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!ObjectId.isValid(params.id)) {
+  if (!ObjectId.isValid(id)) {
     return NextResponse.json({ error: "ID tidak valid" }, { status: 400 });
   }
 
   const body = await req.json();
   const { name, capacity, active } = body;
 
-  // Hanya field yang dikirim yang diupdate
   const updateFields: Partial<IDevice> = {};
   if (name !== undefined) updateFields.name = name;
   if (capacity !== undefined) updateFields.capacity = Number(capacity);
@@ -42,8 +41,8 @@ export async function PATCH(
     .collection<IDevice>("devices")
     .findOneAndUpdate(
       {
-        _id: new ObjectId(params.id),
-        userId: new ObjectId(session.user.id), // hanya milik sendiri
+        _id: new ObjectId(id),
+        userId: new ObjectId(session.user.id),
       },
       { $set: updateFields },
       { returnDocument: "after" }
@@ -60,17 +59,17 @@ export async function PATCH(
 }
 
 // ── DELETE /api/devices/[id] ──────────────────────────────
-// Hapus device milik user yang sedang login
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!ObjectId.isValid(params.id)) {
+  if (!ObjectId.isValid(id)) {
     return NextResponse.json({ error: "ID tidak valid" }, { status: 400 });
   }
 
@@ -79,7 +78,7 @@ export async function DELETE(
     .db()
     .collection<IDevice>("devices")
     .deleteOne({
-      _id: new ObjectId(params.id),
+      _id: new ObjectId(id),
       userId: new ObjectId(session.user.id),
     });
 
