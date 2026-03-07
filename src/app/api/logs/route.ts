@@ -1,3 +1,5 @@
+
+
 // src/app/api/logs/route.ts
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
@@ -5,6 +7,7 @@ import clientPromise from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { IDevice } from "@/models/Device";
 import { ISensorLog } from "@/models/SensorLog";
+export const runtime = "nodejs";
 
 // ── GET /api/logs ─────────────────────────────────────────
 // Query params:

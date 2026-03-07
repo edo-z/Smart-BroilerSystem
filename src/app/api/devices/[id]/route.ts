@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 // src/app/api/devices/[id]/route.ts
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";

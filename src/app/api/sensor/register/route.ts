@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 // src/app/api/sensor/register/route.ts
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/db";
