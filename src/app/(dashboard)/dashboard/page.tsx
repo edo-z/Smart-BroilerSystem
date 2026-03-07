@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef, useEffect, useContext } from "react";
+import React, { useMemo, useRef, useEffect, useContext, useState } from "react";
 import {
   FaHome,
   FaThermometerHalf,
@@ -40,6 +40,23 @@ ChartJS.register(
 // ─────────────────────────────────────────────
 type KandangStatus = "warning" | "normal" | "kosong";
 
+interface Device {
+  _id: string;
+  name: string;
+  capacity: number;
+  active: boolean;
+  claimed: boolean;
+  createdAt: string;
+}
+
+interface SensorLog {
+  _id: string;
+  deviceId: string;
+  temperature: number;
+  humidity: number;
+  recordedAt: string;
+}
+
 interface KandangRow {
   id: string;
   umur: string;
@@ -63,9 +80,9 @@ interface AlertItem {
 const CHART_LABELS = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "23:59"];
 
 const KANDANG_DATA: KandangRow[] = [
-  { id: "Kandang A1", umur: "14 Hari",  suhu: 32.0, kelembapan: 65, status: "warning" },
-  { id: "Kandang A2", umur: "21 Hari",  suhu: 28.5, kelembapan: 64, status: "normal"  },
-  { id: "Kandang B1", umur: "-",        suhu: null,  kelembapan: null, status: "kosong" },
+  { id: "Kandang A1", umur: "14 Hari", suhu: 32.0, kelembapan: 65, status: "warning" },
+  { id: "Kandang A2", umur: "21 Hari", suhu: 28.5, kelembapan: 64, status: "normal" },
+  { id: "Kandang B1", umur: "-", suhu: null, kelembapan: null, status: "kosong" },
 ];
 
 const ALERT_DATA: AlertItem[] = [
@@ -96,14 +113,14 @@ const ALERT_DATA: AlertItem[] = [
 ];
 
 const ALERT_VARIANT_CLASSES: Record<AlertItem["variant"], string> = {
-  red:   "bg-red-50 border border-red-100",
-  blue:  "bg-blue-50 border border-blue-100",
+  red: "bg-red-50 border border-red-100",
+  blue: "bg-blue-50 border border-blue-100",
   slate: "bg-slate-50 border border-slate-100",
 };
 
 const ALERT_TITLE_CLASSES: Record<AlertItem["variant"], string> = {
-  red:   "text-red-700",
-  blue:  "text-blue-700",
+  red: "text-red-700",
+  blue: "text-blue-700",
   slate: "text-slate-700",
 };
 
@@ -178,8 +195,8 @@ function AlertCard({ item }: { item: AlertItem }) {
 function StatusBadge({ status }: { status: KandangStatus }) {
   const config = {
     warning: "bg-orange-100 text-orange-700",
-    normal:  "bg-green-100 text-green-700",
-    kosong:  "bg-slate-100 text-slate-500",
+    normal: "bg-green-100 text-green-700",
+    kosong: "bg-slate-100 text-slate-500",
   };
   const label = { warning: "Warning", normal: "Normal", kosong: "Kosong" };
   return (
@@ -277,23 +294,31 @@ export default function DashboardPage() {
    * bukan di dalam backgroundColor callback — menghindari null ctx & any type.
    * FIX 2: useMemo agar chartData tidak dibuat ulang setiap render.
    */
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+  const [logs, setLogs] = useState<SensorLog[]>([]);
+  const [loading, setLoading] = useState(true);
   const chartData = useMemo<ChartData<"line">>(() => ({
-    labels: CHART_LABELS,
+    labels: logs.map((l) =>
+      new Date(l.recordedAt).toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    ),
     datasets: [
       {
         label: "Suhu (°C)",
-        data: [28, 27.5, 29, 31, 30.5, 29.5, 28.5],
+        data: logs.map((l) => l.temperature),
         borderColor: "#ef4444",
-        // Gradient dibuat via plugin afterLayout di bawah — lihat gradientPlugin
         backgroundColor: "rgba(239, 68, 68, 0.15)",
         tension: 0.4,
         fill: true,
-        pointRadius: 4,
-        pointHoverRadius: 6,
+        pointRadius: 2,
+        pointHoverRadius: 5,
       },
       {
         label: "Kelembapan (%)",
-        data: [60, 62, 65, 58, 62, 65, 63],
+        data: logs.map((l) => l.humidity),
         borderColor: "#3b82f6",
         borderDash: [5, 5],
         backgroundColor: "transparent",
@@ -303,7 +328,7 @@ export default function DashboardPage() {
         pointHoverRadius: 4,
       },
     ],
-  }), []);
+  }), [logs]);
 
   /**
    * FIX 2 lanjutan: Plugin gradient yang bekerja SETELAH canvas siap,
@@ -329,8 +354,51 @@ export default function DashboardPage() {
    * Ganti dengan useUserContext() atau props sesuai arsitektur proyek.
    * Contoh: const userName = useUserContext()?.name?.split(" ")[0] ?? "Peternak Cerdas";
    */
-  const userName = "Peternak Cerdas"; // ← ganti dengan context/props dari layout
+  // Fetch semua device milik user saat pertama load
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        const res = await fetch("/api/devices");
+        const data: Device[] = await res.json();
+        setDevices(data);
+        // Otomatis pilih device pertama yang sudah claimed
+        const firstActive = data.find((d) => d.claimed);
+        if (firstActive) setSelectedDeviceId(firstActive._id);
+      } catch (err) {
+        console.error("Gagal fetch devices:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDevices();
+  }, []);
 
+  // Polling data sensor setiap 5 detik
+  useEffect(() => {
+    if (!selectedDeviceId) return;
+
+    const fetchLogs = async () => {
+      try {
+        const res = await fetch(`/api/sensor/data?deviceId=${selectedDeviceId}&limit=50`);
+        const data: SensorLog[] = await res.json();
+        // Data dari API urutan terbaru di atas, balik agar chart kiri = lama
+        setLogs(data.reverse());
+      } catch (err) {
+        console.error("Gagal fetch logs:", err);
+      }
+    };
+
+    fetchLogs(); // langsung fetch pertama kali
+    const interval = setInterval(fetchLogs, 5000); // lalu tiap 5 detik
+    return () => clearInterval(interval); // cleanup saat unmount
+  }, [selectedDeviceId]);
+  const userName = "Peternak Cerdas"; // ← ganti dengan context/props dari layout
+  // Derived values dari data real
+  const latestLog = logs[logs.length - 1] ?? null;
+  const avgTemp = latestLog ? latestLog.temperature : null;
+  const avgHumid = latestLog ? latestLog.humidity : null;
+  const totalActive = devices.filter((d) => d.active).length;
+  const totalStandby = devices.filter((d) => !d.active).length;
   return (
     <div className="max-w-7xl mx-auto w-full">
 
@@ -338,7 +406,7 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">
-            Halo, {userName}! 👋
+            Halo, {userName}!
           </h2>
           <p className="text-slate-500 text-sm mt-1">
             Berikut adalah ringkasan performa kandang Anda hari ini.
@@ -350,40 +418,50 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* STATS GRID — FIX 5: skeleton siap dipakai saat loading data async */}
+      {/* STATS GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard
-          icon={<FaHome className="text-xl text-slate-400" />}
-          iconBg="bg-slate-100"
-          title="Total Kandang"
-          value={3}
-          desc="1 Aktif, 2 Standby"
-        />
-        <StatCard
-          icon={<FaThermometerHalf className="text-xl text-red-500" />}
-          iconBg="bg-red-50"
-          title="Rata-rata Suhu"
-          value={29}
-          unit="°C"
-          desc="▲ Normal (Target 28°C)"
-          descColor="text-green-500"
-        />
-        <StatCard
-          icon={<FaTint className="text-xl text-blue-500" />}
-          iconBg="bg-blue-50"
-          title="Kelembapan"
-          value={62}
-          unit="%"
-          desc="Rentang Ideal 60-70%"
-        />
-        <StatCard
-          icon={<FaExclamationTriangle className="text-xl text-orange-500" />}
-          iconBg="bg-orange-50"
-          title="Alerts"
-          value={1}
-          desc="1 Critical Alert"
-          descColor="text-red-500"
-        />
+        {loading ? (
+          <>
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </>
+        ) : (
+          <>
+            <StatCard
+              icon={<FaHome className="text-xl text-slate-400" />}
+              iconBg="bg-slate-100"
+              title="Total Kandang"
+              value={devices.length}
+              desc={`${totalActive} Aktif, ${totalStandby} Standby`}
+            />
+            <StatCard
+              icon={<FaThermometerHalf className="text-xl text-red-500" />}
+              iconBg="bg-red-50"
+              title="Suhu Terkini"
+              value={avgTemp !== null ? avgTemp.toFixed(1) : "--"}
+              unit="°C"
+              desc={avgTemp !== null ? (avgTemp > 31 ? "⚠ Di atas normal" : "▲ Normal") : "Belum ada data"}
+              descColor={avgTemp !== null && avgTemp > 31 ? "text-red-500" : "text-green-500"}
+            />
+            <StatCard
+              icon={<FaTint className="text-xl text-blue-500" />}
+              iconBg="bg-blue-50"
+              title="Kelembapan"
+              value={avgHumid !== null ? avgHumid.toFixed(0) : "--"}
+              unit="%"
+              desc="Rentang Ideal 60-70%"
+            />
+            <StatCard
+              icon={<FaExclamationTriangle className="text-xl text-orange-500" />}
+              iconBg="bg-orange-50"
+              title="Device Aktif"
+              value={totalActive}
+              desc={`${devices.filter((d) => d.claimed).length} terhubung`}
+            />
+          </>
+        )}
       </div>
 
       {/* CHART & ALERTS — FIX 1+2: gradient plugin & useMemo */}
@@ -423,7 +501,26 @@ export default function DashboardPage() {
       </div>
 
       {/* FIX 6: KandangTable sebagai komponen terpisah */}
-      <KandangTable data={KANDANG_DATA} />
+      <KandangTable
+        data={devices.map((d) => {
+          const lastLog = logs.filter(
+            (l) => l.deviceId === d._id
+          ).at(-1) ?? null;
+          const suhu = lastLog?.temperature ?? null;
+          const status: KandangStatus = !d.claimed
+            ? "kosong"
+            : suhu !== null && suhu > 31
+              ? "warning"
+              : "normal";
+          return {
+            id: d.name,
+            umur: "-",
+            suhu,
+            kelembapan: lastLog?.humidity ?? null,
+            status,
+          };
+        })}
+      />
 
     </div>
   );

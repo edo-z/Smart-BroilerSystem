@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaCog,
   FaThermometerHalf,
@@ -8,8 +8,6 @@ import {
   FaBell,
   FaWifi,
   FaSave,
-  FaToggleOn,
-  FaToggleOff,
   FaChevronRight,
   FaExclamationTriangle,
   FaCheck,
@@ -17,7 +15,24 @@ import {
   FaLock,
   FaTrash,
   FaPlus,
+  FaQrcode,
+  FaCopy,
+  FaTimes,
 } from "react-icons/fa";
+import { QRCodeSVG } from "qrcode.react";
+
+// ─────────────────────────────────────────────
+// TYPES
+// ─────────────────────────────────────────────
+interface Device {
+  _id: string;
+  name: string;
+  capacity: number;
+  active: boolean;
+  claimed: boolean;
+  claimCode: string;
+  createdAt: string;
+}
 
 type ToggleProps = {
   enabled: boolean;
@@ -28,14 +43,12 @@ function Toggle({ enabled, onChange }: ToggleProps) {
   return (
     <button
       onClick={() => onChange(!enabled)}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${
-        enabled ? "bg-slate-900" : "bg-slate-200"
-      }`}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${enabled ? "bg-slate-900" : "bg-slate-200"
+        }`}
     >
       <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ${
-          enabled ? "translate-x-6" : "translate-x-1"
-        }`}
+        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ${enabled ? "translate-x-6" : "translate-x-1"
+          }`}
       />
     </button>
   );
@@ -59,11 +72,85 @@ export default function SettingsPage() {
   const [retentionDays, setRetentionDays] = useState("30");
 
   // Kandang
-  const [kandangList, setKandangList] = useState([
-    { id: "A1", name: "Kandang A1", capacity: 1000, active: true },
-    { id: "A2", name: "Kandang A2", capacity: 1200, active: true },
-    { id: "B1", name: "Kandang B1", capacity: 800, active: false },
-  ]);
+  // ── Device state (dari database)
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [deviceLoading, setDeviceLoading] = useState(true);
+
+  // ── Modal tambah kandang
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newCapacity, setNewCapacity] = useState("");
+  const [addLoading, setAddLoading] = useState(false);
+
+  // ── Modal QR code (muncul setelah tambah kandang berhasil)
+  const [qrDevice, setQrDevice] = useState<Device | null>(null);
+
+  // ── Fetch devices
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        const res = await fetch("/api/devices");
+        const data: Device[] = await res.json();
+        setDevices(data);
+      } catch (err) {
+        console.error("Gagal fetch devices:", err);
+      } finally {
+        setDeviceLoading(false);
+      }
+    };
+    fetchDevices();
+  }, []);
+
+  // ── Tambah device baru
+  const handleAddDevice = async () => {
+    if (!newName || !newCapacity) return;
+    setAddLoading(true);
+    try {
+      const res = await fetch("/api/devices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName, capacity: Number(newCapacity) }),
+      });
+      const data: Device = await res.json();
+      setDevices((prev) => [...prev, data]);
+      setShowAddModal(false);
+      setNewName("");
+      setNewCapacity("");
+      // Langsung tampilkan QR code device baru
+      setQrDevice(data);
+    } catch (err) {
+      console.error("Gagal tambah device:", err);
+    } finally {
+      setAddLoading(false);
+    }
+  };
+
+  // ── Toggle aktif/nonaktif device
+  const handleToggleDevice = async (device: Device) => {
+    try {
+      await fetch(`/api/devices/${device._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active: !device.active }),
+      });
+      setDevices((prev) =>
+        prev.map((d) => d._id === device._id ? { ...d, active: !d.active } : d)
+      );
+    } catch (err) {
+      console.error("Gagal update device:", err);
+    }
+  };
+
+  // ── Hapus device
+  const handleDeleteDevice = async (id: string) => {
+    if (!confirm("Yakin ingin menghapus kandang ini?")) return;
+    try {
+      await fetch(`/api/devices/${id}`, { method: "DELETE" });
+      setDevices((prev) => prev.filter((d) => d._id !== id));
+    } catch (err) {
+      console.error("Gagal hapus device:", err);
+    }
+  };
 
   const [saved, setSaved] = useState(false);
 
@@ -94,11 +181,10 @@ export default function SettingsPage() {
         </div>
         <button
           onClick={handleSave}
-          className={`btn btn-sm h-10 min-h-0 px-5 rounded-xl font-bold flex items-center gap-2 transition-all border-none ${
-            saved
-              ? "bg-green-500 text-white"
-              : "bg-slate-900 hover:bg-slate-700 text-white"
-          }`}
+          className={`btn btn-sm h-10 min-h-0 px-5 rounded-xl font-bold flex items-center gap-2 transition-all border-none ${saved
+            ? "bg-green-500 text-white"
+            : "bg-slate-900 hover:bg-slate-700 text-white"
+            }`}
         >
           {saved ? (
             <>
@@ -114,19 +200,17 @@ export default function SettingsPage() {
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* SIDEBAR NAVIGATION */}
-        <aside className="w-full lg:w-56 flex-shrink-0">
+        <aside className="w-full lg:w-56 shrink-0">
           <nav className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             {sections.map((s, i) => (
               <button
                 key={s.id}
                 onClick={() => setActiveSection(s.id)}
-                className={`w-full flex items-center justify-between px-4 py-3.5 text-sm font-medium transition-colors ${
-                  i !== sections.length - 1 ? "border-b border-slate-100" : ""
-                } ${
-                  activeSection === s.id
+                className={`w-full flex items-center justify-between px-4 py-3.5 text-sm font-medium transition-colors ${i !== sections.length - 1 ? "border-b border-slate-100" : ""
+                  } ${activeSection === s.id
                     ? "bg-slate-900 text-white"
                     : "text-slate-600 hover:bg-slate-50"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <span className="text-sm">{s.icon}</span>
@@ -309,45 +393,185 @@ export default function SettingsPage() {
 
           {/* === KANDANG === */}
           {activeSection === "kandang" && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                <div>
-                  <h3 className="font-bold text-slate-800">Manajemen Kandang</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Kelola daftar kandang dan kapasitasnya.</p>
-                </div>
-                <button className="btn btn-sm bg-slate-900 hover:bg-slate-700 text-white border-none rounded-lg h-9 min-h-0 px-4 flex items-center gap-2 font-bold text-xs">
-                  <FaPlus /> Tambah
-                </button>
-              </div>
-              <div className="divide-y divide-slate-100">
-                {kandangList.map((k) => (
-                  <div key={k.id} className="flex items-center justify-between px-6 py-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center">
-                        <FaCog className="text-slate-500" />
+            <>
+              {/* Modal Tambah Kandang */}
+              {showAddModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                  <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-bold text-slate-800">Tambah Kandang Baru</h3>
+                      <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600">
+                        <FaTimes />
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Nama Kandang</label>
+                        <input
+                          type="text"
+                          placeholder="contoh: Kandang A1"
+                          value={newName}
+                          onChange={(e) => setNewName(e.target.value)}
+                          className="input input-bordered w-full rounded-xl text-sm bg-slate-50 border-slate-200 focus:outline-none h-10"
+                        />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-slate-800">{k.name}</p>
-                        <p className="text-xs text-slate-400">Kapasitas: {k.capacity.toLocaleString()} ekor</p>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Kapasitas (ekor)</label>
+                        <input
+                          type="number"
+                          placeholder="contoh: 1000"
+                          value={newCapacity}
+                          onChange={(e) => setNewCapacity(e.target.value)}
+                          className="input input-bordered w-full rounded-xl text-sm bg-slate-50 border-slate-200 focus:outline-none h-10"
+                        />
                       </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Toggle
-                        enabled={k.active}
-                        onChange={(v) =>
-                          setKandangList((prev) =>
-                            prev.map((item) => (item.id === k.id ? { ...item, active: v } : item))
-                          )
-                        }
-                      />
-                      <button className="text-red-400 hover:text-red-600 transition-colors p-1">
-                        <FaTrash className="text-xs" />
+                      <button
+                        onClick={handleAddDevice}
+                        disabled={addLoading || !newName || !newCapacity}
+                        className="btn btn-sm bg-slate-900 hover:bg-slate-700 text-white border-none rounded-xl h-10 min-h-0 font-bold disabled:opacity-50"
+                      >
+                        {addLoading ? "Menyimpan..." : "Simpan & Generate QR"}
                       </button>
                     </div>
                   </div>
-                ))}
+                </div>
+              )}
+
+              {/* Modal QR Code */}
+              {qrDevice && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                  <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-bold text-slate-800">QR Code — {qrDevice.name}</h3>
+                      <button onClick={() => setQrDevice(null)} className="text-slate-400 hover:text-slate-600">
+                        <FaTimes />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-4">
+                      {/* QR Code */}
+                      <div className="p-4 bg-white border-2 border-slate-200 rounded-2xl">
+                        <QRCodeSVG
+                          value={qrDevice.claimCode}
+                          size={180}
+                          bgColor="#ffffff"
+                          fgColor="#0f172a"
+                          level="M"
+                        />
+                      </div>
+
+                      {/* Claim Code */}
+                      <div className="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                        <div>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase">Claim Code</p>
+                          <p className="text-lg font-mono font-bold text-slate-900 tracking-widest">
+                            {qrDevice.claimCode}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => navigator.clipboard.writeText(qrDevice.claimCode)}
+                          className="btn btn-ghost btn-xs text-slate-500 hover:text-slate-900"
+                          title="Copy kode"
+                        >
+                          <FaCopy />
+                        </button>
+                      </div>
+
+                      <p className="text-xs text-slate-400 text-center leading-relaxed">
+                        Flash kode ini ke ESP32 Anda. Kode hanya bisa digunakan <span className="font-bold text-slate-600">satu kali</span>.
+                      </p>
+
+                      <button
+                        onClick={() => setQrDevice(null)}
+                        className="btn btn-sm bg-slate-900 hover:bg-slate-700 text-white border-none rounded-xl w-full h-9 min-h-0 font-bold"
+                      >
+                        Selesai
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Daftar Kandang */}
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                  <div>
+                    <h3 className="font-bold text-slate-800">Manajemen Kandang</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">Kelola daftar kandang dan kapasitasnya.</p>
+                  </div>
+                  <button
+                    onClick={() => setShowAddModal(true)}
+                    className="btn btn-sm bg-slate-900 hover:bg-slate-700 text-white border-none rounded-lg h-9 min-h-0 px-4 flex items-center gap-2 font-bold text-xs"
+                  >
+                    <FaPlus /> Tambah
+                  </button>
+                </div>
+
+                {deviceLoading ? (
+                  <div className="divide-y divide-slate-100">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center justify-between px-6 py-4 animate-pulse">
+                        <div className="flex items-center gap-4">
+                          <div className="w-9 h-9 rounded-xl bg-slate-100" />
+                          <div>
+                            <div className="h-3 w-24 bg-slate-100 rounded mb-2" />
+                            <div className="h-3 w-32 bg-slate-100 rounded" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : devices.length === 0 ? (
+                  <div className="py-12 text-center text-slate-400 text-sm">
+                    Belum ada kandang. Klik "Tambah" untuk mulai.
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100">
+                    {devices.map((device) => (
+                      <div key={device._id} className="flex items-center justify-between px-6 py-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center">
+                            <FaCog className="text-slate-500" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-800">{device.name}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <p className="text-xs text-slate-400">
+                                Kapasitas: {device.capacity.toLocaleString()} ekor
+                              </p>
+                              {device.claimed ? (
+                                <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">
+                                  Terhubung
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={() => setQrDevice(device)}
+                                  className="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-full flex items-center gap-1 hover:bg-orange-100"
+                                >
+                                  <FaQrcode className="text-[8px]" /> Tampilkan QR
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <Toggle
+                            enabled={device.active}
+                            onChange={() => handleToggleDevice(device)}
+                          />
+                          <button
+                            onClick={() => handleDeleteDevice(device._id)}
+                            className="text-red-400 hover:text-red-600 transition-colors p-1"
+                          >
+                            <FaTrash className="text-xs" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
+            </>
           )}
 
           {/* === SISTEM === */}

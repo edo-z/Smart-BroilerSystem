@@ -12,7 +12,7 @@ import {
   FaHistory,
 } from "react-icons/fa";
 import LogoutButton from "@/components/auth/LogoutButton";
-import { headers } from "next/headers";
+import SidebarNav from "@/components/dashboard/SidebarNav";
 
 // ─────────────────────────────────────────────
 // Active state ditangani via CSS data-attribute
@@ -22,9 +22,9 @@ import { headers } from "next/headers";
 // ─────────────────────────────────────────────
 
 const NAV_ITEMS = [
-  { href: "/dashboard",             label: "Dashboard",  icon: <FaHome className="w-4" /> },
-  { href: "/dashboard/riwayat",     label: "Riwayat",    icon: <FaHistory className="w-4" /> },
-  { href: "/dashboard/pengaturan",  label: "Pengaturan", icon: <FaCog className="w-4" /> },
+  { href: "/dashboard", label: "Dashboard", icon: <FaHome className="w-4" /> },
+  { href: "/dashboard/riwayat", label: "Riwayat", icon: <FaHistory className="w-4" /> },
+  { href: "/dashboard/pengaturan", label: "Pengaturan", icon: <FaCog className="w-4" /> },
 ];
 
 export default async function DashboardLayout({
@@ -43,11 +43,6 @@ export default async function DashboardLayout({
   const user = session.user;
 
   // 3. Ambil pathname dari headers untuk active state sidebar
-  //    tanpa perlu usePathname() (Client Component)
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") ?? "";
-  // Catatan: pastikan middleware Anda meneruskan header ini:
-  //   response.headers.set("x-pathname", request.nextUrl.pathname)
 
   return (
     <div className="drawer lg:drawer-open bg-slate-50 min-h-screen">
@@ -77,31 +72,7 @@ export default async function DashboardLayout({
           </div>
 
           {/* Navigasi dengan active state server-side */}
-          <ul className="menu flex-1 gap-1 px-0 text-slate-600">
-            {NAV_ITEMS.map(({ href, label, icon }) => {
-              // exact match untuk /dashboard, prefix match untuk sub-halaman
-              const isActive =
-                href === "/dashboard"
-                  ? pathname === "/dashboard"
-                  : pathname.startsWith(href);
-
-              return (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                      isActive
-                        ? "bg-slate-900 text-white hover:bg-slate-800"
-                        : "text-slate-600 hover:bg-slate-100"
-                    }`}
-                  >
-                    {icon}
-                    {label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+          <SidebarNav />
 
           {/* Profil User */}
           <div className="border-t border-slate-200 pt-4 mt-4">
@@ -109,7 +80,7 @@ export default async function DashboardLayout({
               {/* FIX 1 & 2: Gunakan next/image + avatar lokal sebagai fallback */}
               <div className="relative w-10 h-10 rounded-full ring-2 ring-slate-900 ring-offset-2 flex-shrink-0 overflow-hidden">
                 <Image
-                  src={user?.image ?? "/default-avatar.png"}
+                  src={user?.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name ?? "User")}&background=0f172a&color=fff`}
                   alt={user?.name ?? "Profile"}
                   fill
                   sizes="40px"
