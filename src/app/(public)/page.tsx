@@ -122,15 +122,15 @@ export default function LandingPage() {
       {/* 1. HERO SECTION (FIXED LAYOUT)           */}
       {/* ========================================= */}
       {/* Perbaikan: Menambahkan 'relative' pada parent Hero */}
-      <div id="home" className="hero min-h-[100vh] bg-white pb-20 py-24 relative">
+      <div id="home" className="hero min-h-screen bg-white pb-20 py-24 relative">
         <div className="hero-content text-center max-w-6xl flex-col lg:flex-row gap-16 px-4">
           
           {/* Left Content */}
           <div className="w-full lg:w-1/2 text-left space-y-6 animate-fade-in-up z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold uppercase tracking-wider">
+            {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold uppercase tracking-wider">
               <FaWifi className="text-xs" />
-              Smart Farming Technology
-            </div>
+              Smart Broiler Tech
+            </div> */}
             
             <h1 className="text-5xl md:text-6xl font-bold leading-tight text-slate-900">
               Manajemen Kandang <br />
@@ -280,7 +280,7 @@ export default function LandingPage() {
                 </div>
               </div>
               
-              <div className="h-[350px] w-full">
+              <div className="h-87.5 w-full">
                 <Line data={chartData} options={chartOptions} />
               </div>
             </div>
@@ -372,21 +372,21 @@ export default function LandingPage() {
               
               <div className="space-y-6">
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">1</div>
+                  <div className="shrink-0 w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">1</div>
                   <div>
                     <h4 className="font-bold text-slate-800">Konsistensi Suhu</h4>
                     <p className="text-sm text-slate-500 mt-1">Jaga fluktuasi suhu maksimal ±2°C per jam.</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">2</div>
+                  <div className="shrink-0 w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">2</div>
                   <div>
                     <h4 className="font-bold text-slate-800">Kualitas Udara</h4>
                     <p className="text-sm text-slate-500 mt-1">Amoniak (NH3) harus dijaga di bawah 25 ppm.</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">3</div>
+                  <div className="shrink-0 w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">3</div>
                   <div>
                     <h4 className="font-bold text-slate-800">Minum Bersih</h4>
                     <p className="text-sm text-slate-500 mt-1">Cek pipa air setiap hari.</p>

@@ -50,11 +50,11 @@ export default function Navbar() {
               Documentations
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link href="/soon" className="hover:text-secondary hover:bg-transparent transition-all text-sm">
               Tips Peternak
             </Link>
-          </li>
+          </li> */}
 
           {/* CTA Button (Outline Style for minimal look) */}
           <li className="ml-4">
@@ -89,15 +89,15 @@ export default function Navbar() {
           <li className="mb-2">
             <Link href="/docs/overview" className="font-medium text-secondary-700">Documentations</Link>
           </li>
-          <li className="mb-4">
+          {/* <li className="mb-4">
             <Link href="/soon" className="font-medium text-secondary-700">Tips Peternak</Link>
-          </li>
+          </li> */}
 
           <div className="divider my-0"></div>
 
           <li>
-            <Link href="/soon" className="bg-secondary text-white hover:bg-secondary/90">
-              Hubungi Kami
+            <Link href="/login" className="bg-secondary text-white hover:bg-secondary/90">
+              Mulai Sekarang
             </Link>
           </li>
         </ul>

@@ -58,18 +58,18 @@ export default function Footer() {
             <h3 className="text-white text-lg font-bold mb-6">Hubungi Kami</h3>
             <ul className="space-y-4 text-sm">
               <li className="flex items-start gap-3">
-                <FaMapMarkerAlt className="mt-1 text-secondary w-5 flex-shrink-0" />
+                <FaMapMarkerAlt className="mt-1 text-secondary w-5 shrink-0" />
                 <span className="text-slate-400">
-                  Jl. Teknologi Peternakan No. 88, <br />Jawa Barat, Indonesia
+                  Jl. Kampus ITS, Keputih, Kec. Sukolilo, <br /> Kota Surabaya, Jawa Timur 60111
                 </span>
               </li>
               <li className="flex items-center gap-3">
-                <FaPhone className="text-secondary w-5 flex-shrink-0" />
-                <span className="text-slate-400">+62 812-3456-7890</span>
+                <FaPhone className="text-secondary w-5 shrink-0" />
+                <span className="text-slate-400">+62 813 1556 7896</span>
               </li>
               <li className="flex items-center gap-3">
-                <FaEnvelope className="text-secondary w-5 flex-shrink-0" />
-                <span className="text-slate-400">support@broilersmart.id</span>
+                <FaEnvelope className="text-secondary w-5 shrink-0" />
+                <span className="text-slate-400">busines.aldozeno@gmail.com</span>
               </li>
             </ul>
           </div>
