@@ -13,8 +13,8 @@ export default function Navbar() {
       <div className="flex-1">
         <Link href="/" className="flex items-center gap-3 group">
           {/* Icon Box dengan background tipis */}
-          <div className=" text-white p-2.5 rounded-xl shadow-lg shadow-secondary/20 group-hover:scale-105 transition-transform duration-300">
-            {/* <FaMicrochip className="text-xl" /> */}
+          {/* <div className=" text-white p-2.5 rounded-xl shadow-lg shadow-secondary/20 group-hover:scale-105 transition-transform duration-300">
+            <FaMicrochip className="text-xl" />
             <Image
               src={heroImg}
               alt="Deskripsi gambar"
@@ -23,16 +23,16 @@ export default function Navbar() {
               height={32}
               priority // Tambahkan ini jika gambar berada di atas (LCP)
             />
-          </div>
+          </div> */}
 
           {/* Teks Logo dengan Subtitle */}
           <div className="flex flex-col leading-none">
-            <span className="text-xl font-bold text-secondary-800 tracking-tight group-hover:text-secondary transition-colors">
-              BroilerSmart
+            <span className="text-4xl font-bold font-serif text-secondary-800 tracking-tight group-hover:text-secondary transition-colors">
+              AVESIS
             </span>
-            <span className="text-[10px] font-bold text-secondary-400 uppercase tracking-[0.2em]">
-              IoT Monitoring
-            </span>
+            {/* <span className="text-[10px] font-bold text-secondary-400 uppercase tracking-[0.2em]">
+              Penjaga Kenyamanan Ayam Anda
+            </span> */}
           </div>
         </Link>
       </div>
@@ -81,7 +81,7 @@ export default function Navbar() {
 
         <ul
           tabIndex={0}
-          className="menu menu-sm dropdown-content mt-3 z-[1] p-4 shadow-xl bg-base-100 rounded-2xl w-60 border border-secondary-100"
+          className="menu menu-sm dropdown-content mt-3 z-1 p-4 shadow-xl bg-base-100 rounded-2xl w-60 border border-secondary-100"
         >
           <li className="mb-2">
             <Link href="/soon" className="font-medium text-secondary-700">Fitur Produk</Link>

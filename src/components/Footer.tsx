@@ -23,11 +23,10 @@ export default function Footer() {
           {/* Kolom 1: Brand & Identitas */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-2xl font-bold text-white">
-              BroilerSmart
+              AVESIS
             </div>
             <p className="text-sm leading-relaxed text-slate-400">
-              Solusi cerdas monitoring lingkungan kandang ayam broiler.
-              Menjaga suhu dan kelembapan optimal untuk hasil ternak yang maksimal dan berkelanjutan.
+              Empowering Humans with Precision Automation.
             </p>
           </div>
 

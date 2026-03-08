@@ -1,11 +1,12 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import { 
-  FaTemperatureHigh, 
-  FaTint, 
-  FaMicrochip, 
-  FaWifi, 
+import Image from 'next/image'
+import {
+  FaTemperatureHigh,
+  FaTint,
+  FaMicrochip,
+  FaWifi,
   FaCheckCircle,
   FaBook,
   FaArrowRight,
@@ -40,7 +41,7 @@ ChartJS.register(
 );
 
 export default function LandingPage() {
-  
+
   // --- CONFIG CHART (Safe Gradient) ---
   const chartData = {
     labels: ["0 Hari", "7 Hari", "14 Hari", "21 Hari", "28 Hari", "32 Hari"],
@@ -61,7 +62,7 @@ export default function LandingPage() {
           gradient.addColorStop(1, "rgba(59, 130, 246, 0)");
           return gradient;
         },
-        tension: 0.4, 
+        tension: 0.4,
         fill: true,
         pointBackgroundColor: "#ffffff",
         pointBorderColor: "#3b82f6",
@@ -84,7 +85,7 @@ export default function LandingPage() {
         padding: 12,
         displayColors: false,
         callbacks: {
-          label: function(context: any) {
+          label: function (context: any) {
             return `Target: ${context.parsed.y}°C`;
           }
         }
@@ -101,7 +102,7 @@ export default function LandingPage() {
         ticks: {
           color: "#64748b", // Slate-500
           font: { size: 11 },
-          callback: function(value: any) { return value + "°C"; }
+          callback: function (value: any) { return value + "°C"; }
         }
       },
       x: {
@@ -117,86 +118,84 @@ export default function LandingPage() {
   return (
     // Wrapper Utama
     <div className="bg-slate-50 min-h-screen font-sans text-slate-700 flex flex-col antialiased">
-      
+
       {/* ========================================= */}
       {/* 1. HERO SECTION (FIXED LAYOUT)           */}
       {/* ========================================= */}
-      {/* Perbaikan: Menambahkan 'relative' pada parent Hero */}
-      <div id="home" className="hero min-h-screen bg-white pb-20 py-24 relative">
-        <div className="hero-content text-center max-w-6xl flex-col lg:flex-row gap-16 px-4">
-          
+      
+      <div
+        id="home"
+        className="hero min-h-screen pb-20 py-auto relative overflow-hidden"
+        style={{
+          backgroundImage: "url('https://i.ibb.co.com/tw15Wsrp/banner.webp')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        {/* Dark Overlay */}
+        {/* <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-0" /> */}
+
+        {/* Subtle gradient overlay for depth */}
+        {/* <div className="absolute inset-0 bg-linear-to-br from-slate-900/80 via-slate-800/40 to-slate-800/60 z-0" /> */}
+
+        <div className="hero-content text-center max-w-6xl flex-col lg:flex-row gap-16 px-4 relative z-10">
+
           {/* Left Content */}
-          <div className="w-full lg:w-1/2 text-left space-y-6 animate-fade-in-up z-10">
-            {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold uppercase tracking-wider">
-              <FaWifi className="text-xs" />
-              Smart Broiler Tech
-            </div> */}
-            
-            <h1 className="text-5xl md:text-6xl font-bold leading-tight text-slate-900">
-              Manajemen Kandang <br />
-              <span className="text-blue-600 font-serif italic">Presisi & Terukur</span>
+          <div className="w-full lg:w-1/2 text-left space-y-6 animate-fade-in-up">
+
+            <h1 className="text-8xl font-bold leading-tight text-black font-serif mb-1">
+              AVESIS
             </h1>
-            
-            <p className="text-lg text-slate-500 leading-relaxed max-w-xl">
-              Alat monitoring otomatis suhu dan kelembapan. Memastikan kenyamanan biologis ayam broiler setiap hari untuk hasil panen yang maksimal.
+
+            <p className="text-2lg text-slate-700 leading-relaxed">
+              <span className="font-semibold">Empowering Humans with Precision Automation. <br /></span>
             </p>
-            
+
             <div className="flex gap-4 pt-2">
-              <Link href="/login" className="btn btn-primary bg-slate-900 hover:bg-slate-800 border-none text-white px-8 h-12 rounded-lg shadow-xl transition-shadow">
+              <Link href="/login" className="btn btn-primary bg-slate-900 hover:bg-white border-none hover:text-slate-900 text-white px-8 h-12 rounded-lg shadow-xl transition-shadow font-semibold">
                 Mulai Sekarang
               </Link>
-              <Link href="/docs" className="btn btn-outline border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 px-8 h-12 rounded-lg">
-                Pelajari Cara Kerja
+              <Link href="/docs" className="btn btn-outline border-slate-900  text-slate-900 hover:text-slate-900 hover:bg-white hover:border-white/60 px-8 h-12 rounded-lg hover:shadow-xl transition-shadow">
+                Dokumentasi
               </Link>
             </div>
-            
-            {/* <div className="pt-8 flex items-center gap-4 text-sm text-slate-400">
-              <p>Dipercaya oleh:</p>
-              <div className="flex gap-2 font-semibold text-slate-600">
-                <span>PT. Agro Maju</span>
-                <span>•</span>
-                <span>Bromo Farm</span>
-                <span>•</span>
-                <span>Java Poultry</span>
-              </div>
-            </div> */}
           </div>
 
-          {/* Right Content */}
-          {/* Perbaikan: Menambahkan 'relative' dan 'z-0' agar visual berada di bawah teks jika layar sempit */}
+          {/* Right Content - Card */}
           <div className="relative w-full lg:w-1/2 flex justify-center animate-fade-in z-0">
-            <div className="w-full max-w-md bg-white p-6 rounded-3xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] border border-slate-100">
-              
+            <div className="w-full max-w-md bg-white/10 backdrop-blur-md p-6 rounded-3xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] border  border-blue-300">
+
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                  <span className="text-sm font-semibold text-slate-700">Kandang A1 - Live</span>
+                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                  <span className="text-sm font-semibold text-shadow-slate-800">Kandang A1 - Online</span>
                 </div>
-                <span className="text-xs font-mono text-slate-400">ID: BS-001</span>
+                <span className="text-xs font-mono text-black/40">ID: 261E5CDB</span>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <div className="text-xs text-slate-400 uppercase font-bold mb-1">Suhu</div>
-                  <div className="text-3xl font-bold text-slate-800">28.5<span className="text-sm text-slate-500 ml-1">°C</span></div>
-                  <div className="text-xs text-blue-600 mt-1 font-medium">Target Terpenuhi</div>
+                <div className="bg-white/10 p-4 rounded-2xl border border-blue-300 hover:shadow-xl">
+                  <div className="text-xs text-black/50 uppercase font-semibold mb-1">Suhu</div>
+                  <div className="text-3xl font-bold text-slate-700">28.5<span className="text-sm text-slate-900 ml-1">°C</span></div>
+                  <div className="text-xs font-semibold text-black/50 mt-1">Target Terpenuhi</div>
                 </div>
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <div className="text-xs text-slate-400 uppercase font-bold mb-1">Kelembapan</div>
-                  <div className="text-3xl font-bold text-slate-800">64<span className="text-sm text-slate-500 ml-1">%</span></div>
-                  <div className="text-xs text-blue-400 mt-1 font-medium">Rentang Normal</div>
+                <div className="bg-white/10 p-4 rounded-2xl border border-blue-300 hover:shadow-xl">
+                  <div className="text-xs text-black/50 uppercase font-semibold mb-1">Kelembapan</div>
+                  <div className="text-3xl font-bold text-slate-700">64<span className="text-sm text-slate-900 ml-1">%</span></div>
+                  <div className="text-xs font-semibold text-black/50 mt-1">Rentang Normal</div>
                 </div>
               </div>
 
-              <div className="bg-slate-50 rounded-xl p-4 flex items-center gap-4 border border-slate-100">
-                <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
+              <div className="bg-white/10 rounded-xl p-4 flex items-center gap-4 border border-blue-300">
+                <div className="w-1 h-8 bg-blue-400 rounded-full"></div>
                 <div className="flex-1">
                   <div className="flex justify-between text-xs font-bold mb-1">
-                    <span>Kenyamanan Kandang</span>
-                    <span className="text-blue-600">Excellent</span>
+                    <span className="text-slate-900 font-bold">Kenyamanan Kandang</span>
+                    <span className="text-slate-600">Nyaman 85%</span>
                   </div>
-                  <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-blue-600 h-full w-[85%] rounded-full"></div>
+                  <div className="w-full bg-black/10 h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-blue-400 h-full w-[85%] rounded-full"></div>
                   </div>
                 </div>
               </div>
@@ -225,7 +224,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-3">Sensor Presisi</h3>
               <p className="text-slate-500 text-sm leading-relaxed">
-                Menggunakan sensor DHT22 industrial grade dengan akurasi ±0.5°C untuk data yang dapat dipercaya.
+                Menggunakan sensor SHT31 industrial grade dengan akurasi ±0.5°C untuk data yang dapat dipercaya.
               </p>
             </div>
             <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-slate-100">
@@ -234,7 +233,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-3">Humidity Control</h3>
               <p className="text-slate-500 text-sm leading-relaxed">
-                Monitoring kadar air udara untuk mencegah kasus pernapasan (CRD) pada masa pertumbuhan.
+                Monitoring kadar air pada udara untuk mencegah kasus pernapasan (CRD) pada masa pertumbuhan.
               </p>
             </div>
             <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-slate-100">
@@ -243,7 +242,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-3">Cloud Sync</h3>
               <p className="text-slate-500 text-sm leading-relaxed">
-                Data tersimpan aman di cloud dan dapat diakses kapan saja melalui aplikasi seluler.
+                Data tersimpan aman di cloud dan dapat diakses kapan saja melalui device apapun.
               </p>
             </div>
           </div>
@@ -256,9 +255,9 @@ export default function LandingPage() {
       <section id="monitoring" className="py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center mb-16">
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-4">Biological Imperative</span>
+            {/* <span className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-4">Biological Imperative</span> */}
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-4">
-              Adaptasi Suhu Berbasis Umur
+              Adaptasi Kenyaman Secara Pintar
             </h2>
             <p className="text-slate-500 max-w-2xl text-center">
               Sistem secara otomatis mengikuti kurva biologis standar penurunan suhu dari fase menetas hingga siap panen.
@@ -266,7 +265,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-            
+
             {/* Kiri: Chart */}
             <div className="lg:col-span-8 bg-slate-50 rounded-3xl p-6 md:p-10 border border-slate-100 shadow-inner">
               <div className="flex justify-between items-end mb-6 px-2">
@@ -279,7 +278,7 @@ export default function LandingPage() {
                   <span className="text-sm text-slate-500">Derajat Celcius (°C)</span>
                 </div>
               </div>
-              
+
               <div className="h-87.5 w-full">
                 <Line data={chartData} options={chartOptions} />
               </div>
@@ -287,7 +286,7 @@ export default function LandingPage() {
 
             {/* Kanan: Fase Info */}
             <div className="lg:col-span-4 space-y-6">
-              
+
               <div className="p-6 rounded-2xl bg-orange-50 border-l-4 border-orange-400">
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-bold text-orange-900">Phase 1: Brooding</h4>
@@ -345,15 +344,15 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-slate-800">
             <div className="py-6 md:py-0">
-              <div className="text-4xl md:text-5xl font-bold text-blue-400 mb-2">99.9%</div>
+              <div className="text-4xl md:text-5xl font-bold text-blue-400 mb-2">--</div>
               <p className="text-slate-400 text-sm font-medium tracking-wide uppercase">Akurasi Sensor</p>
             </div>
             <div className="py-6 md:py-0">
-              <div className="text-4xl md:text-5xl font-bold text-blue-400 mb-2">&lt; 1s</div>
+              <div className="text-4xl md:text-5xl font-bold text-blue-400 mb-2">--</div>
               <p className="text-slate-400 text-sm font-medium tracking-wide uppercase">Latensi Data</p>
             </div>
             <div className="py-6 md:py-0">
-              <div className="text-4xl md:text-5xl font-bold text-blue-400 mb-2">+15%</div>
+              <div className="text-4xl md:text-5xl font-bold text-blue-400 mb-2">--</div>
               <p className="text-slate-400 text-sm font-medium tracking-wide uppercase">Efisiensi Pakan</p>
             </div>
           </div>
@@ -366,10 +365,10 @@ export default function LandingPage() {
       <section id="tips" className="py-24 bg-slate-50">
         <div className="container mx-auto px-4">
           <div className="bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-100 flex flex-col md:flex-row">
-            
+
             <div className="w-full md:w-1/2 p-10 md:p-14">
               <h2 className="text-3xl font-bold mb-6 text-slate-900">Tips Manajemen Kandang</h2>
-              
+
               <div className="space-y-6">
                 <div className="flex gap-4">
                   <div className="shrink-0 w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">1</div>
@@ -412,45 +411,45 @@ export default function LandingPage() {
                 </li>
               </ul>
               <a href="/docs/overview" className="btn btn-primary w-full btn-outline border-white text-white hover:bg-white hover:text-slate-900">
-                Lihat Dokumentasi <FaBook className="ml-2"/>
+                Lihat Dokumentasi <FaBook className="ml-2" />
               </a>
             </div>
 
           </div>
           {/* (Di dalam section Tips, di bawah CTA Card) */}
 
-{/* ========================= */}
-{/* TECH STACK STRIP (OPSIONAL) */}
-{/* Menunjukkan kredibilitas teknis */}
-{/* ========================= */}
-<div className="mt-12 pt-8 border-t border-slate-200">
-  <div className="text-center">
-    <p className="text-xs text-slate-400 uppercase tracking-widest font-bold mb-6">
-      Powered By Modern Technology
-    </p>
-    <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-slate-600 text-sm font-medium">
-      {/* Link ke docs/hardware */}
-      <Link href="/docs" className="flex items-center gap-2 hover:text-secondary transition-colors">
-        <FaMicrochip /> <span>ESP32S3 N16R8</span>
-      </Link>
-      
-      {/* Link ke docs/cara-kerja */}
-      <Link href="/docs/cara-kerja" className="flex items-center gap-2 hover:text-secondary transition-colors">
-        <FaBrain /> <span>Fuzzy Logic</span>
-      </Link>
-      
-      {/* Link ke docs/software */}
-      <Link href="/docs/software" className="flex items-center gap-2 hover:text-secondary transition-colors">
-        <FaWifi /> <span>MQTT IoT</span>
-      </Link>
-      
-      {/* Link ke docs/software */}
-      <Link href="/docs/software" className="flex items-center gap-2 hover:text-secondary transition-colors">
-        <FaReact /> <span>Next.js</span>
-      </Link>
-    </div>
-  </div>
-</div>
+          {/* ========================= */}
+          {/* TECH STACK STRIP (OPSIONAL) */}
+          {/* Menunjukkan kredibilitas teknis */}
+          {/* ========================= */}
+          <div className="mt-12 pt-8 border-t border-slate-200">
+            <div className="text-center">
+              <p className="text-xs text-slate-400 uppercase tracking-widest font-bold mb-6">
+                Powered By Modern Technology
+              </p>
+              <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-slate-600 text-sm font-medium">
+                {/* Link ke docs/hardware */}
+                <Link href="/docs" className="flex items-center gap-2 hover:text-secondary transition-colors">
+                  <FaMicrochip /> <span>ESP32S3 N16R8</span>
+                </Link>
+
+                {/* Link ke docs/logic */}
+                <Link href="/docs/logic" className="flex items-center gap-2 hover:text-secondary transition-colors">
+                  <FaBrain /> <span>Fuzzy Logic</span>
+                </Link>
+
+                {/* Link ke docs/software */}
+                <Link href="/docs/software" className="flex items-center gap-2 hover:text-secondary transition-colors">
+                  <FaWifi /> <span>MQTT IoT</span>
+                </Link>
+
+                {/* Link ke docs/software */}
+                <Link href="/docs/software" className="flex items-center gap-2 hover:text-secondary transition-colors">
+                  <FaReact /> <span>Next.js</span>
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
