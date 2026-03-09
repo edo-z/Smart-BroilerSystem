@@ -154,7 +154,7 @@ export default function LandingPage() {
         <div className="hero-content text-center max-w-6xl flex-col lg:flex-row gap-16 px-4 relative z-10">
 
           {/* Left Content */}
-          <div className="w-full text-center space-y-6 animate-fade-in-up">
+          <div className="w-full text-center space-y-10">
             <SplitText
               text="AVESIS"
               className="text-8xl font-bold leading-tight text-black font-serif mb-1"
@@ -172,7 +172,7 @@ export default function LandingPage() {
             <BlurText
               className="text-lg text-slate-700 leading-tight font-semibold justify-center mb-1"
               text='"Empowering Humans with Precision Automation"'
-              delay={70}
+              delay={60}
               animateBy="letters"
               direction="bottom"
               onAnimationComplete={BlurTex} animationFrom={undefined} animationTo={undefined} />
@@ -180,20 +180,20 @@ export default function LandingPage() {
             <BlurText
               className="text-lg text-slate-700 leading-tight font-medium justify-center mt-3"
               text="Membangun Masa Depan dengan Ketepatan"
-              delay={80}
+              delay={65}
               animateBy="letters"
               direction="bottom"
               onAnimationComplete={BlurTex} animationFrom={undefined} animationTo={undefined} />
 
             <div className="gap-4 pt-auto">
-              <div className="flex gap-4 pt-auto mb-4">
+              <div className="ga-4 pt-auto mb-4">
                 {/* <Link href="/login" className="btn btn-outline bg-slate-900 hover:bg-white border-none hover:text-slate-900 text-white px-24 h-12 rounded-lg shadow-xl transition-shadow font-semibold backdrop-blur-xl z-0">
                   Mulai Sekarang
                 </Link> */}
-                <Link href="/login" className="btn btn-outline bg-white/50 hover:bg-slate-900 border-none hover:text-white text-slate-900 px-45 h-12 rounded-lg shadow-xl transition-shadow font-semibold backdrop-blur-sm z-0">
+                <Link href="/login" className="btn btn-outline bg-white/50 hover:bg-slate-900 border-none hover:text-white text-slate-900 px-auto rounded-lg shadow-xl transition-shadow font-semibold backdrop-blur-sm z-0">
                   <BlurText
                     text="Mulai Sekarang!"
-                    delay={80}
+                    delay={50}
                     animateBy="letters"
                     direction="bottom"
                     onAnimationComplete={BlurTex} animationFrom={undefined} animationTo={undefined} />
@@ -204,8 +204,9 @@ export default function LandingPage() {
 
           {/* Right Content - Card */}
 
-          <TiltedCard
-            imageSrc='https://ibb.co.com/GKWbykN'
+          <div className="bg-white">
+            <TiltedCard
+            imageSrc='../../../public/images/white.webp'
             altText=''
             captionText="Kandang A1"
             containerHeight="300px"
@@ -219,7 +220,7 @@ export default function LandingPage() {
             displayOverlayContent
             overlayContent={
 
-              <div>
+              
                 <div className="relative justify-center animate-fade-in z-0">
                   <div className="w-full max-w-md bg-white/10 backdrop-blur-md p-6 rounded-3xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] border  border-blue-300">
                     <div className="flex justify-between items-center mb-6">
@@ -257,9 +258,11 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              
             }
           />
+
+          </div>
 
         </div>
       </div>
