@@ -26,7 +26,7 @@ export default function Footer() {
               AVESIS
             </div>
             <p className="text-sm leading-relaxed text-slate-400">
-              Empowering Humans with Precision Automation.
+              "Empowering Humans with Precision Automation"
             </p>
           </div>
 

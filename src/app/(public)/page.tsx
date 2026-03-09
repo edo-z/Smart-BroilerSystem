@@ -28,6 +28,17 @@ import {
   Filler
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import SplitText from "../../component/SplitText";
+import BlurText from "../../component/BlurText";
+import FadeContent from '../../component/FadeContent'
+import TiltedCard from '../../component/TiltedCard';
+
+const SplitTex = () => {
+  console.log('All letters have animated!');
+};
+const BlurTex = () => {
+  console.log('Animation completed!');
+};
 
 // Registrasi Chart.js
 ChartJS.register(
@@ -122,19 +133,20 @@ export default function LandingPage() {
       {/* ========================================= */}
       {/* 1. HERO SECTION (FIXED LAYOUT)           */}
       {/* ========================================= */}
-      
+
       <div
         id="home"
         className="hero min-h-screen pb-20 py-auto relative overflow-hidden"
         style={{
-          backgroundImage: "url('https://i.ibb.co.com/tw15Wsrp/banner.webp')",
+          backgroundImage: "url('')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
         }}
       >
         {/* Dark Overlay */}
-        {/* <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-0" /> */}
+        <div className="absolute inset-0 bg-white backdrop-blur-sm z-0" />
+
 
         {/* Subtle gradient overlay for depth */}
         {/* <div className="absolute inset-0 bg-linear-to-br from-slate-900/80 via-slate-800/40 to-slate-800/60 z-0" /> */}
@@ -142,66 +154,113 @@ export default function LandingPage() {
         <div className="hero-content text-center max-w-6xl flex-col lg:flex-row gap-16 px-4 relative z-10">
 
           {/* Left Content */}
-          <div className="w-full lg:w-1/2 text-left space-y-6 animate-fade-in-up">
+          <div className="w-full text-center space-y-6 animate-fade-in-up">
+            <SplitText
+              text="AVESIS"
+              className="text-8xl font-bold leading-tight text-black font-serif mb-1"
+              delay={100}
+              duration={1.05}
+              ease="power3.out"
+              splitType="chars"
+              from={{ opacity: 0, y: 40 }}
+              to={{ opacity: 1, y: 0 }}
+              threshold={0.1}
+              rootMargin="-100px"
+              textAlign="center"
+              onLetterAnimationComplete={SplitTex}
+            />
+            <BlurText
+              className="text-lg text-slate-700 leading-tight font-semibold justify-center mb-1"
+              text='"Empowering Humans with Precision Automation"'
+              delay={70}
+              animateBy="letters"
+              direction="bottom"
+              onAnimationComplete={BlurTex} animationFrom={undefined} animationTo={undefined} />
 
-            <h1 className="text-8xl font-bold leading-tight text-black font-serif mb-1">
-              AVESIS
-            </h1>
+            <BlurText
+              className="text-lg text-slate-700 leading-tight font-medium justify-center mt-3"
+              text="Membangun Masa Depan dengan Ketepatan"
+              delay={80}
+              animateBy="letters"
+              direction="bottom"
+              onAnimationComplete={BlurTex} animationFrom={undefined} animationTo={undefined} />
 
-            <p className="text-2lg text-slate-700 leading-relaxed">
-              <span className="font-semibold">Empowering Humans with Precision Automation. <br /></span>
-            </p>
-
-            <div className="flex gap-4 pt-2">
-              <Link href="/login" className="btn btn-primary bg-slate-900 hover:bg-white border-none hover:text-slate-900 text-white px-8 h-12 rounded-lg shadow-xl transition-shadow font-semibold">
-                Mulai Sekarang
-              </Link>
-              <Link href="/docs" className="btn btn-outline border-slate-900  text-slate-900 hover:text-slate-900 hover:bg-white hover:border-white/60 px-8 h-12 rounded-lg hover:shadow-xl transition-shadow">
-                Dokumentasi
-              </Link>
+            <div className="gap-4 pt-auto">
+              <div className="flex gap-4 pt-auto mb-4">
+                {/* <Link href="/login" className="btn btn-outline bg-slate-900 hover:bg-white border-none hover:text-slate-900 text-white px-24 h-12 rounded-lg shadow-xl transition-shadow font-semibold backdrop-blur-xl z-0">
+                  Mulai Sekarang
+                </Link> */}
+                <Link href="/login" className="btn btn-outline bg-white/50 hover:bg-slate-900 border-none hover:text-white text-slate-900 px-45 h-12 rounded-lg shadow-xl transition-shadow font-semibold backdrop-blur-sm z-0">
+                  <BlurText
+                    text="Mulai Sekarang!"
+                    delay={80}
+                    animateBy="letters"
+                    direction="bottom"
+                    onAnimationComplete={BlurTex} animationFrom={undefined} animationTo={undefined} />
+                </Link>
+              </div>
             </div>
           </div>
 
           {/* Right Content - Card */}
-          <div className="relative w-full lg:w-1/2 flex justify-center animate-fade-in z-0">
-            <div className="w-full max-w-md bg-white/10 backdrop-blur-md p-6 rounded-3xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] border  border-blue-300">
 
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                  <span className="text-sm font-semibold text-shadow-slate-800">Kandang A1 - Online</span>
-                </div>
-                <span className="text-xs font-mono text-black/40">ID: 261E5CDB</span>
-              </div>
+          <TiltedCard
+            imageSrc='https://ibb.co.com/GKWbykN'
+            altText=''
+            captionText="Kandang A1"
+            containerHeight="300px"
+            containerWidth="300px"
+            imageHeight="300px"
+            imageWidth="300px"
+            rotateAmplitude={-12}
+            scaleOnHover={1.05}
+            showMobileWarning={false}
+            showTooltip
+            displayOverlayContent
+            overlayContent={
 
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="bg-white/10 p-4 rounded-2xl border border-blue-300 hover:shadow-xl">
-                  <div className="text-xs text-black/50 uppercase font-semibold mb-1">Suhu</div>
-                  <div className="text-3xl font-bold text-slate-700">28.5<span className="text-sm text-slate-900 ml-1">°C</span></div>
-                  <div className="text-xs font-semibold text-black/50 mt-1">Target Terpenuhi</div>
-                </div>
-                <div className="bg-white/10 p-4 rounded-2xl border border-blue-300 hover:shadow-xl">
-                  <div className="text-xs text-black/50 uppercase font-semibold mb-1">Kelembapan</div>
-                  <div className="text-3xl font-bold text-slate-700">64<span className="text-sm text-slate-900 ml-1">%</span></div>
-                  <div className="text-xs font-semibold text-black/50 mt-1">Rentang Normal</div>
-                </div>
-              </div>
+              <div>
+                <div className="relative justify-center animate-fade-in z-0">
+                  <div className="w-full max-w-md bg-white/10 backdrop-blur-md p-6 rounded-3xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] border  border-blue-300">
+                    <div className="flex justify-between items-center mb-6">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                        <span className="text-sm font-semibold text-shadow-slate-800">Kandang A1 - Online</span>
+                      </div>
+                      <span className="text-xs font-mono text-black/40">ID: 261E5CDB</span>
+                    </div>
 
-              <div className="bg-white/10 rounded-xl p-4 flex items-center gap-4 border border-blue-300">
-                <div className="w-1 h-8 bg-blue-400 rounded-full"></div>
-                <div className="flex-1">
-                  <div className="flex justify-between text-xs font-bold mb-1">
-                    <span className="text-slate-900 font-bold">Kenyamanan Kandang</span>
-                    <span className="text-slate-600">Nyaman 85%</span>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="bg-white/10 p-4 rounded-2xl border border-blue-300 hover:shadow-xl">
+                        <div className="text-xs text-black/50 uppercase font-semibold mb-1">Suhu</div>
+                        <div className="text-3xl font-bold text-slate-700">28.5<span className="text-sm text-slate-900 ml-1">°C</span></div>
+                        <div className="text-xs font-semibold text-black/50 mt-1">Target Terpenuhi</div>
+                      </div>
+                      <div className="bg-white/10 p-4 rounded-2xl border border-blue-300 hover:shadow-xl">
+                        <div className="text-xs text-black/50 uppercase font-semibold mb-1">Kelembapan</div>
+                        <div className="text-3xl font-bold text-slate-700">64<span className="text-sm text-slate-900 ml-1">%</span></div>
+                        <div className="text-xs font-semibold text-black/50 mt-1">Rentang Normal</div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white/10 rounded-xl p-4 flex items-center gap-4 border border-blue-300 hover:shadow-xl">
+                      <div className="w-1 h-8 bg-blue-400 rounded-full"></div>
+                      <div className="flex-1">
+                        <div className="flex justify-between text-xs font-normal mb-1">
+                          <span className="text-slate-900 font-normal">Kenyamanan Kandang</span>
+                          <span className="text-blue-600 font-bold">85%</span>
+                        </div>
+                        <div className="w-full bg-black/10 h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-blue-400 h-full w-[85%] rounded-full"></div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="w-full bg-black/10 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-blue-400 h-full w-[85%] rounded-full"></div>
-                  </div>
                 </div>
               </div>
+            }
+          />
 
-            </div>
-          </div>
         </div>
       </div>
 
@@ -453,6 +512,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-    </div>
+    </div >
   );
 }

@@ -27,7 +27,7 @@ export default function Navbar() {
 
           {/* Teks Logo dengan Subtitle */}
           <div className="flex flex-col leading-none">
-            <span className="text-4xl font-bold font-serif text-secondary-800 tracking-tight group-hover:text-secondary transition-colors">
+            <span className="text-4xl font-bold font-serif text-black tracking-tight group-hover:text-secondary transition-colors">
               AVESIS
             </span>
             {/* <span className="text-[10px] font-bold text-secondary-400 uppercase tracking-[0.2em]">
