@@ -30,8 +30,12 @@ import {
 import { Line } from "react-chartjs-2";
 import SplitText from "../../component/SplitText";
 import BlurText from "../../component/BlurText";
-import FadeContent from '../../component/FadeContent'
+import ScrollFloat from '../../component/ScrollFloat';
 import TiltedCard from '../../component/TiltedCard';
+import FadeContent from "@/component/FadeContent";
+import ScrollReveal from "@/component/ScrollReveal";
+import CountUp from "@/component/CountUp";
+import GradientText from "@/component/GradientText";
 
 const SplitTex = () => {
   console.log('All letters have animated!');
@@ -155,20 +159,28 @@ export default function LandingPage() {
 
           {/* Left Content */}
           <div className="w-full text-center space-y-10">
-            <SplitText
-              text="AVESIS"
+
+            <GradientText
+              colors={["#ffffff", "#99c1f1", "#1a5fb4"]}
+              animationSpeed={3}
+              showBorder={false}
+              direction="diagonal"
               className="text-8xl font-bold leading-tight text-black font-serif mb-1"
-              delay={100}
-              duration={1.05}
-              ease="power3.out"
-              splitType="chars"
-              from={{ opacity: 0, y: 40 }}
-              to={{ opacity: 1, y: 0 }}
-              threshold={0.1}
-              rootMargin="-100px"
-              textAlign="center"
-              onLetterAnimationComplete={SplitTex}
-            />
+            >
+              <SplitText
+                text="AVESIS"
+                delay={100}
+                duration={1.05}
+                ease="power3.out"
+                splitType="chars"
+                from={{ opacity: 0, y: 40 }}
+                to={{ opacity: 1, y: 0 }}
+                threshold={0.1}
+                rootMargin="-100px"
+                textAlign="center"
+                onLetterAnimationComplete={SplitTex}
+              />
+            </GradientText>
             <BlurText
               className="text-lg text-slate-700 leading-tight font-semibold justify-center mb-1"
               text='"Empowering Humans with Precision Automation"'
@@ -190,14 +202,22 @@ export default function LandingPage() {
                 {/* <Link href="/login" className="btn btn-outline bg-slate-900 hover:bg-white border-none hover:text-slate-900 text-white px-24 h-12 rounded-lg shadow-xl transition-shadow font-semibold backdrop-blur-xl z-0">
                   Mulai Sekarang
                 </Link> */}
-                <Link href="/login" className="btn btn-outline bg-white/50 hover:bg-slate-900 border-none hover:text-white text-slate-900 px-auto rounded-lg shadow-xl transition-shadow font-semibold backdrop-blur-sm z-0">
-                  <BlurText
-                    text="Mulai Sekarang!"
-                    delay={50}
-                    animateBy="letters"
-                    direction="bottom"
-                    onAnimationComplete={BlurTex} animationFrom={undefined} animationTo={undefined} />
-                </Link>
+                <FadeContent
+                  blur={true}
+                  duration={1900}
+                  ease="ease-out"
+                  initialOpacity={0}
+                  threshold={0.1}
+                >
+                  <Link
+                    href="/login"
+                    className="btn btn-outline bg-white/50 hover:bg-slate-900 border-none hover:text-white text-slate-900 px-8 rounded-lg shadow-xl transition-shadow font-semibold"
+                  >
+                    <span className="flex items-center gap-2">
+                      Mulai Sekarang <FaArrowRight />
+                    </span>
+                  </Link>
+                </FadeContent>
               </div>
             </div>
           </div>
@@ -206,21 +226,21 @@ export default function LandingPage() {
 
           <div className="bg-white">
             <TiltedCard
-            imageSrc='../../../public/images/white.webp'
-            altText=''
-            captionText="Kandang A1"
-            containerHeight="300px"
-            containerWidth="300px"
-            imageHeight="300px"
-            imageWidth="300px"
-            rotateAmplitude={-12}
-            scaleOnHover={1.05}
-            showMobileWarning={false}
-            showTooltip
-            displayOverlayContent
-            overlayContent={
+              imageSrc='/images/white.webp'
+              altText=''
+              captionText="Kandang A1"
+              containerHeight="480px"
+              containerWidth="480px"
+              imageHeight="300px"
+              imageWidth="300px"
+              rotateAmplitude={-12}
+              scaleOnHover={1.05}
+              showMobileWarning={false}
+              showTooltip
+              displayOverlayContent
+              overlayContent={
 
-              
+
                 <div className="relative justify-center animate-fade-in z-0">
                   <div className="w-full max-w-md bg-white/10 backdrop-blur-md p-6 rounded-3xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] border  border-blue-300">
                     <div className="flex justify-between items-center mb-6">
@@ -234,12 +254,30 @@ export default function LandingPage() {
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div className="bg-white/10 p-4 rounded-2xl border border-blue-300 hover:shadow-xl">
                         <div className="text-xs text-black/50 uppercase font-semibold mb-1">Suhu</div>
-                        <div className="text-3xl font-bold text-slate-700">28.5<span className="text-sm text-slate-900 ml-1">°C</span></div>
+                        <div className="text-3xl font-bold text-slate-700">
+                          <CountUp
+                            from={0.0}
+                            to={28.5}
+                            separator=","
+                            direction="up"
+                            duration={1}
+                            className="count-up-text"
+                          />
+                          <span className="text-sm text-slate-900 ml-1">°C</span>
+                        </div>
                         <div className="text-xs font-semibold text-black/50 mt-1">Target Terpenuhi</div>
                       </div>
                       <div className="bg-white/10 p-4 rounded-2xl border border-blue-300 hover:shadow-xl">
                         <div className="text-xs text-black/50 uppercase font-semibold mb-1">Kelembapan</div>
-                        <div className="text-3xl font-bold text-slate-700">64<span className="text-sm text-slate-900 ml-1">%</span></div>
+                        <div className="text-3xl font-bold text-slate-700">
+                          <CountUp
+                            from={0}
+                            to={64}
+                            separator=","
+                            direction="up"
+                            duration={1}
+                            className="count-up-text"
+                          /><span className="text-sm text-slate-900 ml-1">%</span></div>
                         <div className="text-xs font-semibold text-black/50 mt-1">Rentang Normal</div>
                       </div>
                     </div>
@@ -249,7 +287,15 @@ export default function LandingPage() {
                       <div className="flex-1">
                         <div className="flex justify-between text-xs font-normal mb-1">
                           <span className="text-slate-900 font-normal">Kenyamanan Kandang</span>
-                          <span className="text-blue-600 font-bold">85%</span>
+                          <span className="text-blue-600 font-bold">
+                            <CountUp
+                              from={0}
+                              to={85}
+                              separator=","
+                              direction="up"
+                              duration={1}
+                              className="count-up-text"
+                            />%</span>
                         </div>
                         <div className="w-full bg-black/10 h-1.5 rounded-full overflow-hidden">
                           <div className="bg-blue-400 h-full w-[85%] rounded-full"></div>
@@ -258,9 +304,9 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
-              
-            }
-          />
+
+              }
+            />
 
           </div>
 
@@ -273,40 +319,223 @@ export default function LandingPage() {
       <section id="produk" className="py-24 bg-slate-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Teknologi Untuk Efisiensi</h2>
-            <p className="text-slate-500">
-              Dikembangkan berdasarkan standar internasional manajemen peternakan broiler.
-            </p>
+
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">
+              <ScrollFloat
+                animationDuration={60}
+                ease='back.inOut(2)'
+                scrollStart='center bottom+=30%'
+                scrollEnd='bottom bottom-=60%'
+                stagger={0.9}
+              >
+                Teknologi Unggulan Pilihan
+              </ScrollFloat>
+            </h2>
+            <span className="text-slate-500 text-lg">
+              <ScrollFloat
+                animationDuration={600}
+                ease='back.inOut(2)'
+                scrollStart='center bottom+=30%'
+                scrollEnd='bottom bottom-=60%'
+                stagger={0.9}
+              >
+                Dikembangkan berdasarkan standar internasional dengan mengikuti standar internasional
+                dengan mengikuti prinsip desain yang berfokus pada pengguna untuk memastikan pengalaman yang intuitif dan efektif.
+              </ScrollFloat>
+            </span>
+
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-slate-100">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-6">
-                <FaTemperatureHigh className="text-xl" />
+          <div className="space-y-16">
+
+            {/* ── Baris 1: Penjelasan KIRI, Icon KANAN ── */}
+            <div className="flex flex-col md:flex-row items-center gap-12">
+
+              {/* Kiri: Penjelasan */}
+              <div className="w-full md:w-1/2 space-y-4">
+                <h3 className="text-2xl font-bold text-slate-900">Sensor Presisi</h3>
+                <p className="text-slate-500 leading-relaxed">
+                  <ScrollReveal
+                    baseOpacity={0}
+                    enableBlur
+                    baseRotation={1}
+                    blurStrength={15}
+                    rotationEnd='bottom bottom-=90%'
+                    wordAnimationEnd='bottom bottom-=40%'
+                  >
+                    Menggunakan sensor SHT31 industrial grade dengan akurasi ±0.5°C untuk suhu dan ±3% untuk kelembapan.
+                    memastikan data yang sangat akurat untuk pengendalian iklim yang optimal dengan mengikuti standar industri untuk aplikasi peternakan ayam broiler.
+                    memberikan keandalan tinggi dalam berbagai kondisi lingkungan untuk mendukung kesehatan dan pertumbuhan ayam broiler secara efektif.
+
+                  </ScrollReveal>
+
+                </p>
+                <div className="flex items-center gap-2 text-blue-600 text-sm font-semibold">
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Sensor Presisi</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Menggunakan sensor SHT31 industrial grade dengan akurasi ±0.5°C untuk data yang dapat dipercaya.
-              </p>
-            </div>
-            <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-slate-100">
-              <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 mb-6">
-                <FaTint className="text-xl" />
+
+              {/* Kanan: Visual Card */}
+              <div className="w-full md:w-1/3">
+                
+                  <TiltedCard
+                    imageSrc=''
+                    altText='SHT31 Sensor'
+                    captionText="SHT31 Sensor"
+                    containerHeight="460px"
+                    containerWidth="600px"
+                    imageHeight="300px"
+                    imageWidth="500px"
+                    rotateAmplitude={-12}
+                    scaleOnHover={1.05}
+                    showMobileWarning={false}
+                    showTooltip
+                    displayOverlayContent
+                    overlayContent={
+                      
+                      <div className="relative animate-fade-in z-0">
+                        <div className="bg-white backdrop-blur-md rounded-3xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] border border-blue-300 overflow-hidden h-90 w-165"
+                          style={{
+                            backgroundImage: "url('/images/1.webp')",
+                            backgroundSize: "auto 101%",
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat",
+                          }}>
+                        </div>
+                         
+                      </div>
+                       
+                    }
+                  />
+              
+
+
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Humidity Control</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Monitoring kadar air pada udara untuk mencegah kasus pernapasan (CRD) pada masa pertumbuhan.
-              </p>
             </div>
-            <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-slate-100">
-              <div className="w-12 h-12 bg-sky-50 rounded-xl flex items-center justify-center text-sky-600 mb-6">
-                <FaWifi className="text-xl" />
+
+            {/* Divider */}
+            <div className="border-t border-slate-100" />
+
+            {/* ── Baris 2: Visual KIRI, Penjelasan KANAN ── */}
+            <div className="flex flex-col md:flex-row-reverse items-center gap-12">
+
+              {/* Kanan: Penjelasan */}
+              <div className="w-full md:w-1/2 space-y-4">
+                <h3 className="text-2xl font-bold text-slate-900">Humidity Control</h3>
+                <p className="text-slate-500 leading-relaxed">
+                  <ScrollReveal
+                    baseOpacity={0}
+                    enableBlur
+                    baseRotation={1}
+                    blurStrength={15}
+                    rotationEnd='bottom bottom-=90%'
+                    wordAnimationEnd='bottom bottom-=40%'
+                  >
+                    Monitoring kadar air pada udara untuk mencegah kasus pernapasan (CRD)
+                    pada masa pertumbuhan ayam broiler dengan menjaga kelembapan relatif ideal antara 60-70% untuk mendukung kesehatan dan pertumbuhan optimal,
+                    serta mengurangi risiko penyakit pernapasan yang umum terjadi pada ayam broiler akibat kelembapan yang tidak sesuai,
+                    sehingga meningkatkan kesejahteraan dan produktivitas ternak secara keseluruhan.
+                  </ScrollReveal>
+
+                </p>
+                <div className="flex items-center gap-2 text-indigo-600 text-sm font-semibold">
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Cloud Sync</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                Data tersimpan aman di cloud dan dapat diakses kapan saja melalui device apapun.
-              </p>
+
+              {/* Kiri: Visual Card */}
+              <div className="w-full md:w-1/2">
+                <TiltedCard
+                  imageSrc=''
+                  altText='Humidity Control'
+                  captionText="Humidity Control"
+                  containerHeight="460px"
+                  containerWidth="600px"
+                  imageHeight="300px"
+                  imageWidth="500px"
+                  rotateAmplitude={-12}
+                  scaleOnHover={1.05}
+                  showMobileWarning={false}
+                  showTooltip
+                  displayOverlayContent
+                  overlayContent={
+                    <div className="relative animate-fade-in z-0">
+                      <div className="bg-white backdrop-blur-md rounded-3xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] border border-blue-300 overflow-hidden h-90 w-165"
+                        style={{
+                          backgroundImage: "url('/images/2.webp')",
+                          backgroundSize: "auto 101%",
+                          backgroundPosition: "center",
+                          backgroundRepeat: "no-repeat",
+                        }}>
+                      </div>
+                    </div>
+                  }
+                />
+              </div>
+
             </div>
+
+            {/* Divider */}
+            <div className="border-t border-slate-100" />
+
+            {/* ── Baris 3: Penjelasan KIRI, Visual KANAN ── */}
+            <div className="flex flex-col md:flex-row items-center gap-12">
+
+              {/* Kiri: Penjelasan */}
+              <div className="w-full md:w-1/2 space-y-4">
+                <h3 className="text-2xl font-bold text-slate-900">Cloud Sync</h3>
+                <p className="text-slate-500 leading-relaxed">
+                  <ScrollReveal
+                    baseOpacity={0}
+                    enableBlur
+                    baseRotation={1}
+                    blurStrength={15}
+                    rotationEnd='bottom bottom-=90%'
+                    wordAnimationEnd='bottom bottom-=40%'
+                  >
+                    Data tersimpan aman di cloud dan dapat diakses kapan saja
+                    melalui device apapun secara real-time, memungkinkan peternak untuk memantau kondisi kandang dari jarak jauh dengan mudah dan cepat,
+                    serta memberikan fleksibilitas tinggi dalam pengelolaan kandang tanpa batasan lokasi,
+                    sehingga meningkatkan efisiensi operasional dan responsivitas terhadap perubahan kondisi kandang secara signifikan,
+                    mendukung pengambilan keputusan yang lebih baik untuk kesehatan dan pertumbuhan ayam broiler secara keseluruhan.
+                  </ScrollReveal>
+
+                </p>
+                <div className="flex items-center gap-2 text-sky-600 text-sm font-semibold">
+                </div>
+              </div>
+
+              {/* Kanan: Visual Card */}
+              <div className="w-full md:w-1/2">
+                <TiltedCard
+                  imageSrc=''
+                  altText='Cloud Sync'
+                  captionText="Cloud Sync"
+                  containerHeight="460px"
+                  containerWidth="600px"
+                  imageHeight="300px"
+                  imageWidth="500px"
+                  rotateAmplitude={-12}
+                  scaleOnHover={1.05}
+                  showMobileWarning={false}
+                  showTooltip
+                  displayOverlayContent
+                  overlayContent={
+                    <div className="relative animate-fade-in z-0">
+                      <div className="bg-white backdrop-blur-md rounded-3xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] border border-blue-300 overflow-hidden h-90 w-165"
+                        style={{
+                          backgroundImage: "url('/images/3.webp')",
+                          backgroundSize: "auto 101%",
+                          backgroundPosition: "center",
+                          backgroundRepeat: "no-repeat",
+                        }}>
+                      </div>
+                    </div>
+
+                  }
+                />
+              </div>
+
+            </div>
+
           </div>
         </div>
       </section>
