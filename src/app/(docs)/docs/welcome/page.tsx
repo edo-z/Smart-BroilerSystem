@@ -116,7 +116,7 @@ const OverviewPage = () => {
           <div className="animate-in fade-in duration-500">
             <header className="mb-14 border-b border-slate-100 pb-10">
               <h1 className="text-5xl font-black tracking-tight text-slate-900 leading-tight mb-4">
-                Selamat Datang di <span className="text-emerald-600">Smart-Co</span>
+                Selamat Datang di <span className="text-emerald-600">Si-Broiler</span>
               </h1>
               <p className="text-slate-600 text-lg max-w-3xl leading-relaxed">
                 Panduan praktis untuk mengoperasikan sistem kontrol suhu otomatis Anda. Dirancang untuk memastikan kesehatan ternak maksimal dengan usaha minimal.

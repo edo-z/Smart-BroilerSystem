@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { FaRocket, FaEnvelope, FaLock, FaArrowRight, FaGoogle } from "react-icons/fa";
 import { loginWithCredentials, loginWithGoogle } from "@/actions/auth-actions";
+import GradientText from "@/component/GradientText";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +48,7 @@ export default function LoginPage() {
       {/* ========================================= */}
       {/* 1. BAGIAN KIRI (BRANDING)                 */}
       {/* ========================================= */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-900 to-slate-800 text-white relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-slate-900 to-slate-800 text-white relative overflow-hidden">
         {/* Background Decoration */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-2000"></div>
@@ -58,8 +59,15 @@ export default function LoginPage() {
           {/* Tagline */}
           <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
             Monitor Kandang <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
-              Lebih Cerdas.
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-cyan-400">
+
+              <GradientText
+                colors={["#003cbd", "#0ea5e9", "#00c3ff"]}
+                animationSpeed={8}
+                showBorder={false}
+              >
+                Lebih Ceras.
+              </GradientText>
             </span>
           </h1>
           <p className="text-lg text-slate-300 leading-relaxed max-w-md mb-12">
@@ -69,14 +77,7 @@ export default function LoginPage() {
           {/* Dummy Footer Left */}
           <div className="mt-auto">
             <div className="flex gap-4 text-slate-400">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span className="text-sm">Sistem Online</span>
-              </div>
             </div>
-            <p className="text-xs text-slate-500 mt-4">
-              &copy; {new Date().getFullYear()} BroilerSmart Technologies
-            </p>
           </div>
         </div>
       </div>
