@@ -1011,11 +1011,14 @@ export default function LandingPage() {
                   <FaReact /> <span>Next.js</span>
                 </Link>
               </div>
-              <div style={{ height: '60px', position: 'relative', overflow: 'hidden' }} className="mt-20">
+              <p className="text-xs text-slate-400 uppercase tracking-widest font-mono font-bold mt-8 mb-8">
+                And More in Our Open-Source Stack
+              </p>
+              <div style={{ height: '60px', position: 'relative', overflow: 'hidden' }} >
                 {/* Basic horizontal loop */}
                 <LogoLoop
                   logos={techLogos}
-                  speed={130}
+                  speed={100}
                   direction="left"
                   logoHeight={50}
                   gap={80}
