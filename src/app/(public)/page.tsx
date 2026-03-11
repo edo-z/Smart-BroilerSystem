@@ -34,6 +34,8 @@ import FadeContent from '../../component/FadeContent'
 import TiltedCard from '../../component/TiltedCard';
 import GradientText from "@/component/GradientText";
 import CountUp from "@/component/CountUp";
+import LogoLoop from '@/component/LogoLoop';
+import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss } from 'react-icons/si';
 
 // Icon SVGs inline
 const IconTemp = () => (
@@ -52,7 +54,18 @@ const IconCloud = () => (
     <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
   </svg>
 );
-
+const techLogos = [
+  { node: <SiReact />, title: "React", href: "https://react.dev" },
+  { node: <SiNextdotjs />, title: "Next.js", href: "https://nextjs.org" },
+  { node: <SiTypescript />, title: "TypeScript", href: "https://www.typescriptlang.org" },
+  { node: <SiTailwindcss />, title: "Tailwind CSS", href: "https://tailwindcss.com" },
+];
+// Alternative with image sources
+const imageLogos = [
+  { src: "/logos/company1.png", alt: "Company 1", href: "https://company1.com" },
+  { src: "/logos/company2.png", alt: "Company 2", href: "https://company2.com" },
+  { src: "/logos/company3.png", alt: "Company 3", href: "https://company3.com" },
+];
 const features = [
   {
     id: "01",
@@ -952,13 +965,13 @@ export default function LandingPage() {
               <p className="text-slate-700 mb-8">
                 Kami selalu mencari individu yang passionate untuk bergabung dalam perjalanan inovasi kami. Jika Anda tertarik untuk berkontribusi pada proyek open-source kami.
               </p>
-               <ul className="space-y-3 mb-8 text-sm text-slate-700">
+              <ul className="space-y-3 mb-8 text-sm text-slate-700">
                 <li className="flex items-center gap-2"><FaCheckCircle className="text-blue-400" /> Dokumentasi Teknis </li>
                 <li className="flex items-center gap-2"><FaCheckCircle className="text-blue-400" /> Panduan Instalasi</li>
                 <li className="flex items-center gap-2"><FaCheckCircle className="text-blue-400" /> Tips Pemeliharaan</li>
               </ul>
               <a href="https://github.com/edo-z/Smart-BroilerSystem" className="btn btn-primary w-full btn-outline border-slate-700  text-slate-900  hover:bg-slate-900  hover:text-white">
-                <FaBook className="ml-2" />Source Code 
+                <FaBook className="ml-2" />Source Code
               </a>
             </div>
 
@@ -997,6 +1010,21 @@ export default function LandingPage() {
                 <Link href="/docs/software" className="flex items-center gap-2 hover:text-secondary transition-colors">
                   <FaReact /> <span>Next.js</span>
                 </Link>
+              </div>
+              <div style={{ height: '60px', position: 'relative', overflow: 'hidden' }} className="mt-25">
+                {/* Basic horizontal loop */}
+                <LogoLoop
+                  logos={techLogos}
+                  speed={130}
+                  direction="left"
+                  logoHeight={50}
+                  gap={80}
+                  hoverSpeed={30}
+                  scaleOnHover
+                  fadeOut
+                  fadeOutColor="#ffffff"
+                  ariaLabel="Technology partners"
+                />
               </div>
             </div>
           </div>
