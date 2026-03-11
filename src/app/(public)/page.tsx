@@ -958,7 +958,7 @@ export default function LandingPage() {
                 <li className="flex items-center gap-2"><FaCheckCircle className="text-blue-400" /> Tips Pemeliharaan</li>
               </ul>
               <a href="https://github.com/edo-z/Smart-BroilerSystem" className="btn btn-primary w-full btn-outline border-slate-700  text-slate-900  hover:bg-slate-900  hover:text-white">
-                Source Code <FaBook className="ml-2" />
+                <FaBook className="ml-2" />Source Code 
               </a>
             </div>
 
@@ -981,7 +981,7 @@ export default function LandingPage() {
           {/* Tech Stack Strip */}
           <div className="mt-12 pt-8 border-t border-slate-200">
             <div className="text-center">
-              <p className="text-xs text-slate-400 uppercase tracking-widest font-bold mb-6">
+              <p className="text-xs text-slate-400 uppercase tracking-widest font-mono font-bold mb-6">
                 Powered By Modern Technology
               </p>
               <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-slate-600 text-sm font-medium">
