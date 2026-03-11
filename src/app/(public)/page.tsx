@@ -966,9 +966,9 @@ export default function LandingPage() {
                 Kami selalu mencari individu yang passionate untuk bergabung dalam perjalanan inovasi kami. Jika Anda tertarik untuk berkontribusi pada proyek open-source kami.
               </p>
               <ul className="space-y-3 mb-8 text-sm text-slate-700">
-                <li className="flex items-center gap-2"><FaCheckCircle className="text-blue-400" /> Dokumentasi Teknis </li>
-                <li className="flex items-center gap-2"><FaCheckCircle className="text-blue-400" /> Panduan Instalasi</li>
-                <li className="flex items-center gap-2"><FaCheckCircle className="text-blue-400" /> Tips Pemeliharaan</li>
+                <li className="flex items-center gap-2"><FaCheckCircle className="text-blue-400" /> Bergabung dengan Tim</li>
+                <li className="flex items-center gap-2"><FaCheckCircle className="text-blue-400" /> Kontribusi pada Proyek</li>
+                <li className="flex items-center gap-2"><FaCheckCircle className="text-blue-400" /> Dukungan Komunitas</li>
               </ul>
               <a href="https://github.com/edo-z/Smart-BroilerSystem" className="btn btn-primary w-full btn-outline border-slate-700  text-slate-900  hover:bg-slate-900  hover:text-white">
                 <FaBook className="ml-2" />Source Code
