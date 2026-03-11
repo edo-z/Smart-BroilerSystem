@@ -1011,7 +1011,7 @@ export default function LandingPage() {
                   <FaReact /> <span>Next.js</span>
                 </Link>
               </div>
-              <div style={{ height: '60px', position: 'relative', overflow: 'hidden' }} className="mt-25">
+              <div style={{ height: '60px', position: 'relative', overflow: 'hidden' }} className="mt-20">
                 {/* Basic horizontal loop */}
                 <LogoLoop
                   logos={techLogos}
