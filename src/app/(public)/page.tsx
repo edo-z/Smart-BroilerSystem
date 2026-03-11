@@ -36,6 +36,9 @@ import GradientText from "@/component/GradientText";
 import CountUp from "@/component/CountUp";
 import LogoLoop from '@/component/LogoLoop';
 import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss } from 'react-icons/si';
+import ProdukSection from "@/components/public/fitur/page";
+import MonitoringSection from "@/components/public/monitoring/page";
+import { ProdukSectionWithNav } from "@/components/public/produk/page";
 
 // Icon SVGs inline
 const IconTemp = () => (
@@ -73,7 +76,7 @@ const features = [
     label: "SENSOR PRESISI",
     title: "Akurasi Industri, Data Nyata",
     desc: "Sensor SHT31 industrial-grade dengan akurasi ±0.5°C dan resolusi 0.01°C. Setiap titik data dikalibrasi terhadap standar NIST untuk keandalan yang tak diragukan.",
-    stat: "±0.5°C",
+    stat: "---°C",
     statLabel: "Akurasi Suhu",
     accent: "#0ea5e9",
     accentBg: "rgba(14,165,233,0.06)",
@@ -85,7 +88,7 @@ const features = [
     label: "HUMIDITY CONTROL",
     title: "Cegah CRD Sebelum Terjadi",
     desc: "Monitoring kelembaban real-time untuk menjaga RH pada zona optimal 60–70%. Deviasi terdeteksi dalam <3 detik, sebelum berdampak pada sistem pernapasan ayam.",
-    stat: "<3s",
+    stat: "---s",
     statLabel: "Waktu Deteksi",
     accent: "#6366f1",
     accentBg: "rgba(99,102,241,0.06)",
@@ -97,7 +100,7 @@ const features = [
     label: "CLOUD SYNC",
     title: "Data Tersedia, Di Mana Saja",
     desc: "Sinkronisasi otomatis ke MongoDB Atlas dengan latensi <500ms. Akses histori, tren, dan laporan performa kandang dari perangkat apapun, kapanpun.",
-    stat: "99.9%",
+    stat: "---%",
     statLabel: "Uptime SLA",
     accent: "#10b981",
     accentBg: "rgba(16,185,129,0.06)",
@@ -477,482 +480,18 @@ export default function LandingPage() {
       {/* ========================================= */}
       {/* 2. FITUR / PRODUK SECTION (REDESIGNED)   */}
       {/* ========================================= */}
-      <section id="produk" style={{ padding: "96px 0", background: "#f8fafc", position: "relative", overflow: "hidden" }}>
+      
 
-        {/* Subtle grid background */}
-        <div style={{
-          position: "absolute", inset: 0, pointerEvents: "none",
-          backgroundImage: `
-            linear-gradient(rgba(148,163,184,0.07) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(148,163,184,0.07) 1px, transparent 1px)
-          `,
-          backgroundSize: "48px 48px",
-        }} />
-
-        <div style={{ maxWidth: "1140px", margin: "0 auto", padding: "0 24px", position: "relative" }}>
-
-          {/* Header — split 2 kolom */}
-          <div
-            ref={headingRef}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "48px",
-              alignItems: "end",
-              marginBottom: "64px",
-              opacity: headingVisible ? 1 : 0,
-              transform: headingVisible ? "translateY(0)" : "translateY(20px)",
-              transition: "opacity 0.7s ease, transform 0.7s ease",
-            }}
-          >
-            {/* Kiri: Badge + Headline */}
-            <div>
-              <h2 style={{
-                fontSize: "clamp(38px, 6vw, 50px)",
-                fontWeight: 800,
-                color: "#0f172a",
-                lineHeight: 1.35,
-                letterSpacing: "-0.025em",
-                margin: 60,
-              }}>
-                Teknologi untuk <br /> {" "}
-                <span style={{
-                  background: "linear-gradient(135deg, #0ea5e9, #6366f1)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}>
-                  <GradientText
-                    colors={["#5227FF", "#0ea5e9", "#6366f1"]}
-                    animationSpeed={8}
-                    showBorder={false}
-                    className="text-inherit font-extrabold leading-tight"
-                  >
-                    Efisiensi Nyata
-                  </GradientText>
-
-                </span>
-              </h2>
-            </div>
-
-            {/* Kanan: Deskripsi + Metrics */}
-            <div>
-              <p style={{
-                fontSize: "15px",
-                color: "#64748b",
-                lineHeight: 1.75,
-                margin: 0,
-                maxWidth: "380px",
-              }}>
-                Dikembangkan berdasarkan standar internasional manajemen peternakan broiler modern —
-                dari sensor hingga cloud, setiap komponen dirancang untuk keandalan operasional.
-              </p>
-              <div style={{
-                display: "flex", gap: "32px", marginTop: "28px",
-                paddingTop: "24px",
-                borderTop: "1px solid #e8ecf0",
-              }}>
-                {[["3", "Sensor Aktif"], ["< 500ms", "Sync Latency"], ["24/7", "Monitoring"]].map(([val, lbl]) => (
-                  <div key={lbl}>
-                    <div style={{ fontFamily: "monospace", fontSize: "16px", fontWeight: 700, color: "#0f172a" }}>{val}</div>
-                    <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>{lbl}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Cards Grid */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "20px",
-          }}>
-            {features.map((f, i) => (
-              <FeatureCard key={f.id} feature={f} index={i} />
-            ))}
-          </div>
-
-          {/* Bottom tagline */}
-          <div style={{
-            marginTop: "48px",
-            textAlign: "center",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "12px",
-          }}>
-            <div style={{ height: "1px", width: "60px", background: "#e2e8f0" }} />
-            <span style={{
-              fontFamily: "monospace",
-              fontSize: "11px",
-              color: "#94a3b8",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase" as const,
-            }}>
-              Standar Internasional Manajemen Broiler
-            </span>
-            <div style={{ height: "1px", width: "60px", background: "#e2e8f0" }} />
-          </div>
-        </div>
-
-        <style>{`
-          @keyframes avesPulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.85); }
-          }
-          @media (max-width: 768px) {
-            #produk [style*="grid-template-columns: 1fr 1fr"] {
-              grid-template-columns: 1fr !important;
-            }
-            #produk [style*="grid-template-columns: repeat(3, 1fr)"] {
-              grid-template-columns: 1fr !important;
-            }
-          }
-        `}</style>
-      </section>
+        <ProdukSection />
+        <ProdukSectionWithNav /> 
+      
 
       {/* ========================================= */}
       {/* 3. MONITORING / GRAFIK BIOLOGIS           */}
       {/* ========================================= */}
-      <section id="monitoring" style={{
-        background: "#080f1a",
-        padding: "100px 0",
-        position: "relative",
-        overflow: "hidden",
-      }}>
-
-        {/* Background: radial glow top-left */}
-        <div style={{
-          position: "absolute", top: "-120px", left: "-80px",
-          width: "600px", height: "600px",
-          background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 65%)",
-          pointerEvents: "none",
-        }} />
-        {/* radial glow bottom-right */}
-        <div style={{
-          position: "absolute", bottom: "-100px", right: "-60px",
-          width: "500px", height: "500px",
-          background: "radial-gradient(circle, rgba(249,115,22,0.06) 0%, transparent 65%)",
-          pointerEvents: "none",
-        }} />
-
-        {/* Dot grid overlay */}
-        <div style={{
-          position: "absolute", inset: 0, pointerEvents: "none",
-          backgroundImage: "radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-        }} />
-
-        <div style={{ maxWidth: "1180px", margin: "0 auto", padding: "0 24px", position: "relative" }}>
-
-          {/* ── Header ── */}
-          <div style={{ marginBottom: "64px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap" as const, gap: "16px" }}>
-              <h2 style={{
-                fontSize: "clamp(26px, 4vw, 40px)",
-                fontWeight: 800,
-                color: "#f8fafc",
-                lineHeight: 1.15,
-                letterSpacing: "-0.025em",
-                margin: 0,
-              }}>
-                Adaptasi Kenyamanan<br />
-                <span style={{ color: "#60a5fa" }}>Secara Pintar</span>
-              </h2>
-              <p style={{
-                fontSize: "14px",
-                color: "#64748b",
-                lineHeight: 1.75,
-                maxWidth: "360px",
-                margin: 0,
-              }}>
-                Sistem mengikuti kurva biologis standar secara otomatis — dari fase menetas hingga siap panen.
-              </p>
-            </div>
-          </div>
-
-          {/* ── Main Grid ── */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 340px",
-            gap: "24px",
-            alignItems: "start",
-          }}>
-
-            {/* LEFT: Chart Panel */}
-            <div style={{
-              background: "#0d1829",
-              border: "1px solid rgba(255,255,255,0.06)",
-              borderRadius: "20px",
-              padding: "32px",
-              position: "relative",
-              overflow: "hidden",
-            }}>
-
-              {/* Corner accent */}
-              <div style={{
-                position: "absolute", top: 0, right: 0,
-                width: "200px", height: "200px",
-                background: "radial-gradient(circle at top right, rgba(59,130,246,0.06), transparent 70%)",
-                pointerEvents: "none",
-              }} />
-
-              {/* Chart header */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" }}>
-                <div>
-                  <div style={{
-                    fontFamily: "monospace",
-                    fontSize: "10px",
-                    color: "#475569",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase" as const,
-                    marginBottom: "6px",
-                  }}>
-                    Target Suhu Kandang
-                  </div>
-                  <div style={{ fontSize: "20px", fontWeight: 700, color: "#f1f5f9", letterSpacing: "-0.02em" }}>
-                    Hari 0 — 32
-                  </div>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "flex-end", gap: "6px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <div style={{ width: "24px", height: "2px", background: "#3b82f6", borderRadius: "2px" }} />
-                    <span style={{ fontFamily: "monospace", fontSize: "11px", color: "#475569" }}>Suhu Ideal (°C)</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Chart */}
-              <div style={{ height: "280px", width: "100%" }}>
-                <Line data={chartData} options={{
-                  ...chartOptions,
-                  scales: {
-                    y: {
-                      min: 20,
-                      max: 36,
-                      grid: { color: "rgba(255,255,255,0.04)" },
-                      ticks: {
-                        color: "#475569",
-                        font: { size: 11 },
-                        callback: function (value: any) { return value + "°C"; }
-                      },
-                      border: { color: "transparent" },
-                    },
-                    x: {
-                      grid: { display: false },
-                      ticks: { color: "#475569", font: { size: 11 } },
-                      border: { color: "rgba(255,255,255,0.06)" },
-                    }
-                  },
-                  plugins: {
-                    ...chartOptions.plugins,
-                    tooltip: {
-                      ...chartOptions.plugins.tooltip,
-                      backgroundColor: "rgba(13,24,41,0.95)",
-                      borderColor: "rgba(59,130,246,0.3)",
-                      borderWidth: 1,
-                    }
-                  }
-                }} />
-              </div>
-
-              {/* Bottom stat strip */}
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "1px",
-                marginTop: "28px",
-                background: "rgba(255,255,255,0.05)",
-                borderRadius: "12px",
-                overflow: "hidden",
-                border: "1px solid rgba(255,255,255,0.05)",
-              }}>
-                {[
-                  { label: "Suhu Awal", value: "34°C", sub: "Hari ke-0" },
-                  { label: "Suhu Akhir", value: "24°C", sub: "Hari ke-32" },
-                  { label: "Penurunan", value: "−10°C", sub: "Total Rentang" },
-                ].map((s) => (
-                  <div key={s.label} style={{ padding: "14px 18px", background: "#0d1829" }}>
-                    <div style={{ fontFamily: "monospace", fontSize: "10px", color: "#475569", letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: "4px" }}>{s.label}</div>
-                    <div style={{ fontSize: "18px", fontWeight: 700, color: "#f1f5f9", letterSpacing: "-0.02em" }}>{s.value}</div>
-                    <div style={{ fontSize: "11px", color: "#334155", marginTop: "2px" }}>{s.sub}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* RIGHT: Phase Timeline */}
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: "0" }}>
-
-              {/* Timeline connector line */}
-              <div style={{ position: "relative" }}>
-
-                {/* Phase 1 */}
-                <div style={{
-                  background: "#0d1829",
-                  border: "1px solid rgba(249,115,22,0.2)",
-                  borderRadius: "16px",
-                  padding: "24px",
-                  marginBottom: "12px",
-                  position: "relative",
-                  overflow: "hidden",
-                  transition: "border-color 0.2s",
-                }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(249,115,22,0.5)")}
-                  onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(249,115,22,0.2)")}
-                >
-                  <div style={{
-                    position: "absolute", top: 0, right: 0,
-                    width: "100px", height: "100px",
-                    background: "radial-gradient(circle at top right, rgba(249,115,22,0.08), transparent 70%)",
-                  }} />
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
-                    <div style={{
-                      display: "inline-flex", alignItems: "center", gap: "6px",
-                      background: "rgba(249,115,22,0.1)",
-                      border: "1px solid rgba(249,115,22,0.2)",
-                      borderRadius: "6px", padding: "4px 10px",
-                    }}>
-                      <FaFire style={{ color: "#f97316", fontSize: "10px" }} />
-                      <span style={{ fontFamily: "monospace", fontSize: "10px", color: "#f97316", fontWeight: 600, letterSpacing: "0.08em" }}>PHASE 01</span>
-                    </div>
-                    <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#f97316", fontWeight: 700 }}>0–14 hari</span>
-                  </div>
-                  <div style={{ fontSize: "15px", fontWeight: 700, color: "#f1f5f9", marginBottom: "6px" }}>Brooding</div>
-                  <div style={{ fontSize: "12px", color: "#64748b", lineHeight: 1.6, marginBottom: "14px" }}>
-                    Fase pemanas kritis. Anak ayam belum mampu mengatur suhu tubuh sendiri.
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontFamily: "monospace", fontSize: "22px", fontWeight: 800, color: "#fb923c" }}>~
-                      <CountUp
-                        from={0}
-                        to={34}
-                        separator=","
-                        direction="up"
-                        duration={1}
-                        className="count-up-text"
-                      />
-                      °C</span>
-                    <div style={{ height: "3px", width: "80px", background: "rgba(255,255,255,0.06)", borderRadius: "99px", overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: "100%", background: "linear-gradient(90deg, #f9731688, #f97316)", borderRadius: "99px" }} />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Phase 2 */}
-                <div style={{
-                  background: "#0d1829",
-                  border: "1px solid rgba(59,130,246,0.2)",
-                  borderRadius: "16px",
-                  padding: "24px",
-                  marginBottom: "12px",
-                  position: "relative",
-                  overflow: "hidden",
-                  transition: "border-color 0.2s",
-                }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(59,130,246,0.5)")}
-                  onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(59,130,246,0.2)")}
-                >
-                  <div style={{
-                    position: "absolute", top: 0, right: 0,
-                    width: "100px", height: "100px",
-                    background: "radial-gradient(circle at top right, rgba(59,130,246,0.08), transparent 70%)",
-                  }} />
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
-                    <div style={{
-                      display: "inline-flex", alignItems: "center", gap: "6px",
-                      background: "rgba(59,130,246,0.1)",
-                      border: "1px solid rgba(59,130,246,0.2)",
-                      borderRadius: "6px", padding: "4px 10px",
-                    }}>
-                      <FaAdjust style={{ color: "#3b82f6", fontSize: "10px" }} />
-                      <span style={{ fontFamily: "monospace", fontSize: "10px", color: "#60a5fa", fontWeight: 600, letterSpacing: "0.08em" }}>PHASE 02</span>
-                    </div>
-                    <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#60a5fa", fontWeight: 700 }}>15–25 hari</span>
-                  </div>
-                  <div style={{ fontSize: "15px", fontWeight: 700, color: "#f1f5f9", marginBottom: "6px" }}>Transition</div>
-                  <div style={{ fontSize: "12px", color: "#64748b", lineHeight: 1.6, marginBottom: "14px" }}>
-                    Ayam mulai menghasilkan panas metabolisme. Suhu diturunkan secara progresif.
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontFamily: "monospace", fontSize: "22px", fontWeight: 800, color: "#60a5fa" }}>~
-                      <CountUp
-                        from={0}
-                        to={28}
-                        separator=","
-                        direction="up"
-                        duration={1}
-                        className="count-up-text"
-                      />°C</span>
-                    <div style={{ height: "3px", width: "80px", background: "rgba(255,255,255,0.06)", borderRadius: "99px", overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: "60%", background: "linear-gradient(90deg, #3b82f688, #3b82f6)", borderRadius: "99px" }} />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Phase 3 */}
-                <div style={{
-                  background: "#0d1829",
-                  border: "1px solid rgba(6,182,212,0.2)",
-                  borderRadius: "16px",
-                  padding: "24px",
-                  position: "relative",
-                  overflow: "hidden",
-                  transition: "border-color 0.2s",
-                }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(6,182,212,0.5)")}
-                  onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(6,182,212,0.2)")}
-                >
-                  <div style={{
-                    position: "absolute", top: 0, right: 0,
-                    width: "100px", height: "100px",
-                    background: "radial-gradient(circle at top right, rgba(6,182,212,0.08), transparent 70%)",
-                  }} />
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
-                    <div style={{
-                      display: "inline-flex", alignItems: "center", gap: "6px",
-                      background: "rgba(6,182,212,0.1)",
-                      border: "1px solid rgba(6,182,212,0.2)",
-                      borderRadius: "6px", padding: "4px 10px",
-                    }}>
-                      <FaFan style={{ color: "#06b6d4", fontSize: "10px" }} />
-                      <span style={{ fontFamily: "monospace", fontSize: "10px", color: "#22d3ee", fontWeight: 600, letterSpacing: "0.08em" }}>PHASE 03</span>
-                    </div>
-                    <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#22d3ee", fontWeight: 700 }}>26–32 hari</span>
-                  </div>
-                  <div style={{ fontSize: "15px", fontWeight: 700, color: "#f1f5f9", marginBottom: "6px" }}>Finisher</div>
-                  <div style={{ fontSize: "12px", color: "#64748b", lineHeight: 1.6, marginBottom: "14px" }}>
-                    Kipas aktif membuang panas tubuh ayam. Ventilasi optimal untuk FCR terbaik.
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontFamily: "monospace", fontSize: "22px", fontWeight: 800, color: "#22d3ee" }}>~
-                      <CountUp
-                        from={0}
-                        to={24}
-                        separator=","
-                        direction="up"
-                        duration={1}
-                        className="count-up-text"
-                      />°C</span>
-                    <div style={{ height: "3px", width: "80px", background: "rgba(255,255,255,0.06)", borderRadius: "99px", overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: "30%", background: "linear-gradient(90deg, #06b6d488, #06b6d4)", borderRadius: "99px" }} />
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <style>{`
-          @media (max-width: 900px) {
-            #monitoring [style*="grid-template-columns: 1fr 340px"] {
-              grid-template-columns: 1fr !important;
-            }
-          }
-        `}</style>
-      </section>
+      
+        <MonitoringSection />
+      
 
       {/* ========================================= */}
       {/* 5. TIPS & CTA                              */}
