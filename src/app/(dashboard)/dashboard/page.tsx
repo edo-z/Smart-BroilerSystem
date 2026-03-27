@@ -266,7 +266,7 @@ function KandangTableSkeleton() {
 }
 
 /** Mobile kandang card */
-function KandangCard({ data }: { data: KandangRow }) {
+function KandangCard({ data, onSelect }: { data: KandangRow; onSelect: () => void }) {
   return (
     <div className={`bg-white rounded-2xl border shadow-sm p-4 ${data.status === "warning" ? "border-orange-200" : "border-slate-100"}`}>
       <div className="flex justify-between items-start mb-3">
@@ -294,7 +294,7 @@ function KandangCard({ data }: { data: KandangRow }) {
           </div>
         </div>
       </div>
-      <button className="btn btn-ghost btn-xs w-full mt-3 text-xs font-semibold text-primary hover:bg-primary/10">Detail →</button>
+      <button onClick={onSelect} className="btn btn-ghost btn-xs w-full mt-3 text-xs font-semibold text-primary hover:bg-primary/10">Lihat Informasi →</button>
     </div>
   );
 }
@@ -430,7 +430,7 @@ function TambahKandangModal({ open, onClose }: { open: boolean; onClose: () => v
 // ─────────────────────────────────────────────
 // KANDANG TABLE
 // ─────────────────────────────────────────────
-function KandangTable({ data }: { data: KandangRow[] }) {
+function KandangTable({ data, selectedId, onSelectDevice }: { data: KandangRow[]; selectedId: string | null; onSelectDevice: (id: string) => void }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
       <PanelHeader>
@@ -448,7 +448,7 @@ function KandangTable({ data }: { data: KandangRow[] }) {
         <>
           {/* Mobile */}
           <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-3 p-4">
-            {data.map((row) => <KandangCard key={row.deviceId} data={row} />)}
+            {data.map((row) => <KandangCard key={row.deviceId} data={row} onSelect={() => onSelectDevice(row.deviceId)} />)}
           </div>
           {/* Desktop */}
           <div className="hidden md:block overflow-x-auto">
@@ -465,8 +465,10 @@ function KandangTable({ data }: { data: KandangRow[] }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {data.map((row) => (
-                  <tr key={row.deviceId} className={`transition-colors hover:bg-slate-50/60 ${row.status === "warning" ? "bg-orange-50/30" : ""}`}>
+                {data.map((row) => {
+                  const isSelected = row.deviceId === selectedId;
+                  return (
+                  <tr key={row.deviceId} className={`transition-colors hover:bg-slate-50/60 ${row.status === "warning" ? "bg-orange-50/30" : isSelected ? "bg-blue-50/40" : ""}`}>
                     <td className="pl-5 font-semibold text-slate-900 py-3">{row.id}</td>
                     <td className="text-slate-500">{row.umur}</td>
                     <td className={`font-bold tabular-nums ${row.suhu !== null ? (row.status === "warning" ? "text-red-600" : "text-emerald-600") : "text-slate-400"}`}>
@@ -481,10 +483,14 @@ function KandangTable({ data }: { data: KandangRow[] }) {
                       </span>
                     </td>
                     <td className="pr-5 text-right">
-                      <button className="btn btn-ghost btn-xs text-xs text-primary font-semibold hover:bg-primary/10">Detail →</button>
+                      {isSelected ? (
+                        <span className="text-xs font-bold text-slate-400 px-2 py-1 bg-slate-100 rounded-lg">Dipantau</span>
+                      ) : (
+                        <button onClick={() => onSelectDevice(row.deviceId)} className="btn btn-ghost btn-xs text-xs text-primary font-semibold hover:bg-primary/10">Lihat Grafik →</button>
+                      )}
                     </td>
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
           </div>
@@ -515,6 +521,7 @@ const chartOptions: ChartOptions<"line"> = {
 // MAIN PAGE
 // ─────────────────────────────────────────────
 export default function DashboardPage() {
+  const [isMounted, setIsMounted] = useState(false);
   const [devices, setDevices] = useState<Device[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
   const [logs, setLogs] = useState<SensorLog[]>([]);
@@ -523,6 +530,10 @@ export default function DashboardPage() {
   const [loadingLogs, setLoadingLogs] = useState(false);
 
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const chartData = useMemo<ChartData<"line">>(() => ({
     labels: logs.map((l) => new Date(l._time).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })),
@@ -645,6 +656,11 @@ export default function DashboardPage() {
     return { id: d.name, deviceId: d._id, umur: "-", suhu, kelembapan: lastLog?.humidity ?? null, status, claimed: d.claimed, capacity: d.capacity, active: d.active, createdAt: d.createdAt };
   });
 
+  // ── Render Nothing on SSR to prevent Hydration Mismatch ──
+  if (!isMounted) {
+    return null;
+  }
+
   // ── No devices ──
   if (!loading && devices.length === 0) {
     return (
@@ -678,18 +694,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Kandang selector */}
-          <select
-            className="select select-sm select-bordered bg-white border-slate-200 text-slate-700 font-medium rounded-xl focus:outline-none focus:border-slate-400 min-w-[160px]"
-            value={selectedDeviceId || ""}
-            onChange={(e) => setSelectedDeviceId(e.target.value)}
-          >
-            <option value="" disabled>Pilih kandang…</option>
-            {devices.filter((d) => d.claimed).map((d) => (
-              <option key={d._id} value={d._id}>{d.name}</option>
-            ))}
-          </select>
-
           {/* Status pill */}
           {totalWarning > 0 ? (
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-700 bg-orange-50 border border-orange-200 px-3 py-1.5 rounded-full">
@@ -799,7 +803,7 @@ export default function DashboardPage() {
       {loadingLogs ? (
         <KandangTableSkeleton />
       ) : (
-        <KandangTable data={kandangRows} />
+        <KandangTable data={kandangRows} selectedId={selectedDeviceId} onSelectDevice={setSelectedDeviceId} />
       )}
     </div>
   );
