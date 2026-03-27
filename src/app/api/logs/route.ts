@@ -81,9 +81,9 @@ export async function GET(req: Request) {
     userDevices.map((d) => [d._id.toString(), d.name])
   );
 
-  const logsWithName = logs.map((log) => ({
+  const logsWithName = logs.map((log: any) => ({
     ...log,
-    deviceName: deviceMap[log.deviceId.toString()] ?? "Unknown",
+    deviceName: deviceMap[log.deviceId?.toString()] ?? "Unknown",
   }));
 
   return NextResponse.json({
