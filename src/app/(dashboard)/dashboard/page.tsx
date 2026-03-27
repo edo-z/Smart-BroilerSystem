@@ -517,11 +517,7 @@ const chartOptions: ChartOptions<"line"> = {
   },
 };
 
-// ─────────────────────────────────────────────
-// MAIN PAGE
-// ─────────────────────────────────────────────
 export default function DashboardPage() {
-  const [isMounted, setIsMounted] = useState(false);
   const [devices, setDevices] = useState<Device[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
   const [logs, setLogs] = useState<SensorLog[]>([]);
@@ -530,10 +526,6 @@ export default function DashboardPage() {
   const [loadingLogs, setLoadingLogs] = useState(false);
 
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const chartData = useMemo<ChartData<"line">>(() => ({
     labels: logs.map((l) => new Date(l._time).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })),
@@ -656,15 +648,10 @@ export default function DashboardPage() {
     return { id: d.name, deviceId: d._id, umur: "-", suhu, kelembapan: lastLog?.humidity ?? null, status, claimed: d.claimed, capacity: d.capacity, active: d.active, createdAt: d.createdAt };
   });
 
-  // ── Render Nothing on SSR to prevent Hydration Mismatch ──
-  if (!isMounted) {
-    return null;
-  }
-
   // ── No devices ──
   if (!loading && devices.length === 0) {
     return (
-      <div className="max-w-7xl mx-auto w-full">
+      <div className="max-w-7xl mx-auto w-full" suppressHydrationWarning>
         <div className="mb-8">
           <h2 className="text-xl font-bold text-slate-900">Selamat datang, {userName}</h2>
           <p className="text-sm text-slate-400 mt-1">Belum ada kandang yang terdaftar.</p>
@@ -679,18 +666,18 @@ export default function DashboardPage() {
   const selectedDevice = devices.find((d) => d._id === selectedDeviceId);
 
   return (
-    <div className="max-w-7xl mx-auto w-full space-y-6">
+    <div className="max-w-7xl mx-auto w-full space-y-6" suppressHydrationWarning>
 
       {/* ── HEADER ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Halo, {userName} 👋</h2>
-          <p className="text-sm text-slate-400 mt-0.5 flex items-center gap-1.5">
+          <div className="text-sm text-slate-400 mt-0.5 flex items-center gap-1.5">
             <FaSyncAlt className="text-[10px]" />
             {lastUpdated
               ? `Diperbarui ${lastUpdated.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`
               : "Menghubungkan…"}
-          </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
