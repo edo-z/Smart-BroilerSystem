@@ -22,12 +22,11 @@ interface Device {
 }
 
 interface SensorLog {
-  _id: string;
-  deviceId: string;
-  deviceName: string;
-  temperature: number;
-  humidity: number;
-  recordedAt: string;
+    _time: string;          // Waktu dari InfluxDB (ISO String)
+  kandang_id: string;     // Tag yang kita simpan
+  temperature: number;    // Field
+  humidity: number;       // Field
+  _measurement: string;   // Biasanya "sensor_data"
 }
 
 interface LogsResponse {
@@ -128,7 +127,7 @@ export default function RiwayatPage() {
   // ── Filter search di client (dari data yang sudah di-fetch)
   const filtered = logs.filter((log) =>
     search === "" ||
-    log.deviceName.toLowerCase().includes(search.toLowerCase()) ||
+    log.kandang_id.toLowerCase().includes(search.toLowerCase()) ||
     String(log.temperature).includes(search) ||
     String(log.humidity).includes(search)
   );
@@ -137,8 +136,8 @@ export default function RiwayatPage() {
   const handleExport = () => {
     const header = ["Waktu", "Device", "Suhu (°C)", "Kelembapan (%)", "Status"];
     const rows = logs.map((l) => [
-      formatDate(l.recordedAt),
-      l.deviceName,
+      formatDate(l._time),
+      l.kandang_id,
       l.temperature,
       l.humidity,
       getTempStatus(l.temperature).label,
@@ -246,13 +245,13 @@ export default function RiwayatPage() {
                 filtered.map((log) => {
                   const status = getTempStatus(log.temperature);
                   return (
-                    <tr key={log._id} className="hover:bg-slate-50/50">
+                    <tr key={log.kandang_id} className="hover:bg-slate-50/50">
                       <td className="font-mono text-xs text-slate-400 whitespace-nowrap">
-                        {formatDate(log.recordedAt)}
+                        {formatDate(log._time)}
                       </td>
                       <td>
                         <span className="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md text-xs">
-                          {log.deviceName}
+                          {log.kandang_id}
                         </span>
                       </td>
                       <td className={`font-semibold ${log.temperature > 31 ? "text-red-600" : "text-green-600"}`}>

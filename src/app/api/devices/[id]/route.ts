@@ -14,6 +14,9 @@ export async function PATCH(
 ) {
   const { id } = await params;
   const session = await auth();
+  const { claimCode, deviceName } = await req.json();
+  
+  
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -29,7 +32,7 @@ export async function PATCH(
   if (name !== undefined) updateFields.name = name;
   if (capacity !== undefined) updateFields.capacity = Number(capacity);
   if (active !== undefined) updateFields.active = active;
-
+  if (claimCode !== undefined) updateFields.claimCode = "";
   if (Object.keys(updateFields).length === 0) {
     return NextResponse.json(
       { error: "Tidak ada field yang diupdate" },
@@ -45,6 +48,8 @@ export async function PATCH(
       {
         _id: new ObjectId(id),
         userId: new ObjectId(session.user.id),
+        claimCode: claimCode,
+        claimed: false,
       },
       { $set: updateFields },
       { returnDocument: "after" }
@@ -57,7 +62,10 @@ export async function PATCH(
     );
   }
 
-  return NextResponse.json(result);
+  return NextResponse.json({
+    message: "Sukses! Perangkat telah diklaim.",
+    resudata: result});
+  
 }
 
 // ── DELETE /api/devices/[id] ──────────────────────────────
