@@ -588,9 +588,11 @@ export default function DashboardPage() {
     const fetch_ = async () => {
       if (first) { setLoadingLogs(true); first = false; }
       try {
-        const res = await fetch(`/api/sensor/data?deviceId=${selectedDeviceId}&limit=50&t=${Date.now()}`);
-        const data: SensorLog[] = await res.json();
-        setLogs(data.reverse());
+        const res = await fetch(`/api/logs?deviceId=${selectedDeviceId}&limit=50&t=${Date.now()}`);
+        const data = await res.json();
+        // /api/logs returns { logs: [], total, page, limit, totalPages }
+        const logsData: SensorLog[] = data.logs || [];
+        setLogs(logsData.reverse());
         setLastUpdated(new Date());
       } catch (err) {
         console.error("Gagal fetch logs:", err);
@@ -609,8 +611,9 @@ export default function DashboardPage() {
       try {
         const results = await Promise.all(
           devices.map((d) =>
-            fetch(`/api/sensor/data?deviceId=${d._id}&limit=1&t=${Date.now()}`)
-              .then((r) => r.json() as Promise<SensorLog[]>)
+            fetch(`/api/logs?deviceId=${d._id}&limit=1&t=${Date.now()}`)
+              .then((r) => r.json() as Promise<{logs: SensorLog[]}>)
+              .then((data) => data.logs || [])
               .catch(() => [] as SensorLog[])
           )
         );
