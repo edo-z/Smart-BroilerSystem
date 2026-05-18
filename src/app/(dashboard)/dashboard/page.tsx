@@ -49,11 +49,14 @@ interface Device {
 }
 
 interface SensorLog {
-  _time: string;
-  kandang_id: string;
+  _id?: string;
+  deviceId: string;
   temperature: number;
   humidity: number;
-  _measurement: string;
+  age: number;
+  vfd: number;
+  dimmer: number;
+  timestamp: string;
 }
 
 interface KandangRow {
@@ -125,30 +128,26 @@ const STATIC_ALERT_DATA: AlertItem[] = [
 // HELPERS
 // ─────────────────────────────────────────────
 function computeAlertHistory(logs: SensorLog[]): AlertItem[] {
-  const spikes: AlertItem[] = [];
-  for (let i = logs.length - 1; i >= 0; i--) {
-    const log = logs[i];
-    if (log.temperature > TEMP_SPIKE_THRESHOLD) {
-      const date = new Date(log._time);
-      const diffMin = Math.floor((Date.now() - date.getTime()) / 60000);
-      const diffHr = Math.floor(diffMin / 60);
-      const timeLabel =
-        diffMin < 1 ? "baru saja"
-        : diffMin < 60 ? `${diffMin}m lalu`
-        : diffHr < 24 ? `${diffHr}j lalu`
-        : `${Math.floor(diffHr / 24)}h lalu`;
-      spikes.push({
-        id: i,
-        icon: <FaFire className="text-red-400 shrink-0" />,
-        title: "Suhu Tinggi",
-        time: timeLabel,
-        message: `Mencapai ${log.temperature.toFixed(1)}°C pukul ${date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}.`,
-        variant: "red",
-      });
-      if (spikes.length >= 5) break;
-    }
-  }
-  return spikes;
+  const spikes = logs.filter((l) => l.temperature > 31).slice(0, 5);
+  const alertItems: AlertItem[] = spikes.map((log, i) => {
+    const date = new Date(log.timestamp);
+    const diffMin = Math.floor((Date.now() - date.getTime()) / 60000);
+    const diffHr = Math.floor(diffMin / 60);
+    const timeLabel =
+      diffMin < 1 ? "baru saja"
+      : diffMin < 60 ? `${diffMin}m lalu`
+      : diffHr < 24 ? `${diffHr}j lalu`
+      : `${Math.floor(diffHr / 24)}h lalu`;
+    return {
+      id: i,
+      icon: <FaFire className="text-red-400 shrink-0" />,
+      title: "Suhu Tinggi",
+      time: timeLabel,
+      message: `Mencapai ${log.temperature.toFixed(1)}°C pukul ${date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}.`,
+      variant: "red" as const,
+    };
+  });
+  return alertItems;
 }
 
 // ─────────────────────────────────────────────
@@ -528,7 +527,7 @@ export default function DashboardPage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const chartData = useMemo<ChartData<"line">>(() => ({
-    labels: logs.map((l) => new Date(l._time).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })),
+    labels: logs.map((l) => new Date(l.timestamp).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })),
     datasets: [
       {
         label: "Suhu (°C)",
@@ -632,7 +631,7 @@ export default function DashboardPage() {
   const totalActive = devices.filter((d) => d.active).length;
   const totalStandby = devices.filter((d) => !d.active).length;
   const totalWarning = devices.filter((d) => {
-    const l = allLogs.findLast((x) => String(x.kandang_id) === String(d._id));
+    const l = allLogs.findLast((x) => String(x.deviceId) === String(d._id));
     return l && l.temperature > TEMP_SPIKE_THRESHOLD;
   }).length;
 
@@ -642,7 +641,7 @@ export default function DashboardPage() {
   }, [logs]);
 
   const kandangRows: KandangRow[] = devices.map((d) => {
-    const lastLog = allLogs.findLast((l) => String(l.kandang_id) === String(d._id)) ?? null;
+    const lastLog = allLogs.findLast((l) => String(l.deviceId) === String(d._id)) ?? null;
     const suhu = lastLog?.temperature ?? null;
     const status: KandangStatus = !d.claimed ? "kosong" : suhu !== null && suhu > TEMP_SPIKE_THRESHOLD ? "warning" : "normal";
     return { id: d.name, deviceId: d._id, umur: "-", suhu, kelembapan: lastLog?.humidity ?? null, status, claimed: d.claimed, capacity: d.capacity, active: d.active, createdAt: d.createdAt };

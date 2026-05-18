@@ -56,7 +56,7 @@ export async function GET(req: Request) {
 
   // Filter tanggal jika ada
   if (from || to) {
-    filter.recordedAt = {
+    filter.timestamp = {
       ...(from ? { $gte: new Date(from) } : {}),
       ...(to ? { $lte: new Date(to) } : {}),
     };
@@ -67,7 +67,7 @@ export async function GET(req: Request) {
     db
       .collection<ISensorLog>("sensor_logs")
       .find(filter)
-      .sort({ recordedAt: -1 })
+      .sort({ timestamp: -1 })
       .skip(skip)
       .limit(limit)
       .toArray(),

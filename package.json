@@ -12,8 +12,6 @@
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.1",
     "@gsap/react": "^2.1.2",
-    "@influxdata/influxdb-client": "^1.35.0",
-    "@influxdata/influxdb3-client": "^2.1.0",
     "autoprefixer": "^10.4.24",
     "bcryptjs": "^3.0.3",
     "chart.js": "^4.5.1",

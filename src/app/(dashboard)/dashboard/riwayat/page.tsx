@@ -22,11 +22,15 @@ interface Device {
 }
 
 interface SensorLog {
-    _time: string;          // Waktu dari InfluxDB (ISO String)
-  kandang_id: string;     // Tag yang kita simpan
-  temperature: number;    // Field
-  humidity: number;       // Field
-  _measurement: string;   // Biasanya "sensor_data"
+  _id?: string;
+  deviceId: string;
+  temperature: number;
+  humidity: number;
+  age: number;
+  vfd: number;
+  dimmer: number;
+  timestamp: string;
+  deviceName?: string;
 }
 
 interface LogsResponse {
@@ -127,19 +131,22 @@ export default function RiwayatPage() {
   // ── Filter search di client (dari data yang sudah di-fetch)
   const filtered = logs.filter((log) =>
     search === "" ||
-    log.kandang_id.toLowerCase().includes(search.toLowerCase()) ||
+    log.deviceId.toLowerCase().includes(search.toLowerCase()) ||
     String(log.temperature).includes(search) ||
     String(log.humidity).includes(search)
   );
 
   // ── Export CSV
   const handleExport = () => {
-    const header = ["Waktu", "Device", "Suhu (°C)", "Kelembapan (%)", "Status"];
+    const header = ["Waktu", "Device", "Suhu (°C)", "Kelembapan (%)", "Umur (hari)", "VFD (%)", "Dimmer (%)", "Status"];
     const rows = logs.map((l) => [
-      formatDate(l._time),
-      l.kandang_id,
+      formatDate(l.timestamp),
+      l.deviceId,
       l.temperature,
       l.humidity,
+      l.age,
+      l.vfd,
+      l.dimmer,
       getTempStatus(l.temperature).label,
     ]);
     const csv = [header, ...rows].map((r) => r.join(",")).join("\n");
@@ -229,6 +236,9 @@ export default function RiwayatPage() {
                 <th>Device</th>
                 <th>Suhu (°C)</th>
                 <th>Kelembapan (%)</th>
+                <th>Umur (hari)</th>
+                <th>VFD (%)</th>
+                <th>Dimmer (%)</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -237,7 +247,7 @@ export default function RiwayatPage() {
                 Array.from({ length: LIMIT }).map((_, i) => <SkeletonRow key={i} />)
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-12 text-slate-400 text-sm">
+                  <td colSpan={8} className="text-center py-12 text-slate-400 text-sm">
                     Tidak ada data yang sesuai.
                   </td>
                 </tr>
@@ -245,19 +255,22 @@ export default function RiwayatPage() {
                 filtered.map((log) => {
                   const status = getTempStatus(log.temperature);
                   return (
-                    <tr key={log.kandang_id} className="hover:bg-slate-50/50">
+                    <tr key={log._id || log.timestamp} className="hover:bg-slate-50/50">
                       <td className="font-mono text-xs text-slate-400 whitespace-nowrap">
-                        {formatDate(log._time)}
+                        {formatDate(log.timestamp)}
                       </td>
                       <td>
                         <span className="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md text-xs">
-                          {log.kandang_id}
+                          {log.deviceId}
                         </span>
                       </td>
                       <td className={`font-semibold ${log.temperature > 31 ? "text-red-600" : "text-green-600"}`}>
                         {log.temperature.toFixed(1)}
                       </td>
                       <td className="text-slate-600">{log.humidity.toFixed(0)}</td>
+                      <td className="text-slate-600">{log.age}</td>
+                      <td className="text-slate-600">{log.vfd}</td>
+                      <td className="text-slate-600">{log.dimmer}</td>
                       <td>
                         <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full border ${status.badgeClass}`}>
                           {status.label}

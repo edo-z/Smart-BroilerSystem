@@ -1,8 +1,13 @@
-// src/models/SensorLog.ts
+import { ObjectId } from "mongodb";
+
 export interface ISensorLog {
-  _time: string;          // Waktu dari InfluxDB (ISO String)
-  kandang_id: string;     // Tag yang kita simpan
-  temperature: number;    // Field
-  humidity: number;       // Field
-  _measurement: string;   // Biasanya "sensor_data"
+  _id?: ObjectId;
+  deviceId: ObjectId;
+  temperature: number;
+  humidity: number;
+  age: number;
+  vfd: number;
+  dimmer: number;
+  timestamp: Date;
+  createdAt: Date;
 }
