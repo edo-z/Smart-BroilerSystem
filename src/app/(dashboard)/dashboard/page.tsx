@@ -518,18 +518,13 @@ const chartOptions: ChartOptions<"line"> = {
   },
 };
 
-import { useMQTT } from "@/contexts/MQTTContext";
-import mqttClient from "@/lib/mqtt-client";
-
 export default function DashboardPage() {
-  const { isConnected, latestData, subscribeDevice, unsubscribeDevice } = useMQTT();
   const [devices, setDevices] = useState<Device[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
   const [logs, setLogs] = useState<SensorLog[]>([]);
   const [allLogs, setAllLogs] = useState<SensorLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingLogs, setLoadingLogs] = useState(false);
-  const [useMQTTData, setUseMQTTData] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   
   // Track device subscriptions
@@ -593,71 +588,26 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!selectedDeviceId) return;
-    
-    // Subscribe to MQTT topic for selected device
-    subscribeDevice(selectedDeviceId);
-    setUseMQTTData(true);
-    
-    // Track subscription changes
-    if (previousDeviceRef.current && previousDeviceRef.current !== selectedDeviceId) {
-      unsubscribeDevice(previousDeviceRef.current);
-    }
-    previousDeviceRef.current = selectedDeviceId;
 
-    // Fetch initial data from API as fallback
-    let first = true;
-    const fetch_ = async () => {
-      // Only use HTTP fallback if MQTT not connected
-      if (!isConnected) {
-        if (first) { setLoadingLogs(true); first = false; }
-        try {
-          const res = await fetch(`/api/logs?deviceId=${selectedDeviceId}&limit=50&t=${Date.now()}`);
-          const data = await res.json();
-          const logsData: SensorLog[] = data.logs || [];
-          setLogs(logsData.reverse());
-          setLastUpdated(new Date());
-        } catch (err) {
-          console.error("Gagal fetch logs:", err);
-        } finally {
-          setLoadingLogs(false);
-        }
+    const fetchLogs = async () => {
+      setLoadingLogs(true);
+      try {
+        const res = await fetch(`/api/logs?deviceId=${selectedDeviceId}&limit=50&t=${Date.now()}`);
+        const data = await res.json();
+        const logsData: SensorLog[] = data.logs || [];
+        setLogs(logsData.reverse());
+        setLastUpdated(new Date());
+      } catch (err) {
+        console.error("Gagal fetch logs:", err);
+      } finally {
+        setLoadingLogs(false);
       }
     };
-    fetch_();
-    
-    return () => {
-      unsubscribeDevice(selectedDeviceId);
-    };
-  }, [selectedDeviceId, isConnected, subscribeDevice, unsubscribeDevice]);
 
-  // Real-time data from MQTT
-  useEffect(() => {
-    if (!selectedDeviceId || !useMQTTData) return;
-    
-    const mqttData = latestData.get(selectedDeviceId);
-    if (mqttData) {
-      // Add to logs for chart
-      setLogs(prev => {
-        const newLog: SensorLog = {
-          _id: undefined,
-          deviceId: mqttData.deviceId,
-          temperature: mqttData.temperature,
-          humidity: mqttData.humidity,
-          age: mqttData.age,
-          vfd: mqttData.vfd,
-          dimmer: mqttData.dimmer,
-          timestamp: mqttData.timestamp,
-        };
-        // Keep last 50 entries
-        const updated = [...prev, newLog];
-        if (updated.length > 50) {
-          return updated.slice(-50);
-        }
-        return updated;
-      });
-      setLastUpdated(new Date());
-    }
-  }, [latestData, selectedDeviceId, useMQTTData]);
+    fetchLogs();
+    const interval = setInterval(fetchLogs, 5000);
+    return () => clearInterval(interval);
+  }, [selectedDeviceId]);
 
   useEffect(() => {
     if (devices.length === 0) return;
@@ -737,14 +687,10 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          {/* MQTT Connection Status */}
-          <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${
-            isConnected 
-              ? "text-blue-700 bg-blue-50 border border-blue-200" 
-              : "text-slate-600 bg-slate-100 border border-slate-200"
-          }`}>
-            {isConnected ? <FaWifi className="text-[10px]" /> : <FaBolt className="text-[10px] text-orange-400" />}
-            {isConnected ? "Live" : "Polling"}
+          {/* Connection Status */}
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full text-slate-600 bg-slate-100 border border-slate-200">
+            <FaSyncAlt className="text-[10px]" />
+            Polling
           </span>
           
           {/* Status pill */}
