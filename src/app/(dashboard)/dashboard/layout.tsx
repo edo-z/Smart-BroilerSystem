@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa";
 import LogoutButton from "@/components/auth/LogoutButton";
 import SidebarNav from "@/components/dashboard/SidebarNav";
+import DashboardClientLayout from "@/components/dashboard/DashboardClientLayout";
 export const dynamic = "force-dynamic";
 // ─────────────────────────────────────────────
 // Active state ditangani via CSS data-attribute
@@ -117,7 +118,11 @@ export default async function DashboardLayout({
         </div>
 
         {/* Page content */}
-        <main className="p-6 md:p-8">{children}</main>
+        <main className="p-6 md:p-8">
+          <DashboardClientLayout>
+            {children}
+          </DashboardClientLayout>
+        </main>
       </div>
     </div>
   );
