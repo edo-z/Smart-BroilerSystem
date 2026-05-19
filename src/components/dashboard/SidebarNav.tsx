@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FaHome, FaCog, FaHistory, FaMicrochip } from "react-icons/fa";
+import { FaHome, FaCog, FaHistory } from "react-icons/fa";
 
 const NAV_ITEMS = [
   { href: "/dashboard",            label: "Dashboard",  icon: <FaHome className="w-4" /> },
   { href: "/dashboard/riwayat",    label: "Riwayat",    icon: <FaHistory className="w-4" /> },
-  { href: "/dashboard/ota",        label: "OTA Update", icon: <FaMicrochip className="w-4" /> },
   { href: "/dashboard/pengaturan", label: "Pengaturan", icon: <FaCog className="w-4" /> },
 ];
 
