@@ -48,8 +48,8 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    // EMQX Webhook membungkus pesan dalam format wrapper
-    // payload bisa berupa string JSON atau object langsung
+    // EMQX Webhook bisa mengirim dalam format wrapper ({payload: ...})
+    // atau langsung sebagai raw JSON ({deviceId: ..., ...})
     let sensorPayload: any;
 
     if (body.payload) {
@@ -71,6 +71,9 @@ export async function POST(req: Request) {
           { status: 400 }
         );
       }
+    } else if (body.deviceId && body.apiKey) {
+      // Raw format: body langsung berisi data sensor
+      sensorPayload = body;
     } else {
       return NextResponse.json(
         { error: "Missing payload field" },
@@ -101,9 +104,9 @@ export async function POST(req: Request) {
       );
     }
 
-    if (age < 0 || age > 50 || vfd < 0 || vfd > 100 || dimmer < 0 || dimmer > 100) {
+    if (age < 0 || age > 50 || vfd < 0 || vfd > 255 || dimmer < 0 || dimmer > 255) {
       return NextResponse.json(
-        { error: "age harus 0-50, vfd dan dimmer harus 0-100" },
+        { error: "age harus 0-50, vfd dan dimmer harus 0-255 (PWM 8-bit)" },
         { status: 400 }
       );
     }
