@@ -95,6 +95,22 @@ interface Toast {
 // ─────────────────────────────────────────────
 const TEMP_SPIKE_THRESHOLD = 31;
 
+// Fase umur & deadband setpoint (mirror fuzzy.h)
+const PHASE_MAP = [
+  { maxAge: 10,  tempLow: 33, tempHigh: 34, rhLow: 65, rhHigh: 70, label: "BA (Bayi)" },
+  { maxAge: 18,  tempLow: 30, tempHigh: 32, rhLow: 60, rhHigh: 65, label: "BL (Bala)" },
+  { maxAge: 28,  tempLow: 28, tempHigh: 29, rhLow: 60, rhHigh: 65, label: "T (Transisi)" },
+  { maxAge: 38,  tempLow: 25, tempHigh: 27, rhLow: 55, rhHigh: 60, label: "PA (Akhir)" },
+  { maxAge: 50,  tempLow: 24, tempHigh: 25, rhLow: 55, rhHigh: 60, label: "PL (Panen)" },
+];
+
+function getPhase(age: number) {
+  for (const p of PHASE_MAP) {
+    if (age <= p.maxAge) return p;
+  }
+  return PHASE_MAP[PHASE_MAP.length - 1];
+}
+
 const ALERT_LEFT_BAR: Record<AlertItem["variant"], string> = {
   red: "border-l-red-400",
   blue: "border-l-blue-400",
@@ -419,11 +435,41 @@ function TambahKandangModal({ open, onClose }: { open: boolean; onClose: () => v
             </div>
             <div className="flex gap-3">
               <button onClick={() => setStep("info")} className="btn btn-outline border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl flex-1">Kembali</button>
-              <button onClick={() => { onClose(); }} className="btn btn-primary bg-slate-900 hover:bg-slate-800 border-none text-white rounded-xl flex-1">Daftarkan</button>
+              <button onClick={() => onClose()} className="btn btn-primary bg-slate-900 hover:bg-slate-800 border-none text-white rounded-xl flex-1">Daftarkan</button>
             </div>
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// VFD / DIMMER OUTPUT BAR
+// ─────────────────────────────────────────────
+function OutputBar({ label, value, max, icon, colorClass }: {
+  label: string;
+  value: number | null;
+  max: number;
+  icon: React.ReactNode;
+  colorClass: string;
+}) {
+  const pct = value !== null ? Math.round((value / max) * 100) : 0;
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 w-16 shrink-0">
+        {icon}
+        <span className="text-xs font-semibold text-slate-500">{label}</span>
+      </div>
+      <div className="flex-1 h-2.5 rounded-full bg-slate-100 overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-700 ${colorClass}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <span className="text-xs font-bold text-slate-700 tabular-nums w-12 text-right">
+        {value !== null ? `${pct}%` : "—"}
+      </span>
     </div>
   );
 }
@@ -530,31 +576,65 @@ export default function DashboardPage() {
   // Track device subscriptions
   const previousDeviceRef = useRef<string | null>(null);
 
-  const chartData = useMemo<ChartData<"line">>(() => ({
-    labels: logs.map((l) => new Date(l.timestamp).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })),
-    datasets: [
-      {
-        label: "Suhu (°C)",
-        data: logs.map((l) => l.temperature),
-        borderColor: "#ef4444",
-        backgroundColor: "rgba(239,68,68,0.12)",
-        tension: 0.4, fill: true, pointRadius: 2, pointHoverRadius: 6, borderWidth: 2,
-      },
-      {
-        label: "Kelembapan (%)",
-        data: logs.map((l) => l.humidity),
-        borderColor: "#3b82f6",
-        borderDash: [4, 4],
-        backgroundColor: "transparent",
-        tension: 0.4, fill: false, pointRadius: 0, pointHoverRadius: 5, borderWidth: 1.5,
-      },
-    ],
-  }), [logs]);
+  const chartData = useMemo<ChartData<"line">>(() => {
+    const labels = logs.map((l) => new Date(l.timestamp).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }));
+    const targetLow = logs.map((l) => getPhase(l.age).tempLow);
+    const targetHigh = logs.map((l) => getPhase(l.age).tempHigh);
+    return {
+      labels,
+      datasets: [
+        {
+          label: "Target Bawah (°C)",
+          data: targetLow,
+          borderColor: "#0ea5e9",
+          borderDash: [3, 3],
+          borderWidth: 1,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          tension: 0.2,
+          fill: false,
+          order: 0,
+        },
+        {
+          label: "Target Atas (°C)",
+          data: targetHigh,
+          borderColor: "#0ea5e9",
+          borderDash: [3, 3],
+          borderWidth: 1,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          tension: 0.2,
+          backgroundColor: "rgba(14,165,233,0.06)",
+          fill: "-1",
+          order: 0,
+        },
+        {
+          label: "Suhu (°C)",
+          data: logs.map((l) => l.temperature),
+          borderColor: "#ef4444",
+          backgroundColor: "rgba(239,68,68,0.12)",
+          tension: 0.4, fill: true, pointRadius: 2, pointHoverRadius: 6, borderWidth: 2,
+          order: 1,
+        },
+        {
+          label: "Kelembapan (%)",
+          data: logs.map((l) => l.humidity),
+          borderColor: "#3b82f6",
+          borderDash: [4, 4],
+          backgroundColor: "transparent",
+          tension: 0.4, fill: false, pointRadius: 0, pointHoverRadius: 5, borderWidth: 1.5,
+          order: 2,
+        },
+      ],
+    };
+  }, [logs]);
 
   const gradientPlugin = useMemo(() => ({
     id: "customGradient",
     afterLayout(chart: ChartJS) {
-      const dataset = chart.data.datasets[0] as ChartData<"line">["datasets"][0] & { backgroundColor: unknown };
+      const tempDataset = chart.data.datasets.find((d) => d.label === "Suhu (°C)");
+      if (!tempDataset) return;
+      const dataset = tempDataset as ChartData<"line">["datasets"][0] & { backgroundColor: unknown };
       const ctx = chart.ctx;
       const { top, bottom } = chart.chartArea ?? {};
       if (!ctx || top == null) return;
@@ -635,6 +715,15 @@ export default function DashboardPage() {
   const latest = logs[logs.length - 1] ?? null;
   const avgTemp = latest?.temperature ?? null;
   const avgHumid = latest?.humidity ?? null;
+  const latestVfd = latest?.vfd ?? null;
+  const latestDimmer = latest?.dimmer ?? null;
+
+  const emergencyStatus = useMemo<"emergency" | "caution" | "none">(() => {
+    if (avgTemp === null) return "none";
+    if (avgTemp < 15 || avgTemp > 43) return "emergency";
+    if (avgTemp < 18 || avgTemp > 40) return "caution";
+    return "none";
+  }, [avgTemp]);
   const totalActive = devices.filter((d) => d.active).length;
   const totalStandby = devices.filter((d) => !d.active).length;
   const totalWarning = devices.filter((d) => {
@@ -651,7 +740,7 @@ export default function DashboardPage() {
     const lastLog = allLogs.findLast((l) => String(l.deviceId) === String(d._id)) ?? null;
     const suhu = lastLog?.temperature ?? null;
     const status: KandangStatus = !d.claimed ? "kosong" : suhu !== null && suhu > TEMP_SPIKE_THRESHOLD ? "warning" : "normal";
-    return { id: d.name, deviceId: d._id, umur: "-", suhu, kelembapan: lastLog?.humidity ?? null, status, claimed: d.claimed, capacity: d.capacity, active: d.active, createdAt: d.createdAt };
+    return { id: d.name, deviceId: d._id, umur: lastLog?.age != null ? `${lastLog.age} hr` : "-", suhu, kelembapan: lastLog?.humidity ?? null, status, claimed: d.claimed, capacity: d.capacity, active: d.active, createdAt: d.createdAt };
   });
 
   // ── No devices ──
@@ -708,6 +797,29 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* ── EMERGENCY BANNER ── */}
+      {selectedDeviceId && emergencyStatus !== "none" && (
+        <div className={`w-full rounded-2xl p-4 border ${
+          emergencyStatus === "emergency"
+            ? "bg-red-50 border-red-200"
+            : "bg-amber-50 border-amber-200"
+        }`}>
+          <div className="flex items-center gap-3">
+            <FaExclamationTriangle className={`text-lg shrink-0 ${emergencyStatus === "emergency" ? "text-red-500" : "text-amber-500"}`} />
+            <div>
+              <p className={`font-bold text-sm ${emergencyStatus === "emergency" ? "text-red-800" : "text-amber-800"}`}>
+                {emergencyStatus === "emergency" ? "DARURAT — Suhu di Luar Batas Aman" : "PERHATIAN — Suhu Mendekati Batas"}
+              </p>
+              <p className={`text-xs mt-0.5 ${emergencyStatus === "emergency" ? "text-red-600" : "text-amber-600"}`}>
+                {emergencyStatus === "emergency"
+                  ? `Suhu ${avgTemp?.toFixed(1)}°C berada di luar rentang 15–43°C. Semua output otomatis dimatikan. Periksa kandang segera!`
+                  : `Suhu ${avgTemp?.toFixed(1)}°C mendekati batas aman. Pantau kondisi kandang lebih ketat.`}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── METRIC CARDS ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {loading ? (
@@ -734,6 +846,54 @@ export default function DashboardPage() {
           </>
         )}
       </div>
+
+      {/* ── UMUR AYAM ── */}
+      {selectedDeviceId && (
+        <div className="grid grid-cols-1 gap-4">
+          {loading ? (
+            <MetricCardSkeleton />
+          ) : (
+            <MetricCard
+              accent="bg-purple-400"
+              label="Umur Ayam"
+              value={latest?.age != null ? `${latest.age}` : "—"}
+              unit="hr"
+              sub={latest?.age != null
+                ? `Fase: ${getPhase(latest.age).label} · Target: ${getPhase(latest.age).tempLow}-${getPhase(latest.age).tempHigh}°C / RH ${getPhase(latest.age).rhLow}-${getPhase(latest.age).rhHigh}%`
+                : "Menunggu data"}
+              subColor="text-purple-600"
+            />
+          )}
+        </div>
+      )}
+
+      {/* ── OUTPUT STATUS (VFD / Dimmer) ── */}
+      {selectedDeviceId && logs.length > 0 && (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Output Aktuator</h3>
+            <span className="text-[10px] text-slate-400">
+              VFD: kipas ventilasi · Dimmer: pemanas
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <OutputBar
+              label="VFD"
+              value={latestVfd}
+              max={255}
+              icon={<FaBolt className="text-emerald-500 text-xs" />}
+              colorClass="bg-gradient-to-r from-emerald-400 to-emerald-500"
+            />
+            <OutputBar
+              label="Dimmer"
+              value={latestDimmer}
+              max={255}
+              icon={<FaFire className="text-orange-500 text-xs" />}
+              colorClass="bg-gradient-to-r from-orange-400 to-red-500"
+            />
+          </div>
+        </div>
+      )}
 
       {/* ── CHART + ALERTS (3-col: chart 2, alerts 1) ── */}
       {loadingLogs ? (

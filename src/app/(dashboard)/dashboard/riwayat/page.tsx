@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   FaThermometerHalf,
   FaTint,
@@ -62,6 +62,16 @@ function formatDate(iso: string) {
   });
 }
 
+function getPageRange(current: number, total: number): (number | "...")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages: (number | "...")[] = [1];
+  if (current > 3) pages.push("...");
+  for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
+  if (current < total - 2) pages.push("...");
+  if (total > 1) pages.push(total);
+  return pages;
+}
+
 // ─────────────────────────────────────────────
 // SKELETON ROW
 // ─────────────────────────────────────────────
@@ -89,6 +99,13 @@ export default function RiwayatPage() {
   // Filter state
   const [search, setSearch] = useState("");
   const [filterDevice, setFilterDevice] = useState("all");
+
+  // Lookup deviceId → device name
+  const deviceMap = useMemo(() => {
+    const map = new Map<string, string>();
+    devices.forEach((d) => map.set(d._id, d.name));
+    return map;
+  }, [devices]);
 
   // ── Fetch devices untuk dropdown filter
   useEffect(() => {
@@ -261,7 +278,7 @@ export default function RiwayatPage() {
                       </td>
                       <td>
                         <span className="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md text-xs">
-                          {log.deviceId}
+                          {deviceMap.get(log.deviceId) ?? log.deviceId}
                         </span>
                       </td>
                       <td className={`font-semibold ${log.temperature > 31 ? "text-red-600" : "text-green-600"}`}>
@@ -298,17 +315,21 @@ export default function RiwayatPage() {
             >
               <FaChevronLeft className="text-[10px]" />
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPage(p)}
-                className={`btn btn-xs w-8 h-8 min-h-0 rounded-lg font-bold text-xs border-none ${
-                  p === page ? "bg-slate-900 text-white" : "btn-ghost text-slate-600"
-                }`}
-              >
-                {p}
-              </button>
-            ))}
+            {getPageRange(page, totalPages).map((p, i) =>
+              p === "..." ? (
+                <span key={`e${i}`} className="px-1 text-slate-300 text-xs">...</span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`btn btn-xs w-8 h-8 min-h-0 rounded-lg font-bold text-xs border-none ${
+                    p === page ? "bg-slate-900 text-white" : "btn-ghost text-slate-600"
+                  }`}
+                >
+                  {p}
+                </button>
+              )
+            )}
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
