@@ -9,6 +9,9 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaFilter,
+  FaTrash,
+  FaTimes,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 
 // ─────────────────────────────────────────────
@@ -78,10 +81,190 @@ function getPageRange(current: number, total: number): (number | "...")[] {
 function SkeletonRow() {
   return (
     <tr className="animate-pulse">
-      {Array.from({ length: 5 }).map((_, i) => (
+      {Array.from({ length: 9 }).map((_, i) => (
         <td key={i}><div className="h-4 bg-slate-100 rounded w-3/4" /></td>
       ))}
     </tr>
+  );
+}
+
+// ─────────────────────────────────────────────
+// DELETE CONFIRM MODAL
+// ─────────────────────────────────────────────
+function DeleteLogModal({
+  log,
+  deviceName,
+  deleting,
+  onConfirm,
+  onClose,
+}: {
+  log: SensorLog | null;
+  deviceName: string;
+  deleting: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  if (!log) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{
+        backgroundColor: "rgba(15,23,42,0.45)",
+        backdropFilter: "blur(4px)",
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="relative w-full max-w-sm rounded-3xl bg-white overflow-hidden"
+        style={{
+          boxShadow:
+            "0 32px 64px -12px rgba(15,23,42,0.35), 0 0 0 1px rgba(15,23,42,0.06)",
+        }}
+      >
+        <div className="h-1.5 w-full bg-gradient-to-r from-red-500 via-red-400 to-red-300" />
+        <div className="flex items-start justify-between px-6 pt-6 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-red-50 rounded-xl">
+              <FaExclamationTriangle className="text-red-400 text-lg" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Hapus Log</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="btn btn-ghost btn-xs w-8 h-8 min-h-0 rounded-lg text-slate-400 hover:text-slate-700"
+          >
+            <FaTimes />
+          </button>
+        </div>
+        <div className="h-px bg-slate-100 mx-6" />
+        <div className="px-6 pt-4 pb-4 space-y-2">
+          <div className="text-sm text-slate-600">
+            Apakah Anda yakin ingin menghapus log berikut?
+          </div>
+          <div className="bg-slate-50 rounded-xl p-3 space-y-1.5 text-sm">
+            <div className="flex justify-between">
+              <span className="text-slate-400">Device</span>
+              <span className="font-semibold text-slate-800">{deviceName}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-400">Waktu</span>
+              <span className="font-semibold text-slate-800">{formatDate(log.timestamp)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-400">Suhu</span>
+              <span className="font-semibold text-slate-800">{log.temperature.toFixed(1)} °C</span>
+            </div>
+          </div>
+        </div>
+        <div className="px-6 pb-6 flex gap-2">
+          <button
+            onClick={onClose}
+            className="btn btn-sm flex-1 rounded-xl border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
+          >
+            Batal
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={deleting}
+            className="btn btn-sm flex-1 rounded-xl bg-red-600 hover:bg-red-700 border-none text-white font-bold"
+          >
+            {deleting ? "Menghapus..." : "Hapus"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// BULK DELETE CONFIRM MODAL
+// ─────────────────────────────────────────────
+function BulkDeleteModal({
+  target,
+  logCount,
+  deleting,
+  onConfirm,
+  onClose,
+}: {
+  target: { deviceId: string; deviceName: string } | null;
+  logCount: number;
+  deleting: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  if (!target) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{
+        backgroundColor: "rgba(15,23,42,0.45)",
+        backdropFilter: "blur(4px)",
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="relative w-full max-w-sm rounded-3xl bg-white overflow-hidden"
+        style={{
+          boxShadow:
+            "0 32px 64px -12px rgba(15,23,42,0.35), 0 0 0 1px rgba(15,23,42,0.06)",
+        }}
+      >
+        <div className="h-1.5 w-full bg-gradient-to-r from-red-500 via-red-400 to-red-300" />
+        <div className="flex items-start justify-between px-6 pt-6 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-red-50 rounded-xl">
+              <FaExclamationTriangle className="text-red-400 text-lg" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Hapus Semua Data</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="btn btn-ghost btn-xs w-8 h-8 min-h-0 rounded-lg text-slate-400 hover:text-slate-700"
+          >
+            <FaTimes />
+          </button>
+        </div>
+        <div className="h-px bg-slate-100 mx-6" />
+        <div className="px-6 pt-4 pb-4 space-y-2">
+          <div className="text-sm text-slate-600">
+            Apakah Anda yakin ingin menghapus <span className="font-bold">{logCount}</span> log untuk:
+          </div>
+          <div className="bg-slate-50 rounded-xl p-3 text-sm">
+            <div className="flex justify-between">
+              <span className="text-slate-400">Device</span>
+              <span className="font-semibold text-slate-800">{target.deviceName}</span>
+            </div>
+          </div>
+        </div>
+        <div className="px-6 pb-6 flex gap-2">
+          <button
+            onClick={onClose}
+            className="btn btn-sm flex-1 rounded-xl border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
+          >
+            Batal
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={deleting}
+            className="btn btn-sm flex-1 rounded-xl bg-red-600 hover:bg-red-700 border-none text-white font-bold"
+          >
+            {deleting ? "Menghapus..." : `Hapus ${logCount} Log`}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -95,6 +278,10 @@ export default function RiwayatPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<SensorLog | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [bulkDeleteTarget, setBulkDeleteTarget] = useState<{ deviceId: string; deviceName: string } | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   // Filter state
   const [search, setSearch] = useState("");
@@ -152,6 +339,38 @@ export default function RiwayatPage() {
     String(log.temperature).includes(search) ||
     String(log.humidity).includes(search)
   );
+
+  // ── Delete log
+  const handleDelete = useCallback(async () => {
+    if (!deleteTarget?._id) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/logs/${deleteTarget._id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Gagal menghapus log");
+      setDeleteTarget(null);
+      fetchLogs();
+    } catch (err) {
+      console.error("Gagal hapus log:", err);
+    } finally {
+      setDeleting(false);
+    }
+  }, [deleteTarget, fetchLogs]);
+
+  // ── Bulk delete all logs for device
+  const handleBulkDelete = useCallback(async () => {
+    if (!bulkDeleteTarget?.deviceId) return;
+    setBulkDeleting(true);
+    try {
+      const res = await fetch(`/api/logs?deviceId=${bulkDeleteTarget.deviceId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Gagal menghapus semua log");
+      setBulkDeleteTarget(null);
+      fetchLogs();
+    } catch (err) {
+      console.error("Gagal hapus semua log:", err);
+    } finally {
+      setBulkDeleting(false);
+    }
+  }, [bulkDeleteTarget, fetchLogs]);
 
   // ── Export CSV
   const handleExport = () => {
@@ -236,6 +455,17 @@ export default function RiwayatPage() {
               <option key={d._id} value={d._id}>{d.name}</option>
             ))}
           </select>
+          {filterDevice !== "all" && (
+            <button
+              onClick={() => {
+                const name = deviceMap.get(filterDevice) ?? filterDevice;
+                setBulkDeleteTarget({ deviceId: filterDevice, deviceName: name });
+              }}
+              className="btn btn-sm h-9 min-h-0 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 font-bold text-xs flex items-center gap-1.5 shrink-0"
+            >
+              <FaTrash className="text-[10px]" /> Hapus Semua Data
+            </button>
+          )}
         </div>
         <div className="mt-3 text-xs text-slate-400">
           Menampilkan <span className="font-bold text-slate-600">{filtered.length}</span> dari{" "}
@@ -257,6 +487,7 @@ export default function RiwayatPage() {
                 <th>VFD (%)</th>
                 <th>Dimmer (%)</th>
                 <th>Status</th>
+                <th className="text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="text-sm text-slate-700 divide-y divide-slate-50">
@@ -264,7 +495,7 @@ export default function RiwayatPage() {
                 Array.from({ length: LIMIT }).map((_, i) => <SkeletonRow key={i} />)
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-12 text-slate-400 text-sm">
+                  <td colSpan={9} className="text-center py-12 text-slate-400 text-sm">
                     Tidak ada data yang sesuai.
                   </td>
                 </tr>
@@ -292,6 +523,15 @@ export default function RiwayatPage() {
                         <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full border ${status.badgeClass}`}>
                           {status.label}
                         </span>
+                      </td>
+                      <td className="text-right">
+                        <button
+                          onClick={() => setDeleteTarget(log)}
+                          className="btn btn-ghost btn-xs text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg w-8 h-8 min-h-0"
+                          title="Hapus log"
+                        >
+                          <FaTrash className="text-xs" />
+                        </button>
                       </td>
                     </tr>
                   );
@@ -341,6 +581,20 @@ export default function RiwayatPage() {
         </div>
       </div>
 
+      <DeleteLogModal
+        log={deleteTarget}
+        deviceName={deleteTarget ? (deviceMap.get(deleteTarget.deviceId) ?? deleteTarget.deviceId) : ""}
+        deleting={deleting}
+        onConfirm={handleDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
+      <BulkDeleteModal
+        target={bulkDeleteTarget}
+        logCount={total}
+        deleting={bulkDeleting}
+        onConfirm={handleBulkDelete}
+        onClose={() => setBulkDeleteTarget(null)}
+      />
     </div>
   );
 }

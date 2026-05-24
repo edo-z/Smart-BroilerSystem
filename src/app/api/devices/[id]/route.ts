@@ -14,9 +14,7 @@ export async function PATCH(
 ) {
   const { id } = await params;
   const session = await auth();
-  const { claimCode, deviceName } = await req.json();
-  
-  
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -26,13 +24,16 @@ export async function PATCH(
   }
 
   const body = await req.json();
-  const { name, capacity, active } = body;
+  const { name, capacity, active, claimCode, currentPopulation, harvestTargetDate } = body;
 
   const updateFields: Partial<IDevice> = {};
   if (name !== undefined) updateFields.name = name;
   if (capacity !== undefined) updateFields.capacity = Number(capacity);
   if (active !== undefined) updateFields.active = active;
   if (claimCode !== undefined) updateFields.claimCode = "";
+  if (currentPopulation !== undefined) updateFields.currentPopulation = Number(currentPopulation);
+  if (harvestTargetDate !== undefined) updateFields.harvestTargetDate = new Date(harvestTargetDate);
+
   if (Object.keys(updateFields).length === 0) {
     return NextResponse.json(
       { error: "Tidak ada field yang diupdate" },
@@ -40,20 +41,22 @@ export async function PATCH(
     );
   }
 
+  const filter: Record<string, unknown> = {
+    _id: new ObjectId(id),
+    userId: new ObjectId(session.user.id),
+  };
+
+  // Auto-claim flow: filter by claimCode + not yet claimed
+  if (claimCode !== undefined) {
+    filter.claimCode = claimCode;
+    filter.claimed = false;
+  }
+
   const client = await clientPromise;
   const result = await client
     .db()
     .collection<IDevice>("devices")
-    .findOneAndUpdate(
-      {
-        _id: new ObjectId(id),
-        userId: new ObjectId(session.user.id),
-        claimCode: claimCode,
-        claimed: false,
-      },
-      { $set: updateFields },
-      { returnDocument: "after" }
-    );
+    .findOneAndUpdate(filter, { $set: updateFields }, { returnDocument: "after" });
 
   if (!result) {
     return NextResponse.json(
@@ -63,9 +66,9 @@ export async function PATCH(
   }
 
   return NextResponse.json({
-    message: "Sukses! Perangkat telah diklaim.",
-    resudata: result});
-  
+    message: "Sukses! Perangkat telah diperbarui.",
+    data: result,
+  });
 }
 
 // ── DELETE /api/devices/[id] ──────────────────────────────
