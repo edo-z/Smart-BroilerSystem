@@ -13,6 +13,7 @@ import {
   FaTimes,
   FaExclamationTriangle,
 } from "react-icons/fa";
+import { getPhase, isTempSpike } from "@/lib/sensor";
 
 // ─────────────────────────────────────────────
 // TYPES
@@ -49,13 +50,13 @@ const LIMIT = 15;
 // ─────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────
-function getTempStatus(temp: number): {
+function getTempStatus(temp: number, age: number): {
   label: string;
   badgeClass: string;
 } {
-  if (temp > 31) return { label: "Warning",  badgeClass: "bg-orange-100 text-orange-700 border-orange-200" };
-  if (temp < 26) return { label: "Dingin",   badgeClass: "bg-blue-100 text-blue-700 border-blue-200" };
-  return           { label: "Normal",   badgeClass: "bg-green-100 text-green-700 border-green-200" };
+  if (isTempSpike(age, temp)) return { label: "Warning", badgeClass: "bg-orange-100 text-orange-700 border-orange-200" };
+  if (temp < getPhase(age).tempLow) return { label: "Dingin",   badgeClass: "bg-blue-100 text-blue-700 border-blue-200" };
+  return { label: "Normal",   badgeClass: "bg-green-100 text-green-700 border-green-200" };
 }
 
 function formatDate(iso: string) {
@@ -327,10 +328,7 @@ export default function RiwayatPage() {
     fetchLogs();
   }, [fetchLogs]);
 
-  // Reset ke page 1 saat filter berubah
-  useEffect(() => {
-    setPage(1);
-  }, [filterDevice]);
+
 
   // ── Filter search di client (dari data yang sudah di-fetch)
   const filtered = logs.filter((log) =>
@@ -383,7 +381,7 @@ export default function RiwayatPage() {
       l.age,
       l.vfd,
       l.dimmer,
-      getTempStatus(l.temperature).label,
+      getTempStatus(l.temperature, l.age).label,
     ]);
     const csv = [header, ...rows].map((r) => r.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -410,7 +408,7 @@ export default function RiwayatPage() {
           onClick={handleExport}
           className="btn btn-sm h-10 min-h-0 px-5 rounded-xl font-bold bg-slate-900 hover:bg-slate-700 text-white border-none flex items-center gap-2"
         >
-          <FaDownload className="text-xs" /> Export CSV
+          <FaDownload className="text-xs" /> Export Halaman (CSV)
         </button>
       </div>
 
@@ -447,7 +445,7 @@ export default function RiwayatPage() {
           </div>
           <select
             value={filterDevice}
-            onChange={(e) => setFilterDevice(e.target.value)}
+            onChange={(e) => { setPage(1); setFilterDevice(e.target.value); }}
             className="select select-bordered select-xs rounded-lg bg-slate-50 border-slate-200 text-slate-600 h-9 min-h-0 text-xs focus:outline-none"
           >
             <option value="all">Semua Device</option>
@@ -469,7 +467,7 @@ export default function RiwayatPage() {
         </div>
         <div className="mt-3 text-xs text-slate-400">
           Menampilkan <span className="font-bold text-slate-600">{filtered.length}</span> dari{" "}
-          <span className="font-bold text-slate-600">{total}</span> total log
+          <span className="font-bold text-slate-600">{logs.length}</span> log (halaman ini)
         </div>
       </div>
 
@@ -501,7 +499,7 @@ export default function RiwayatPage() {
                 </tr>
               ) : (
                 filtered.map((log) => {
-                  const status = getTempStatus(log.temperature);
+                  const status = getTempStatus(log.temperature, log.age);
                   return (
                     <tr key={log._id || log.timestamp} className="hover:bg-slate-50/50">
                       <td className="font-mono text-xs text-slate-400 whitespace-nowrap">
@@ -512,7 +510,7 @@ export default function RiwayatPage() {
                           {deviceMap.get(log.deviceId) ?? log.deviceId}
                         </span>
                       </td>
-                      <td className={`font-semibold ${log.temperature > 31 ? "text-red-600" : "text-green-600"}`}>
+                      <td className={`font-semibold ${isTempSpike(log.age, log.temperature) ? "text-red-600" : "text-green-600"}`}>
                         {log.temperature.toFixed(1)}
                       </td>
                       <td className="text-slate-600">{log.humidity.toFixed(0)}</td>

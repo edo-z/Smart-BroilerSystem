@@ -18,6 +18,7 @@ import {
 } from "react-icons/fa";
 import { Line } from "react-chartjs-2";
 import { useMqttSensor, type MqttSensorPayload, type MqttStatus } from "@/hooks/useMqttSensor";
+import { PHASE_MAP, getPhase, isTempSpike } from "@/lib/sensor";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -91,29 +92,8 @@ interface Toast {
 // ─────────────────────────────────────────────
 // CONSTANTS
 // ─────────────────────────────────────────────
-const SPIKE_MARGIN = 2;
 const RH_HIGH_THRESHOLD = 65;
 const RH_LOW_THRESHOLD = 60;
-
-// Fase umur & deadband setpoint (mirror fuzzy.h)
-const PHASE_MAP = [
-  { maxAge: 10,  tempLow: 33, tempHigh: 34, rhLow: 65, rhHigh: 70, label: "BA (Bayi)" },
-  { maxAge: 18,  tempLow: 30, tempHigh: 32, rhLow: 60, rhHigh: 65, label: "BL (Bala)" },
-  { maxAge: 28,  tempLow: 28, tempHigh: 29, rhLow: 60, rhHigh: 65, label: "T (Transisi)" },
-  { maxAge: 38,  tempLow: 25, tempHigh: 27, rhLow: 55, rhHigh: 60, label: "PA (Akhir)" },
-  { maxAge: 50,  tempLow: 24, tempHigh: 25, rhLow: 55, rhHigh: 60, label: "PL (Panen)" },
-];
-
-function getPhase(age: number) {
-  for (const p of PHASE_MAP) {
-    if (age <= p.maxAge) return p;
-  }
-  return PHASE_MAP[PHASE_MAP.length - 1];
-}
-
-function isTempSpike(age: number, temp: number): boolean {
-  return temp > getPhase(age).tempHigh + SPIKE_MARGIN;
-}
 
 const ALERT_LEFT_BAR: Record<AlertItem["variant"], string> = {
   red: "border-l-red-400",
@@ -603,8 +583,8 @@ function RingkasanKandangModal({
   devices,
   totalActive,
   totalStandby,
-  avgTemp,
-  avgHumid,
+  latestTemp,
+  latestHumid,
   totalWarning,
   latest,
   latestVfd,
@@ -615,8 +595,8 @@ function RingkasanKandangModal({
   devices: Device[];
   totalActive: number;
   totalStandby: number;
-  avgTemp: number | null;
-  avgHumid: number | null;
+  latestTemp: number | null;
+  latestHumid: number | null;
   totalWarning: number;
   latest: SensorLog | null;
   latestVfd: number | null;
@@ -661,15 +641,15 @@ function RingkasanKandangModal({
             </div>
             <div className="bg-slate-50 rounded-2xl p-4">
               <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center mb-3">
-                <FaThermometerHalf className={`text-sm ${avgTemp !== null && latest !== null && isTempSpike(latest.age, avgTemp) ? "text-red-500" : "text-emerald-500"}`} />
+                <FaThermometerHalf className={`text-sm ${latestTemp !== null && latest !== null && isTempSpike(latest.age, latestTemp) ? "text-red-500" : "text-emerald-500"}`} />
               </div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Suhu</p>
               <p className="text-2xl font-bold text-slate-900">
-                {avgTemp !== null ? avgTemp.toFixed(1) : "—"}
+                {latestTemp !== null ? latestTemp.toFixed(1) : "—"}
                 <span className="text-sm text-slate-400 font-medium ml-0.5">°C</span>
               </p>
-              <p className={`text-[11px] mt-1 font-medium ${avgTemp !== null && latest !== null ? (isTempSpike(latest.age, avgTemp) ? "text-red-500" : "text-emerald-500") : "text-slate-400"}`}>
-                {avgTemp !== null && latest !== null ? (isTempSpike(latest.age, avgTemp) ? "⚠ Di atas normal" : "✓ Normal") : "Menunggu data"}
+              <p className={`text-[11px] mt-1 font-medium ${latestTemp !== null && latest !== null ? (isTempSpike(latest.age, latestTemp) ? "text-red-500" : "text-emerald-500") : "text-slate-400"}`}>
+                {latestTemp !== null && latest !== null ? (isTempSpike(latest.age, latestTemp) ? "⚠ Di atas normal" : "✓ Normal") : "Menunggu data"}
               </p>
             </div>
             <div className="bg-slate-50 rounded-2xl p-4">
@@ -678,7 +658,7 @@ function RingkasanKandangModal({
               </div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Kelembapan</p>
               <p className="text-2xl font-bold text-slate-900">
-                {avgHumid !== null ? avgHumid.toFixed(0) : "—"}
+                {latestHumid !== null ? latestHumid.toFixed(0) : "—"}
                 <span className="text-sm text-slate-400 font-medium ml-0.5">%</span>
               </p>
               <p className="text-[11px] text-slate-500 mt-1">Ideal: 60 – 70%</p>
@@ -1033,17 +1013,17 @@ export default function DashboardPage() {
 
   const userName = "Peternak Cerdas";
   const latest = logs[logs.length - 1] ?? null;
-  const avgTemp = latest?.temperature ?? null;
-  const avgHumid = latest?.humidity ?? null;
+  const latestTemp = latest?.temperature ?? null;
+  const latestHumid = latest?.humidity ?? null;
   const latestVfd = latest?.vfd ?? null;
   const latestDimmer = latest?.dimmer ?? null;
 
   const emergencyStatus = useMemo<"emergency" | "caution" | "none">(() => {
-    if (avgTemp === null) return "none";
-    if (avgTemp < 15 || avgTemp > 43) return "emergency";
-    if (avgTemp < 18 || avgTemp > 40) return "caution";
+    if (latestTemp === null) return "none";
+    if (latestTemp < 15 || latestTemp > 43) return "emergency";
+    if (latestTemp < 18 || latestTemp > 40) return "caution";
     return "none";
-  }, [avgTemp]);
+  }, [latestTemp]);
   const totalActive = devices.filter((d) => d.active).length;
   const totalStandby = devices.filter((d) => !d.active).length;
   const totalWarning = devices.filter((d) => {
@@ -1154,7 +1134,7 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-1.5">
             <FaThermometerHalf className="text-slate-300 text-[11px]" />
-            <span className="font-semibold text-slate-700">{avgTemp !== null ? avgTemp.toFixed(1) : "—"}°C</span> Rata-rata
+            <span className="font-semibold text-slate-700">{latestTemp !== null ? latestTemp.toFixed(1) : "—"}°C</span> Rata-rata
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -1182,8 +1162,8 @@ export default function DashboardPage() {
               </p>
               <p className={`text-xs mt-1 leading-relaxed ${emergencyStatus === "emergency" ? "text-red-600" : "text-amber-600"}`}>
                 {emergencyStatus === "emergency"
-                  ? `Suhu ${avgTemp?.toFixed(1)}°C berada di luar rentang 15–43°C. Semua output otomatis dimatikan. Periksa kandang segera!`
-                  : `Suhu ${avgTemp?.toFixed(1)}°C mendekati batas aman. Pantau kondisi kandang lebih ketat.`}
+                  ? `Suhu ${latestTemp?.toFixed(1)}°C berada di luar rentang 15–43°C. Semua output otomatis dimatikan. Periksa kandang segera!`
+                  : `Suhu ${latestTemp?.toFixed(1)}°C mendekati batas aman. Pantau kondisi kandang lebih ketat.`}
               </p>
             </div>
             <button onClick={() => setEmergencyDismissed(true)} className="p-1.5 rounded-lg hover:bg-black/5 text-slate-400 hover:text-slate-600 transition-colors shrink-0">
@@ -1219,16 +1199,16 @@ export default function DashboardPage() {
                 <button onClick={() => setRingkasanOpen(true)} className="bg-slate-50 rounded-xl p-3 text-center hover:bg-slate-100 transition-colors cursor-pointer text-left">
                   <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Suhu</p>
                   <p className="text-lg font-bold text-slate-900">
-                    {avgTemp !== null ? avgTemp.toFixed(1) : "—"}<span className="text-xs text-slate-400">°C</span>
+                    {latestTemp !== null ? latestTemp.toFixed(1) : "—"}<span className="text-xs text-slate-400">°C</span>
                   </p>
-                  <p className={`text-[10px] mt-0.5 font-medium ${avgTemp !== null && latest !== null ? (isTempSpike(latest.age, avgTemp) ? "text-red-500" : "text-emerald-500") : "text-slate-400"}`}>
-                    {avgTemp !== null && latest !== null ? (isTempSpike(latest.age, avgTemp) ? "⚠ Tinggi" : "✓ Normal") : "—"}
+                  <p className={`text-[10px] mt-0.5 font-medium ${latestTemp !== null && latest !== null ? (isTempSpike(latest.age, latestTemp) ? "text-red-500" : "text-emerald-500") : "text-slate-400"}`}>
+                    {latestTemp !== null && latest !== null ? (isTempSpike(latest.age, latestTemp) ? "⚠ Tinggi" : "✓ Normal") : "—"}
                   </p>
                 </button>
                 <button onClick={() => setRingkasanOpen(true)} className="bg-slate-50 rounded-xl p-3 text-center hover:bg-slate-100 transition-colors cursor-pointer text-left">
                   <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">RH</p>
                   <p className="text-lg font-bold text-slate-900">
-                    {avgHumid !== null ? avgHumid.toFixed(0) : "—"}<span className="text-xs text-slate-400">%</span>
+                    {latestHumid !== null ? latestHumid.toFixed(0) : "—"}<span className="text-xs text-slate-400">%</span>
                   </p>
                   <p className="text-[10px] text-slate-500 mt-0.5">60–70%</p>
                 </button>
@@ -1356,8 +1336,8 @@ export default function DashboardPage() {
         devices={devices}
         totalActive={totalActive}
         totalStandby={totalStandby}
-        avgTemp={avgTemp}
-        avgHumid={avgHumid}
+        latestTemp={latestTemp}
+        latestHumid={latestHumid}
         totalWarning={totalWarning}
         latest={latest}
         latestVfd={latestVfd}
