@@ -799,6 +799,7 @@ export default function DashboardPage() {
   const [emergencyDismissed, setEmergencyDismissed] = useState(false);
   const [ringkasanOpen, setRingkasanOpen] = useState(false);
   const [tambahKandangOpen, setTambahKandangOpen] = useState(false);
+  const [timeRange, setTimeRange] = useState("Hari Ini");
 
   // MQTT realtime handler
   const handleMqttMessage = useCallback((data: MqttSensorPayload) => {
@@ -1006,12 +1007,19 @@ export default function DashboardPage() {
     initFetch();
   }, []);
 
-  // Fetch historical logs when selected device changes
+  // Fetch historical logs when selected device or time range changes
   useEffect(() => {
     if (!selectedDeviceId) return;
     const fetchHistorical = async () => {
       try {
-        const res = await fetch(`/api/logs?deviceId=${selectedDeviceId}&limit=50&t=${Date.now()}`);
+        const fromMap: Record<string, string> = {
+          "Hari Ini": new Date(new Date().setHours(0,0,0,0)).toISOString(),
+          "Kemarin": new Date(Date.now() - 86400000).toISOString(),
+          "7 Hari": new Date(Date.now() - 7*86400000).toISOString(),
+        };
+        const from = fromMap[timeRange] || "";
+        const url = `/api/logs?deviceId=${selectedDeviceId}&limit=50&from=${from}&t=${Date.now()}`;
+        const res = await fetch(url);
         const data = await res.json();
         const logsData: SensorLog[] = data.logs || [];
         setLogs(logsData.reverse());
@@ -1021,7 +1029,7 @@ export default function DashboardPage() {
       }
     };
     fetchHistorical();
-  }, [selectedDeviceId]);
+  }, [selectedDeviceId, timeRange]);
 
   const userName = "Peternak Cerdas";
   const latest = logs[logs.length - 1] ?? null;
@@ -1286,7 +1294,11 @@ export default function DashboardPage() {
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
             <PanelHeader
               action={
-                <select className="select select-xs select-bordered rounded-full bg-slate-50 border-slate-200 text-slate-500 focus:outline-none w-28">
+                <select
+                  value={timeRange}
+                  onChange={(e) => setTimeRange(e.target.value)}
+                  className="select select-xs select-bordered rounded-full bg-slate-50 border-slate-200 text-slate-500 focus:outline-none w-28"
+                >
                   <option>Hari Ini</option>
                   <option>Kemarin</option>
                   <option>7 Hari</option>
