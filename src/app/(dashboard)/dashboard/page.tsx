@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useEffect, useState, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import {
   FaThermometerHalf,
   FaTint,
@@ -1011,7 +1012,8 @@ export default function DashboardPage() {
     fetchHistorical();
   }, [selectedDeviceId, timeRange]);
 
-  const userName = "Peternak Cerdas";
+  const { data: session } = useSession();
+  const userName = session?.user?.name ?? "Peternak Cerdas";
   const latest = logs[logs.length - 1] ?? null;
   const latestTemp = latest?.temperature ?? null;
   const latestHumid = latest?.humidity ?? null;
