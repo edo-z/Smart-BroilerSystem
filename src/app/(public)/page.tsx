@@ -1,44 +1,21 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import Image from 'next/image'
 import {
-  FaTemperatureHigh,
-  FaTint,
   FaMicrochip,
   FaWifi,
   FaCheckCircle,
   FaBook,
-  FaArrowRight,
-  FaFire,
-  FaAdjust,
-  FaFan,
-  FaCheck,
   FaReact,
   FaBrain
 } from "react-icons/fa";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-  Filler
-} from "chart.js";
-import { Line } from "react-chartjs-2";
 import SplitText from "../../component/SplitText";
 import BlurText from "../../component/BlurText";
-import FadeContent from '../../component/FadeContent'
 import TiltedCard from '../../component/TiltedCard';
-import GradientText from "@/component/GradientText";
-import CountUp from "@/component/CountUp";
 import LogoLoop from '@/component/LogoLoop';
 import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss } from 'react-icons/si';
-import ProdukSection from "@/components/public/fitur/page";
+import ProdukSectionMerged from "@/components/public/produk/page";
 import MonitoringSection from "@/components/public/monitoring/page";
-import { ProdukSectionWithNav } from "@/components/public/produk/page";
 
 // Icon SVGs inline
 const IconTemp = () => (
@@ -63,204 +40,8 @@ const techLogos = [
   { node: <SiTypescript />, title: "TypeScript", href: "https://www.typescriptlang.org" },
   { node: <SiTailwindcss />, title: "Tailwind CSS", href: "https://tailwindcss.com" },
 ];
-// Alternative with image sources
-const imageLogos = [
-  { src: "/logos/company1.png", alt: "Company 1", href: "https://company1.com" },
-  { src: "/logos/company2.png", alt: "Company 2", href: "https://company2.com" },
-  { src: "/logos/company3.png", alt: "Company 3", href: "https://company3.com" },
-];
-const features = [
-  {
-    id: "01",
-    icon: <IconTemp />,
-    label: "SENSOR PRESISI",
-    title: "Akurasi Industri, Data Nyata",
-    desc: "Sensor SHT31 industrial-grade dengan akurasi ±0.5°C dan resolusi 0.01°C. Setiap titik data dikalibrasi terhadap standar NIST untuk keandalan yang tak diragukan.",
-    stat: "---°C",
-    statLabel: "Akurasi Suhu",
-    accent: "#0ea5e9",
-    accentBg: "rgba(14,165,233,0.06)",
-    bar: 92,
-  },
-  {
-    id: "02",
-    icon: <IconDroplet />,
-    label: "HUMIDITY CONTROL",
-    title: "Cegah CRD Sebelum Terjadi",
-    desc: "Monitoring kelembaban real-time untuk menjaga RH pada zona optimal 60–70%. Deviasi terdeteksi dalam <3 detik, sebelum berdampak pada sistem pernapasan ayam.",
-    stat: "---s",
-    statLabel: "Waktu Deteksi",
-    accent: "#6366f1",
-    accentBg: "rgba(99,102,241,0.06)",
-    bar: 78,
-  },
-  {
-    id: "03",
-    icon: <IconCloud />,
-    label: "CLOUD SYNC",
-    title: "Data Tersedia, Di Mana Saja",
-    desc: "Sinkronisasi otomatis ke MongoDB Atlas dengan latensi <500ms. Akses histori, tren, dan laporan performa kandang dari perangkat apapun, kapanpun.",
-    stat: "---%",
-    statLabel: "Uptime SLA",
-    accent: "#10b981",
-    accentBg: "rgba(16,185,129,0.06)",
-    bar: 99,
-  },
-];
 
-// --- Feature Card Component ---
-function FeatureCard({ feature, index }: { feature: typeof features[0]; index: number }) {
-  const [visible, setVisible] = useState(false);
-  const [barFill, setBarFill] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => {
-            setVisible(true);
-            setTimeout(() => setBarFill(feature.bar), 300);
-          }, index * 120);
-        }
-      },
-      { threshold: 0.15 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(28px)",
-        transition: "opacity 0.6s ease, transform 0.6s ease",
-        background: "#fff",
-        border: "1px solid #e8ecf0",
-        borderRadius: "16px",
-        padding: "36px 32px",
-        position: "relative",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        cursor: "default",
-      }}
-      onMouseEnter={e => {
-        const el = e.currentTarget as HTMLDivElement;
-        el.style.borderColor = feature.accent;
-        el.style.boxShadow = `0 8px 40px ${feature.accent}18`;
-        el.style.transform = "translateY(-3px)";
-      }}
-      onMouseLeave={e => {
-        const el = e.currentTarget as HTMLDivElement;
-        el.style.borderColor = "#e8ecf0";
-        el.style.boxShadow = "none";
-        el.style.transform = "translateY(0)";
-      }}
-    >
-      {/* Ambient gradient */}
-      <div style={{
-        position: "absolute", top: 0, right: 0,
-        width: "140px", height: "140px",
-        background: `radial-gradient(circle at top right, ${feature.accent}14, transparent 70%)`,
-        pointerEvents: "none",
-      }} />
-
-      {/* Label + Index */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" }}>
-        <span style={{
-          fontFamily: "monospace",
-          fontSize: "11px",
-          fontWeight: 600,
-          color: feature.accent,
-          letterSpacing: "0.12em",
-        }}>
-          {feature.label}
-        </span>
-        <span style={{
-          fontFamily: "monospace",
-          fontSize: "12px",
-          color: "#c8d0d8",
-          fontWeight: 500,
-        }}>
-          {feature.id}
-        </span>
-      </div>
-
-      {/* Icon */}
-      <div style={{
-        width: "48px", height: "48px",
-        borderRadius: "12px",
-        background: feature.accentBg,
-        border: `1px solid ${feature.accent}22`,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        color: feature.accent,
-        marginBottom: "20px",
-      }}>
-        {feature.icon}
-      </div>
-
-      {/* Title */}
-      <h3 style={{
-        fontSize: "18px",
-        fontWeight: 700,
-        color: "#0f172a",
-        lineHeight: 1.3,
-        marginBottom: "12px",
-        letterSpacing: "-0.01em",
-      }}>
-        {feature.title}
-      </h3>
-
-      {/* Description */}
-      <p style={{
-        fontSize: "14px",
-        color: "#64748b",
-        lineHeight: 1.7,
-        marginBottom: "28px",
-        flexGrow: 1,
-      }}>
-        {feature.desc}
-      </p>
-
-      {/* Divider */}
-      <div style={{ height: "1px", background: "#f1f5f9", marginBottom: "20px" }} />
-
-      {/* Stat + Progress */}
-      <div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "10px" }}>
-          <span style={{
-            fontFamily: "monospace",
-            fontSize: "22px",
-            fontWeight: 700,
-            color: "#0f172a",
-            letterSpacing: "-0.02em",
-          }}>
-            {feature.stat}
-          </span>
-          <span style={{
-            fontSize: "12px",
-            color: "#94a3b8",
-            fontWeight: 500,
-          }}>
-            {feature.statLabel}
-          </span>
-        </div>
-        <div style={{ height: "3px", background: "#f1f5f9", borderRadius: "99px", overflow: "hidden" }}>
-          <div style={{
-            height: "100%",
-            width: `${barFill}%`,
-            background: `linear-gradient(90deg, ${feature.accent}88, ${feature.accent})`,
-            borderRadius: "99px",
-            transition: "width 1s cubic-bezier(0.4,0,0.2,1)",
-          }} />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const SplitTex = () => {
   console.log('All letters have animated!');
@@ -269,93 +50,8 @@ const BlurTex = () => {
   console.log('Animation completed!');
 };
 
-// Registrasi Chart.js
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-  Filler
-);
 
 export default function LandingPage() {
-
-  // Heading visibility for produk section
-  const [headingVisible, setHeadingVisible] = useState(false);
-  const headingRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) setHeadingVisible(true);
-    }, { threshold: 0.2 });
-    if (headingRef.current) observer.observe(headingRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  // --- CONFIG CHART ---
-  const chartData = {
-    labels: ["0 Hari", "7 Hari", "14 Hari", "21 Hari", "28 Hari", "32 Hari"],
-    datasets: [
-      {
-        label: "Suhu Ideal (°C)",
-        data: [34, 32.5, 29, 27, 24.5, 24],
-        borderColor: "#3b82f6",
-        backgroundColor: (context: any) => {
-          const ctx = context.chart?.ctx;
-          if (!ctx) return "rgba(59, 130, 246, 0.2)";
-          const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-          gradient.addColorStop(0, "rgba(59, 130, 246, 0.5)");
-          gradient.addColorStop(1, "rgba(59, 130, 246, 0)");
-          return gradient;
-        },
-        tension: 0.4,
-        fill: true,
-        pointBackgroundColor: "#ffffff",
-        pointBorderColor: "#3b82f6",
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: "rgba(15, 23, 42, 0.9)",
-        titleFont: { family: "sans-serif", size: 13 },
-        bodyFont: { family: "sans-serif", size: 13 },
-        padding: 12,
-        displayColors: false,
-        callbacks: {
-          label: function (context: any) {
-            return `Target: ${context.parsed.y}°C`;
-          }
-        }
-      }
-    },
-    scales: {
-      y: {
-        min: 20,
-        max: 36,
-        grid: { color: "#f1f5f9", drawBorder: false },
-        ticks: {
-          color: "#64748b",
-          font: { size: 11 },
-          callback: function (value: any) { return value + "°C"; }
-        }
-      },
-      x: {
-        grid: { display: false },
-        ticks: { color: "#64748b", font: { size: 11 } }
-      }
-    }
-  };
 
   return (
     <div className="bg-slate-50 min-h-screen font-sans text-slate-700 flex flex-col antialiased">
@@ -366,20 +62,14 @@ export default function LandingPage() {
       <div
         id="home"
         className="hero min-h-screen pb-20 py-auto relative overflow-hidden"
-        style={{
-          backgroundImage: "url('')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
       >
         <div className="absolute inset-0 bg-white backdrop-blur-sm z-0" />
-        <div className="hero-content text-center max-w-6xl flex-col lg:flex-row gap-16 px-4 relative z-10">
+        <div className="hero-content text-center max-w-6xl flex-col lg:flex-row gap-8 lg:gap-16 px-4 relative z-10">
 
           <div className="w-full text-center space-y-10">
             <SplitText
               text="AVESIS"
-              className="text-8xl font-bold leading-tight text-black font-serif mb-1"
+              className="text-5xl sm:text-6xl md:text-8xl font-bold leading-tight text-black font-serif mb-1"
               delay={100}
               duration={1.05}
               ease="power3.out"
@@ -408,8 +98,8 @@ export default function LandingPage() {
               onAnimationComplete={BlurTex} animationFrom={undefined} animationTo={undefined} />
 
             <div className="gap-4 pt-auto">
-              <div className="ga-4 pt-auto mb-4">
-                <Link href="/login" className="btn btn-outline bg-white/50 hover:bg-slate-900 border-none hover:text-white text-slate-900 px-auto rounded-lg shadow-xl transition-shadow font-semibold backdrop-blur-sm z-0">
+              <div className="gap-4 pt-auto mb-4">
+                <Link href="/login" className="btn btn-outline bg-white/50 hover:bg-slate-900 border-none hover:text-white text-slate-900 px-8 rounded-lg shadow-xl transition-shadow font-semibold backdrop-blur-sm z-0">
                   <BlurText
                     text="Mulai Sekarang!"
                     delay={50}
@@ -423,16 +113,16 @@ export default function LandingPage() {
 
           <div className="bg-white">
             <TiltedCard
-              imageSrc='../../../public/images/white.webp'
+              imageSrc='/images/white.webp'
               altText=''
               captionText="Kandang A1"
               containerHeight="400px"
-              containerWidth="400px"
+              containerWidth="min(400px, 85vw)"
               imageHeight="300px"
-              imageWidth="300px"
+              imageWidth="min(300px, 70vw)"
               rotateAmplitude={-12}
               scaleOnHover={1.05}
-              showMobileWarning={false}
+              showMobileWarning
               showTooltip
               displayOverlayContent
               overlayContent={
@@ -441,7 +131,7 @@ export default function LandingPage() {
                     <div className="flex justify-between items-center mb-6">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                        <span className="text-sm font-semibold text-shadow-slate-800">Kandang A1 - Online</span>
+                        <span className="text-sm font-semibold text-slate-800">Kandang A1 - Online</span>
                       </div>
                       <span className="text-xs font-mono text-black/40">ID: 261E5CDB</span>
                     </div>
@@ -478,12 +168,10 @@ export default function LandingPage() {
       </div>
 
       {/* ========================================= */}
-      {/* 2. FITUR / PRODUK SECTION (REDESIGNED)   */}
+      {/* 2. FITUR / PRODUK SECTION               */}
       {/* ========================================= */}
       
-
-        <ProdukSection />
-        <ProdukSectionWithNav /> 
+        <ProdukSectionMerged />
       
 
       {/* ========================================= */}
@@ -499,22 +187,35 @@ export default function LandingPage() {
       <section id="tips" className="py-24 bg-slate-50">
         <div className="container mx-auto px-4">
           <div className="bg-white rounded-3xl overflow-hidden shadow-xl border border-slate-100 flex flex-col md:flex-row">
-            <div className="w-full md:w-1/2 p-10 md:p-14">
-              <h2 className="text-3xl font-bold mb-6 text-slate-900">Mau Jadi Bagian Dalam Tim Pengembang?</h2>
+            <div className="w-full md:w-1/2 p-6 md:p-14">
+              <h2 className="text-3xl font-bold mb-6 text-slate-900">Terpercaya di Berbagai Kandang</h2>
               <p className="text-slate-700 mb-8">
-                Kami selalu mencari individu yang passionate untuk bergabung dalam perjalanan inovasi kami. Jika Anda tertarik untuk berkontribusi pada proyek open-source kami.
+                Sistem BroilerSmart telah diuji dan berjalan di berbagai lingkungan produksi — dari kandang closed-house skala kecil hingga menengah.
               </p>
-              <ul className="space-y-3 mb-8 text-sm text-slate-700">
-                <li className="flex items-center gap-2"><FaCheckCircle className="text-blue-400" /> Bergabung dengan Tim</li>
-                <li className="flex items-center gap-2"><FaCheckCircle className="text-blue-400" /> Kontribusi pada Proyek</li>
-                <li className="flex items-center gap-2"><FaCheckCircle className="text-blue-400" /> Dukungan Komunitas</li>
-              </ul>
-              <a href="https://github.com/edo-z/Smart-BroilerSystem" className="btn btn-primary w-full btn-outline border-slate-700  text-slate-900  hover:bg-slate-900  hover:text-white">
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                  <div className="text-2xl font-bold text-blue-600">99.9%</div>
+                  <div className="text-xs text-slate-500 mt-1">Uptime Monitoring</div>
+                </div>
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                  <div className="text-2xl font-bold text-indigo-600">&lt;500ms</div>
+                  <div className="text-xs text-slate-500 mt-1">Latensi Data</div>
+                </div>
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                  <div className="text-2xl font-bold text-emerald-600">24/7</div>
+                  <div className="text-xs text-slate-500 mt-1">Operasi Otomatis</div>
+                </div>
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                  <div className="text-2xl font-bold text-amber-600">100%</div>
+                  <div className="text-xs text-slate-500 mt-1">Open Source</div>
+                </div>
+              </div>
+              <a href="https://github.com/edo-z/Smart-BroilerSystem" className="btn btn-primary w-full btn-outline border-slate-700 text-slate-900 hover:bg-slate-900 hover:text-white">
                 <FaBook className="ml-2" />Source Code
               </a>
             </div>
 
-            <div className="w-full md:w-1/2 bg-slate-900 p-10 md:p-14 text-white flex flex-col justify-center">
+            <div className="w-full md:w-1/2 bg-slate-900 p-6 md:p-14 text-white flex flex-col justify-center">
               <h3 className="text-2xl font-bold mb-4">Siap Mempelajari Produk Kami?</h3>
               <p className="text-slate-400 mb-8">
                 Semua dokumentasi teknis, panduan instalasi, dan tips pemeliharaan tersedia untuk memastikan Anda mendapatkan hasil maksimal dari sistem kami.

@@ -11,12 +11,13 @@ import {
   FaThermometerHalf 
 } from "react-icons/fa";
 import Link from "next/link";
+import SplitText from '@/component/SplitText';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-slate-900 text-slate-300 pt-16 pb-8 border-t border-slate-800">
+    <footer className="bg-slate-900 text-slate-300 pt-16 pb-0 border-t border-slate-800">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           
@@ -114,12 +115,31 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bagian Copyright */}
-      <div className="border-t border-slate-800 mt-16 pt-8">
-        <div className="container mx-auto px-4 text-center text-sm text-slate-500">
-          <p>&copy; {currentYear} BroilerSmart. All rights reserved.</p>
+      {/* AVESIS Banner */}
+      <div className="w-full overflow-hidden -mb-10 avesis-footer">
+        <div className="flex justify-center items-center select-none leading-none font-black tracking-[0.15em] text-white text-[clamp(2rem,23.5vw,100rem)]">
+          <SplitText
+            text="AVESIS"
+            className="!block"
+            delay={60}
+            duration={1.2}
+            ease="power3.out"
+            splitType="chars"
+            from={{ opacity: 0, y: 60 }}
+            to={{ opacity: 1, y: 0 }}
+            threshold={0.15}
+            rootMargin="-80px"
+            textAlign="center"
+            tag="span"
+          />
         </div>
       </div>
+
+      <style>{`
+        .avesis-footer .split-char {
+          vertical-align: middle;
+        }
+      `}</style>
     </footer>
   );
 }

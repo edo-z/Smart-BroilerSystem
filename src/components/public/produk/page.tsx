@@ -1,15 +1,6 @@
 "use client";
-// =====================================================================
-// PANDUAN INTEGRASI:
-//
-// 1. Letakkan <ProductShowcase /> SEBELUM section #produk di LandingPage
-// 2. Ganti section #produk yang existing dengan <ProdukSectionWithNav />
-// 3. Import keduanya di halaman:
-//    import ProductShowcase, { ProdukSectionWithNav } from "./ProductShowcase";
-// =====================================================================
 
 import { useEffect, useRef, useState } from "react";
-import CountUp from "@/component/CountUp";
 import GradientText from "@/component/GradientText";
 
 // ─── Inline Icons ────────────────────────────────────────────────────
@@ -36,558 +27,13 @@ const IconChip = () => (
     <rect x="4" y="4" width="16" height="16" rx="2"/>
   </svg>
 );
-const IconWifi = () => (
+const IconCog = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/>
-    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
   </svg>
 );
-const IconArrow = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-  </svg>
-);
-
-// ─── Data Produk ─────────────────────────────────────────────────────
-const products = [
-  {
-    id: "AVS-S1",
-    name: "AVESIS Sensor Node",
-    tagline: "Edge Intelligence",
-    category: "HARDWARE",
-    desc: "Unit sensor ESP32-S3 N16R8 dengan SHT31 industrial-grade. Dirancang untuk lingkungan kandang yang lembap, dengan enklosure IP65 dan mounting magnet.",
-    specs: [
-      { label: "MCU", value: "ESP32-S3 N16R8" },
-      { label: "Sensor", value: "SHT31 ±0.5°C" },
-      { label: "Koneksi", value: "Wi-Fi 802.11 b/g/n" },
-      { label: "Proteksi", value: "IP65 Rated" },
-      { label: "Power", value: "5V USB-C / PoE" },
-      { label: "Interval", value: "1–60 detik" },
-    ],
-    badge: "IN DEVELOPMENT",
-    accent: "#f97316",
-    accentDim: "rgba(249,115,22,0.08)",
-    accentBorder: "rgba(249,115,22,0.2)",
-    icon: <IconChip />,
-    // Representasi visual produk — ganti src ke gambar nyata jika tersedia
-    visual: "sensor",
-  },
-  {
-    id: "AVS-G1",
-    name: "AVESIS Gateway",
-    tagline: "Local Intelligence Hub",
-    category: "HARDWARE",
-    desc: "Gateway lokal berbasis Raspberry Pi yang mengumpulkan data dari seluruh sensor node di kandang. Mendukung MQTT bridge ke cloud dan edge processing.",
-    specs: [
-      { label: "Platform", value: "Raspberry Pi 4B" },
-      { label: "Protokol", value: "MQTT / HTTP" },
-      { label: "Node Max", value: "Up to 32 sensor" },
-      { label: "Storage", value: "Local SD + Cloud sync" },
-      { label: "Display", value: "2.8\" TFT Status" },
-      { label: "Uptime", value: "24/7 Operation" },
-    ],
-    badge: "COMING SOON",
-    accent: "#6366f1",
-    accentDim: "rgba(99,102,241,0.08)",
-    accentBorder: "rgba(99,102,241,0.2)",
-    icon: <IconWifi />,
-    visual: "gateway",
-  },
-  {
-    id: "AVS-D1",
-    name: "AVESIS Dashboard",
-    tagline: "Command & Control",
-    category: "SOFTWARE",
-    desc: "Aplikasi web Next.js untuk monitoring real-time, histori data, alert threshold, dan manajemen multi-kandang. Berjalan di semua perangkat.",
-    specs: [
-      { label: "Framework", value: "Next.js 15 App Router" },
-      { label: "Database", value: "MongoDB Atlas" },
-      { label: "Auth", value: "NextAuth v5" },
-      { label: "Deploy", value: "Vercel Edge" },
-      { label: "Refresh", value: "Real-time polling" },
-      { label: "Theme", value: "Dark / Light" },
-    ],
-    badge: "LIVE",
-    accent: "#10b981",
-    accentDim: "rgba(16,185,129,0.08)",
-    accentBorder: "rgba(16,185,129,0.2)",
-    icon: <IconCloud />,
-    visual: "dashboard",
-  },
-];
-
-// ─── SVG Visual Placeholders ──────────────────────────────────────────
-// Ganti komponen ini dengan <Image src="..." /> ketika aset tersedia
-
-function SensorVisual({ accent }: { accent: string }) {
-  return (
-    <svg viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-      {/* Board outline */}
-      <rect x="60" y="30" width="160" height="140" rx="8" fill="#1e293b" stroke={accent} strokeWidth="1.2" strokeOpacity="0.4"/>
-      {/* MCU chip */}
-      <rect x="95" y="60" width="90" height="80" rx="4" fill="#0f172a" stroke={accent} strokeWidth="1" strokeOpacity="0.6"/>
-      <text x="140" y="106" textAnchor="middle" fill={accent} fontSize="8" fontFamily="monospace" opacity="0.8">ESP32-S3</text>
-      <text x="140" y="117" textAnchor="middle" fill={accent} fontSize="7" fontFamily="monospace" opacity="0.5">N16R8</text>
-      {/* Pins left */}
-      {[0,1,2,3,4].map(i => (
-        <rect key={i} x="52" y={68 + i * 14} width="8" height="6" rx="1" fill="#334155" stroke={accent} strokeWidth="0.5" strokeOpacity="0.4"/>
-      ))}
-      {/* Pins right */}
-      {[0,1,2,3,4].map(i => (
-        <rect key={i} x="220" y={68 + i * 14} width="8" height="6" rx="1" fill="#334155" stroke={accent} strokeWidth="0.5" strokeOpacity="0.4"/>
-      ))}
-      {/* SHT31 sensor small chip */}
-      <rect x="68" y="148" width="40" height="12" rx="2" fill="#1e293b" stroke="#94a3b8" strokeWidth="0.8" strokeOpacity="0.4"/>
-      <text x="88" y="157" textAnchor="middle" fill="#94a3b8" fontSize="6" fontFamily="monospace" opacity="0.6">SHT31</text>
-      {/* USB-C port */}
-      <rect x="120" y="162" width="40" height="8" rx="2" fill="#0f172a" stroke="#475569" strokeWidth="0.8"/>
-      <text x="140" y="168" textAnchor="middle" fill="#475569" fontSize="5" fontFamily="monospace">USB-C</text>
-      {/* Signal waves */}
-      <path d="M200 50 Q210 44 220 50" stroke={accent} strokeWidth="1.2" strokeOpacity="0.5" fill="none"/>
-      <path d="M196 45 Q210 37 224 45" stroke={accent} strokeWidth="1" strokeOpacity="0.35" fill="none"/>
-      <path d="M192 40 Q210 30 228 40" stroke={accent} strokeWidth="0.8" strokeOpacity="0.2" fill="none"/>
-      <circle cx="210" cy="55" r="2" fill={accent} opacity="0.6"/>
-      {/* LED status */}
-      <circle cx="78" cy="48" r="4" fill="#22c55e" opacity="0.8"/>
-      <circle cx="78" cy="48" r="7" fill="#22c55e" opacity="0.12"/>
-    </svg>
-  );
-}
-
-function GatewayVisual({ accent }: { accent: string }) {
-  return (
-    <svg viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-      {/* Enclosure */}
-      <rect x="50" y="40" width="180" height="120" rx="10" fill="#1e293b" stroke={accent} strokeWidth="1.2" strokeOpacity="0.4"/>
-      <rect x="58" y="48" width="164" height="104" rx="7" fill="#0f172a" stroke={accent} strokeWidth="0.6" strokeOpacity="0.2"/>
-      {/* Display */}
-      <rect x="68" y="58" width="90" height="55" rx="3" fill="#0a0f1e" stroke={accent} strokeWidth="0.8" strokeOpacity="0.5"/>
-      <text x="113" y="83" textAnchor="middle" fill={accent} fontSize="8" fontFamily="monospace" opacity="0.9">28.5°C</text>
-      <text x="113" y="95" textAnchor="middle" fill="#64748b" fontSize="6" fontFamily="monospace">64% RH</text>
-      <rect x="72" y="100" width="82" height="2" rx="1" fill={accent} opacity="0.15"/>
-      <rect x="72" y="100" width="55" height="2" rx="1" fill={accent} opacity="0.6"/>
-      {/* Ports right */}
-      <rect x="170" y="62" width="32" height="8" rx="1" fill="#0f172a" stroke="#475569" strokeWidth="0.6"/>
-      <text x="186" y="68" textAnchor="middle" fill="#475569" fontSize="5" fontFamily="monospace">ETH</text>
-      <rect x="170" y="76" width="32" height="8" rx="1" fill="#0f172a" stroke="#475569" strokeWidth="0.6"/>
-      <text x="186" y="82" textAnchor="middle" fill="#475569" fontSize="5" fontFamily="monospace">USB</text>
-      {/* SD slot */}
-      <rect x="170" y="90" width="20" height="6" rx="1" fill="#0f172a" stroke="#475569" strokeWidth="0.6"/>
-      <text x="180" y="95" textAnchor="middle" fill="#475569" fontSize="4" fontFamily="monospace">SD</text>
-      {/* Status LEDs */}
-      {[0,1,2].map(i => (
-        <circle key={i} cx={80 + i * 14} cy={128} r="3.5" fill={i===0?"#22c55e":i===1?accent:"#334155"} opacity={i===2?0.3:0.8}/>
-      ))}
-      {/* Antenna */}
-      <rect x="214" y="28" width="4" height="24" rx="2" fill="#334155"/>
-      <rect x="208" y="26" width="16" height="4" rx="2" fill="#475569"/>
-      {/* WiFi waves */}
-      <path d="M218 18 Q224 12 230 18" stroke={accent} strokeWidth="1" strokeOpacity="0.5" fill="none"/>
-      <path d="M215 13 Q224 5 233 13" stroke={accent} strokeWidth="0.8" strokeOpacity="0.3" fill="none"/>
-    </svg>
-  );
-}
-
-function DashboardVisual({ accent }: { accent: string }) {
-  return (
-    <svg viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-      {/* Browser frame */}
-      <rect x="30" y="24" width="220" height="152" rx="8" fill="#0f172a" stroke={accent} strokeWidth="1" strokeOpacity="0.3"/>
-      {/* Titlebar */}
-      <rect x="30" y="24" width="220" height="20" rx="8" fill="#1e293b"/>
-      <rect x="30" y="36" width="220" height="8" fill="#1e293b"/>
-      <circle cx="46" cy="34" r="3.5" fill="#ef4444" opacity="0.6"/>
-      <circle cx="58" cy="34" r="3.5" fill="#f59e0b" opacity="0.6"/>
-      <circle cx="70" cy="34" r="3.5" fill="#22c55e" opacity="0.6"/>
-      {/* URL bar */}
-      <rect x="86" y="28" width="120" height="12" rx="3" fill="#0f172a" stroke="#334155" strokeWidth="0.6"/>
-      <text x="146" y="36.5" textAnchor="middle" fill="#475569" fontSize="5" fontFamily="monospace">avesis.vercel.app</text>
-      {/* Sidebar */}
-      <rect x="30" y="44" width="36" height="132" fill="#0d1829" rx="0"/>
-      {[0,1,2,3].map(i => (
-        <rect key={i} x="38" y={58 + i * 22} width="20" height="14" rx="3" fill={i===0?accent:"#1e293b"} opacity={i===0?0.2:0.5}/>
-      ))}
-      {/* Main area */}
-      {/* Stat cards */}
-      <rect x="74" y="50" width="48" height="30" rx="4" fill="#1e293b"/>
-      <text x="98" y="62" textAnchor="middle" fill={accent} fontSize="9" fontFamily="monospace" fontWeight="bold">28.5°</text>
-      <text x="98" y="72" textAnchor="middle" fill="#475569" fontSize="5" fontFamily="monospace">Suhu</text>
-      <rect x="128" y="50" width="48" height="30" rx="4" fill="#1e293b"/>
-      <text x="152" y="62" textAnchor="middle" fill="#6366f1" fontSize="9" fontFamily="monospace" fontWeight="bold">64%</text>
-      <text x="152" y="72" textAnchor="middle" fill="#475569" fontSize="5" fontFamily="monospace">Kelembapan</text>
-      <rect x="182" y="50" width="48" height="30" rx="4" fill="#1e293b"/>
-      <text x="206" y="62" textAnchor="middle" fill="#22c55e" fontSize="8" fontFamily="monospace" fontWeight="bold">Online</text>
-      <text x="206" y="72" textAnchor="middle" fill="#475569" fontSize="5" fontFamily="monospace">Status</text>
-      {/* Mini chart */}
-      <rect x="74" y="88" width="156" height="52" rx="4" fill="#1e293b"/>
-      {/* Chart line */}
-      <polyline points="84,130 104,122 124,118 144,112 164,108 184,106 204,104 220,102" stroke={accent} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-      <polyline points="84,130 104,122 124,118 144,112 164,108 184,106 204,104 220,102 220,136 84,136" fill={accent} opacity="0.06"/>
-      {/* Chart dots */}
-      {[[84,130],[144,112],[220,102]].map(([cx,cy], i) => (
-        <circle key={i} cx={cx} cy={cy} r="2.5" fill={accent} opacity="0.8"/>
-      ))}
-      {/* Table */}
-      <rect x="74" y="146" width="156" height="24" rx="4" fill="#1e293b"/>
-      {["Kandang A1","Kandang A2","Kandang B1"].map((t,i)=>(
-        <text key={i} x={90 + i * 52} y={161} fill="#475569" fontSize="5" fontFamily="monospace">{t}</text>
-      ))}
-    </svg>
-  );
-}
-
-// ─── Product Card ─────────────────────────────────────────────────────
-function ProductCard({ product, isActive, onClick }: {
-  product: typeof products[0];
-  isActive: boolean;
-  onClick: () => void;
-}) {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <div
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        cursor: "pointer",
-        background: isActive ? product.accentDim : "#fff",
-        border: `1.5px solid ${isActive || hovered ? product.accent : "#e8ecf0"}`,
-        borderRadius: "12px",
-        padding: "20px",
-        transition: "all 0.25s ease",
-        transform: isActive ? "translateY(-2px)" : hovered ? "translateY(-1px)" : "none",
-        boxShadow: isActive ? `0 8px 32px ${product.accent}20` : hovered ? `0 4px 16px rgba(0,0,0,0.07)` : "none",
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-        <div style={{
-          width: "36px", height: "36px", borderRadius: "8px",
-          background: `${product.accent}12`,
-          border: `1px solid ${product.accent}25`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          color: product.accent,
-        }}>
-          {product.icon}
-        </div>
-        <span style={{
-          fontFamily: "monospace",
-          fontSize: "9px",
-          fontWeight: 700,
-          color: product.badge === "LIVE" ? "#22c55e" : product.badge === "IN DEVELOPMENT" ? product.accent : "#94a3b8",
-          background: product.badge === "LIVE" ? "rgba(34,197,94,0.1)" : product.badge === "IN DEVELOPMENT" ? `${product.accent}15` : "rgba(148,163,184,0.1)",
-          border: `1px solid ${product.badge === "LIVE" ? "rgba(34,197,94,0.25)" : product.badge === "IN DEVELOPMENT" ? `${product.accent}30` : "rgba(148,163,184,0.25)"}`,
-          padding: "3px 8px",
-          borderRadius: "99px",
-          letterSpacing: "0.08em",
-        }}>
-          {product.badge === "LIVE" && <span style={{ marginRight: "4px" }}>●</span>}
-          {product.badge}
-        </span>
-      </div>
-      <div style={{ fontFamily: "monospace", fontSize: "10px", color: "#94a3b8", marginBottom: "4px", letterSpacing: "0.1em" }}>
-        {product.id}
-      </div>
-      <div style={{ fontSize: "14px", fontWeight: 700, color: "#0f172a", letterSpacing: "-0.01em" }}>
-        {product.name}
-      </div>
-      <div style={{ fontSize: "11px", color: product.accent, fontWeight: 500, marginTop: "2px" }}>
-        {product.tagline}
-      </div>
-
-      {isActive && (
-        <div style={{ marginTop: "12px", height: "2px", background: "#f1f5f9", borderRadius: "99px", overflow: "hidden" }}>
-          <div style={{ height: "100%", width: "100%", background: product.accent, borderRadius: "99px", animation: "fillBar 0.6s ease forwards" }} />
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Product Detail Panel ─────────────────────────────────────────────
-function ProductDetail({ product }: { product: typeof products[0] }) {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    setVisible(false);
-    const t = setTimeout(() => setVisible(true), 60);
-    return () => clearTimeout(t);
-  }, [product.id]);
-
-  return (
-    <div style={{
-      opacity: visible ? 1 : 0,
-      transform: visible ? "translateX(0)" : "translateX(16px)",
-      transition: "opacity 0.4s ease, transform 0.4s ease",
-    }}>
-      {/* Product Header */}
-      <div style={{ marginBottom: "32px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-          <span style={{
-            fontFamily: "monospace", fontSize: "10px", fontWeight: 600,
-            color: "#94a3b8", letterSpacing: "0.12em",
-            background: "#f1f5f9", padding: "4px 10px", borderRadius: "6px",
-          }}>
-            {product.category}
-          </span>
-          <span style={{
-            fontFamily: "monospace", fontSize: "9px", fontWeight: 700,
-            color: product.badge === "LIVE" ? "#22c55e" : product.badge === "IN DEVELOPMENT" ? product.accent : "#94a3b8",
-            letterSpacing: "0.1em",
-          }}>
-            {product.badge === "LIVE" ? "● " : ""}{product.badge}
-          </span>
-        </div>
-        <h3 style={{
-          fontSize: "clamp(24px, 3vw, 34px)",
-          fontWeight: 800,
-          color: "#0f172a",
-          lineHeight: 1.2,
-          letterSpacing: "-0.025em",
-          marginBottom: "8px",
-        }}>
-          {product.name}
-        </h3>
-        <div style={{ fontSize: "14px", color: product.accent, fontWeight: 600, marginBottom: "16px" }}>
-          {product.tagline}
-        </div>
-        <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.75, maxWidth: "480px" }}>
-          {product.desc}
-        </p>
-      </div>
-
-      {/* Visual Box */}
-      <div style={{
-        background: "#f8fafc",
-        border: `1px solid ${product.accentBorder}`,
-        borderRadius: "20px",
-        padding: "32px",
-        marginBottom: "28px",
-        position: "relative",
-        overflow: "hidden",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "200px",
-      }}>
-        <div style={{
-          position: "absolute", inset: 0, pointerEvents: "none",
-          backgroundImage: `radial-gradient(${product.accent}08 1px, transparent 1px)`,
-          backgroundSize: "20px 20px",
-        }} />
-        <div style={{
-          position: "absolute", top: "-40px", right: "-40px",
-          width: "200px", height: "200px",
-          background: `radial-gradient(circle, ${product.accent}10, transparent 65%)`,
-        }} />
-        <div style={{ width: "280px", height: "200px", position: "relative", zIndex: 1 }}>
-          {product.visual === "sensor" && <SensorVisual accent={product.accent} />}
-          {product.visual === "gateway" && <GatewayVisual accent={product.accent} />}
-          {product.visual === "dashboard" && <DashboardVisual accent={product.accent} />}
-        </div>
-        {/* Product ID watermark */}
-        <div style={{
-          position: "absolute", bottom: "12px", right: "16px",
-          fontFamily: "monospace", fontSize: "10px", color: "#cbd5e1",
-          letterSpacing: "0.1em",
-        }}>
-          {product.id}
-        </div>
-      </div>
-
-      {/* Specs Grid */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gap: "10px",
-      }}>
-        {product.specs.map((spec) => (
-          <div key={spec.label} style={{
-            background: "#f8fafc",
-            border: "1px solid #e8ecf0",
-            borderRadius: "10px",
-            padding: "12px 14px",
-          }}>
-            <div style={{ fontFamily: "monospace", fontSize: "9px", color: "#94a3b8", letterSpacing: "0.1em", marginBottom: "4px" }}>
-              {spec.label}
-            </div>
-            <div style={{ fontSize: "12px", fontWeight: 600, color: "#0f172a" }}>
-              {spec.value}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── SECTION 1: PRODUCT SHOWCASE ─────────────────────────────────────
-export default function ProductShowcase() {
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [sectionVisible, setSectionVisible] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) setSectionVisible(true);
-    }, { threshold: 0.1 });
-    if (sectionRef.current) obs.observe(sectionRef.current);
-    return () => obs.disconnect();
-  }, []);
-
-  const active = products[activeIdx];
-
-  return (
-    <section
-      id="showcase"
-      ref={sectionRef}
-      style={{
-        padding: "100px 0",
-        background: "#fff",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* Subtle noise texture overlay */}
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.35,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
-      }} />
-
-      <div style={{ maxWidth: "1140px", margin: "0 auto", padding: "0 24px", position: "relative" }}>
-
-        {/* ── Header ── */}
-        <div style={{
-          marginBottom: "56px",
-          opacity: sectionVisible ? 1 : 0,
-          transform: sectionVisible ? "none" : "translateY(20px)",
-          transition: "opacity 0.6s ease, transform 0.6s ease",
-        }}>
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: "8px",
-            background: "#f1f5f9",
-            border: "1px solid #e2e8f0",
-            borderRadius: "99px",
-            padding: "6px 14px",
-            marginBottom: "20px",
-          }}>
-            <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#22c55e" }} />
-            <span style={{ fontFamily: "monospace", fontSize: "10px", color: "#64748b", letterSpacing: "0.1em", fontWeight: 600 }}>
-              AVESIS PRODUCT LINE
-            </span>
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap" as const, gap: "16px" }}>
-            <h2 style={{
-              fontSize: "clamp(30px, 5vw, 46px)",
-              fontWeight: 800,
-              color: "#0f172a",
-              lineHeight: 1.2,
-              letterSpacing: "-0.03em",
-              margin: 0,
-            }}>
-              Ekosistem Produk<br />
-              <GradientText
-                colors={["#f97316", "#6366f1", "#10b981"]}
-                animationSpeed={6}
-                showBorder={false}
-                className="font-extrabold"
-              >
-                End-to-End
-              </GradientText>{" "}
-              <span style={{ color: "#0f172a" }}>AVESIS</span>
-            </h2>
-            <p style={{
-              fontSize: "13px", color: "#64748b", lineHeight: 1.75,
-              maxWidth: "320px", margin: 0,
-            }}>
-              Dari sensor di kandang hingga dashboard di genggaman — setiap komponen dirancang untuk bekerja bersama secara seamless.
-            </p>
-          </div>
-        </div>
-
-        {/* ── Main Layout ── */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "300px 1fr",
-          gap: "28px",
-          alignItems: "start",
-          opacity: sectionVisible ? 1 : 0,
-          transform: sectionVisible ? "none" : "translateY(24px)",
-          transition: "opacity 0.7s ease 0.15s, transform 0.7s ease 0.15s",
-        }}>
-
-          {/* LEFT: Product Selector */}
-          <div style={{ display: "flex", flexDirection: "column" as const, gap: "12px" }}>
-            {products.map((p, i) => (
-              <ProductCard
-                key={p.id}
-                product={p}
-                isActive={activeIdx === i}
-                onClick={() => setActiveIdx(i)}
-              />
-            ))}
-
-            {/* Stats strip */}
-            <div style={{
-              marginTop: "8px",
-              padding: "20px",
-              background: "#f8fafc",
-              border: "1px solid #e8ecf0",
-              borderRadius: "12px",
-            }}>
-              <div style={{ fontFamily: "monospace", fontSize: "9px", color: "#94a3b8", letterSpacing: "0.1em", marginBottom: "12px" }}>
-                EKOSISTEM STATS
-              </div>
-              {[
-                { label: "Komponen Total", val: 3, suffix: "" },
-                { label: "Hardware Unit", val: 2, suffix: "" },
-                { label: "Open-Source", val: 100, suffix: "%" },
-              ].map((s) => (
-                <div key={s.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                  <span style={{ fontSize: "11px", color: "#64748b" }}>{s.label}</span>
-                  <span style={{ fontFamily: "monospace", fontSize: "13px", fontWeight: 700, color: "#0f172a" }}>
-                    <CountUp from={0} to={s.val} duration={1.2} className="" />{s.suffix}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* RIGHT: Product Detail */}
-          <div style={{
-            background: "#fff",
-            border: "1px solid #e8ecf0",
-            borderRadius: "20px",
-            padding: "40px",
-            minHeight: "560px",
-          }}>
-            <ProductDetail product={active} />
-          </div>
-        </div>
-      </div>
-
-      <style>{`
-        @keyframes fillBar {
-          from { width: 0; }
-          to { width: 100%; }
-        }
-        @media (max-width: 768px) {
-          #showcase [style*="grid-template-columns: 300px 1fr"] {
-            grid-template-columns: 1fr !important;
-          }
-          #showcase [style*="grid-template-columns: repeat(3, 1fr)"] {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-        }
-      `}</style>
-    </section>
-  );
-}
-
-// ─── SECTION 2: PRODUK SECTION WITH SLIDE NAV ─────────────────────────
-// Ganti section #produk yang ada dengan komponen ini
-// Salin seluruh kode features[] dan FeatureCard dari file asli
+// ─── PRODUK SECTION (MERGED) ──────────────────────────────────────────
 
 const features = [
   {
@@ -650,6 +96,48 @@ const features = [
         "Enkripsi TLS 1.3 end-to-end",
         "Backup otomatis setiap 6 jam",
         "API rate-limited untuk keamanan akses",
+      ],
+    },
+  },
+  {
+    id: "04",
+    icon: <IconChip />,
+    label: "HARDWARE",
+    title: "Otak di Balik Kandang Pintar",
+    desc: "Ditenagai ESP32-S3 N16R8 dengan dual-core 240MHz dan 16MB Flash. Menjalankan algoritma Fuzzy Logic lokal untuk respons instan tanpa bergantung penuh pada koneksi cloud.",
+    stat: "240MHz",
+    statLabel: "Dual-Core Speed",
+    accent: "#f59e0b",
+    accentBg: "rgba(245,158,11,0.06)",
+    bar: 85,
+    detail: {
+      headline: "Komponen & Arsitektur",
+      points: [
+        "Dual-core Xtensa LX7 @ 240MHz dengan 8MB PSRAM",
+        "Onboard Fuzzy Logic controller untuk keputusan real-time",
+        "OTA firmware update via WiFi tanpa turun ke kandang",
+        "Deep sleep mode untuk efisiensi daya saat idle",
+      ],
+    },
+  },
+  {
+    id: "05",
+    icon: <IconCog />,
+    label: "SPESIFIKASI",
+    title: "Spesifikasi Teknis Sistem",
+    desc: "Detail lengkap komponen perangkat keras dan perangkat lunak yang membentuk ekosistem BroilerSmart — dari firmware ESP32 hingga deployment Next.js.",
+    stat: "100%",
+    statLabel: "Open Source",
+    accent: "#ec4899",
+    accentBg: "rgba(236,72,153,0.06)",
+    bar: 90,
+    detail: {
+      headline: "Arsitektur End-to-End",
+      points: [
+        "MQTT broker untuk komunikasi ESP32 ↔ Server real-time",
+        "Next.js App Router dengan TypeScript untuk dashboard",
+        "TailwindCSS + DaisyUI untuk UI komponen yang responsif",
+        "Native MongoDB Driver — tanpa Mongoose, performa maksimal",
       ],
     },
   },
@@ -842,7 +330,7 @@ function FeatureDetailPanel({ feature }: { feature: typeof features[0] }) {
   );
 }
 
-export function ProdukSectionWithNav() {
+export default function ProdukSectionMerged() {
   const [activeFeature, setActiveFeature] = useState(0);
   const [headingVisible, setHeadingVisible] = useState(false);
   const headingRef = useRef<HTMLDivElement>(null);
@@ -930,11 +418,15 @@ export function ProdukSectionWithNav() {
 
       <style>{`
         @media (max-width: 768px) {
+          #produk > div > div:first-of-type {
+            grid-template-columns: 1fr !important;
+            gap: 24px !important;
+          }
           #produk [style*="grid-template-columns: 1fr 1fr"] {
             grid-template-columns: 1fr !important;
           }
-          #produk [style*="grid-template-columns: 1fr 1fr"]:last-of-type {
-            grid-template-columns: 1fr !important;
+          #produk [style*="padding: 40px"] {
+            padding: 24px !important;
           }
           #produk button[style] {
             padding: 8px 12px !important;

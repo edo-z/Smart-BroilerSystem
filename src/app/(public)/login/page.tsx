@@ -2,15 +2,16 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { FaRocket, FaEnvelope, FaLock, FaArrowRight, FaGoogle } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaArrowRight, FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
 import { loginWithCredentials, loginWithGoogle } from "@/actions/auth-actions";
 import GradientText from "@/component/GradientText";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // State khusus untuk loading Google
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   // 1. Handler Login Email Manual
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -18,26 +19,29 @@ export default function LoginPage() {
     setIsLoading(true);
     setError(null);
 
-    const formData = new FormData(e.currentTarget);
-    const result = await loginWithCredentials(formData);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const result = await loginWithCredentials(formData);
 
-    if (result) {
-      // Jika ada string yang kembali, berarti itu error message
-      setError(result);
+      if (result) {
+        setError(result);
+        setIsLoading(false);
+      }
+    } catch {
+      setError("Terjadi kesalahan. Silakan coba lagi.");
       setIsLoading(false);
     }
-    // Jika sukses, Next.js otomatis redirect ke /dashboard via Server Action
   };
 
   // 2. Handler Khusus Google Login
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
+    setGoogleError(null);
     try {
       await loginWithGoogle();
-    } catch (error) {
-      console.error("Google Login error:", error);
+    } catch {
+      setGoogleError("Gagal masuk dengan Google. Silakan coba lagi.");
     } finally {
-      // Stop loading jika terjadi error (jika sukses biasanya redirect otomatis)
       setIsGoogleLoading(false);
     }
   };
@@ -53,14 +57,13 @@ export default function LoginPage() {
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-2000"></div>
 
-        <div className="relative z-10 flex flex-col justify-center h-full px-12 py-34 lg:px-20">
+        <div className="relative z-10 flex flex-col justify-center h-full px-12 py-32 lg:px-20">
 
 
           {/* Tagline */}
           <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
             Monitor Kandang <br />
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-cyan-400">
-
+            <span className="inline-block align-top">
               <GradientText
                 colors={["#003cbd", "#0ea5e9", "#00c3ff"]}
                 animationSpeed={8}
@@ -74,18 +77,15 @@ export default function LoginPage() {
             Akses Dashboard monitoring suhu dan kelembapan real-time Anda. Optimalkan hasil panen dengan data yang akurat.
           </p>
 
-          {/* Dummy Footer Left */}
-          <div className="mt-auto">
-            <div className="flex gap-4 text-slate-400">
-            </div>
-          </div>
+          {/* Spacer */}
+          <div className="mt-auto" />
         </div>
       </div>
 
       {/* ========================================= */}
       {/* 2. BAGIAN KANAN (LOGIN FORM)              */}
       {/* ========================================= */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 py-34">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 py-32">
         <div className="w-full max-w-md">
 
           {/* Login Card */}
@@ -99,9 +99,9 @@ export default function LoginPage() {
             </div>
 
             {/* Alert Error */}
-            {error && (
+            {(error || googleError) && (
               <div className="mt-4 p-3 bg-red-50 text-red-500 border border-red-100 rounded-lg text-sm text-center">
-                {error}
+                {error || googleError}
               </div>
             )}
 
@@ -121,22 +121,27 @@ export default function LoginPage() {
 
               {/* Input Password */}
               <div className="form-control">
-                <label className="label">
+                <div className="label flex justify-between">
                   <span className="label-text font-medium text-slate-700">Kata Sandi</span>
-                  <label className="label-text-alt link link-primary text-xs hover:cursor-pointer">
+                  <span className="label-text-alt link link-primary text-xs hover:cursor-pointer">
                     Lupa kata sandi?
-                  </label>
-                </label>
+                  </span>
+                </div>
                 <label className="input input-bordered flex items-center gap-3 bg-slate-50 focus:bg-white transition-colors">
                   <FaLock className="text-slate-400 text-lg" />
-                  <input name="password" type="password" placeholder="Masukkan kata sandi" className="grow" required />
+                  <input name="password" type={showPassword ? "text" : "password"} placeholder="Masukkan kata sandi" className="grow" required />
+                  <button type="button" tabIndex={-1} onClick={() => setShowPassword((s) => !s)}
+                    className="text-slate-400 hover:text-slate-700 transition-colors shrink-0"
+                    aria-label={showPassword ? "Sembunyikan sandi" : "Tampilkan sandi"}>
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
                 </label>
               </div>
 
               {/* Checkbox Remember Me */}
               <div className="form-control">
                 <label className="label cursor-pointer justify-start gap-3">
-                  <input type="checkbox" className="checkbox checkbox-primary checkbox-sm" />
+                  <input type="checkbox" name="remember" className="checkbox checkbox-primary checkbox-sm" />
                   <span className="label-text text-sm text-slate-600">Ingat saya di perangkat ini</span>
                 </label>
               </div>
@@ -146,9 +151,9 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading || isGoogleLoading}
-                className={`btn btn-primary w-full bg-slate-900 hover:bg-slate-800 text-white border-none h-12 shadow-lg hover:shadow-xl transition-all ${isLoading ? 'loading' : ''}`}
+                className={`w-full bg-slate-900 hover:bg-slate-800 text-white h-12 rounded-xl shadow-lg hover:shadow-xl transition-all font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${isLoading ? 'pointer-events-none' : ''}`}
               >
-                {isLoading ? "Memverifikasi..." : <span className="flex items-center gap-2">Masuk ke Dashboard <FaArrowRight /></span>}
+                {isLoading ? "Memverifikasi..." : <><span>Masuk ke Dashboard</span><FaArrowRight /></>}
               </button>
             </form>
 
@@ -157,21 +162,19 @@ export default function LoginPage() {
               Atau masuk dengan
             </div>
 
-            {/* BUTTON GOOGLE (SUDAH DIPERBAIKI) */}
+            {/* BUTTON GOOGLE */}
             <div className="grid grid-cols-1 gap-4">
               <button
-                type="button" // PENTING: type="button" agar tidak submit form email
+                type="button"
                 onClick={handleGoogleLogin}
                 disabled={isGoogleLoading || isLoading}
-                className={`btn btn-outline border-slate-300 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 text-slate-600 normal-case h-11 flex items-center gap-3 ${isGoogleLoading ? 'loading' : ''}`}
+                className={`w-full border border-slate-300 hover:bg-slate-50 text-slate-600 h-11 rounded-xl transition-all font-medium flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                {!isGoogleLoading && (
-                  <>
-                    <FaGoogle className="text-red-500" />
-                    <span>Google</span>
-                  </>
+                {!isGoogleLoading ? (
+                  <><FaGoogle className="text-red-500" /><span>Google</span></>
+                ) : (
+                  <span>Menghubungkan ke Google...</span>
                 )}
-                {isGoogleLoading && <span>Menghubungkan ke Google...</span>}
               </button>
             </div>
 

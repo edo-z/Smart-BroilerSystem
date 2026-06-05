@@ -510,7 +510,7 @@ export default function RegisterPage() {
     });
     const result = await registerUser(fd);
     if (result?.error) { setServerError(result.error); setIsLoading(false); }
-    else router.push("/login");
+    else { setIsLoading(false); router.push("/login"); }
   }, [formValues, router]);
 
   const summaryRows = useMemo(() => [
@@ -524,14 +524,14 @@ export default function RegisterPage() {
     <div className="min-h-screen flex flex-col lg:flex-row bg-slate-50">
 
       {/* ── LEFT PANEL ── */}
-      <div className="hidden lg:flex w-3xl bg-slate-900 flex-col relative overflow-hidden">
+      <div className="hidden lg:flex w-full max-w-3xl bg-slate-900 flex-col relative overflow-hidden">
         
 
         <div className="relative z-10 flex flex-col justify-between h-full px-10 py-14 xl:px-14 text-white">
           {/* Logo */}
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center">
-              
+              <span className="text-sm font-bold text-white">A</span>
             </div>
           </div>
 
@@ -571,7 +571,7 @@ export default function RegisterPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`text-lg font-semibold leading-none ${isActive ? "text-white" : isDone ? "text-slate-400" : "text-slate-600"}`}>{label}</p>
-                      <p className="text-2sm  text-slate-600 mt-0.5">{sub}</p>
+                      <p className="text-xs text-slate-600 mt-0.5">{sub}</p>
                     </div>
                     {isDone && <span className="text-xs text-emerald-500 font-medium">✓</span>}
                   </motion.div>
@@ -581,9 +581,6 @@ export default function RegisterPage() {
           </div>
 
           {/* Footer */}
-          <div>
-            <p className="text-xs text-slate-600"></p>
-          </div>
         </div>
       </div>
 
@@ -613,15 +610,17 @@ export default function RegisterPage() {
               )}
             </AnimatePresence>
 
+            <form onSubmit={(e) => e.preventDefault()}>
             <Stepper
               initialStep={1}
+              disableStepIndicators={true}
               onStepChange={(s) => { setCurrentStep(s); setServerError(null); }}
               onFinalStepCompleted={handleFinalSubmit}
               onNextAttempt={handleNextAttempt}
               nextButtonProps={{ disabled: isLoading }}
             >
               {/* Step 1 */}
-              <div className="space-y-4 px-10 pt-10 pb-8 flex flex-col gap-6">
+              <div className="px-10 pt-10 pb-8 flex flex-col gap-6">
                 <StepHeading step={1} title="Siapa Anda?" />
                 <Field icon={<FaUser />} label="Nama Lengkap" error={stepErrors.name}>
                   <input className={inputCls} type="text" placeholder="Contoh: Budi Santoso"
@@ -638,7 +637,7 @@ export default function RegisterPage() {
               </div>
 
               {/* Step 2 */}
-              <div className="space-y-4 px-10 pt-10 pb-8 flex flex-col gap-6">
+              <div className="px-10 pt-10 pb-8 flex flex-col gap-6">
                 <StepHeading step={2} title="Data masuk Anda" />
                 <Field icon={<FaEnvelope />} label="Alamat Email" error={stepErrors.email}>
                   <input className={inputCls} type="email" placeholder="email@contoh.com"
@@ -660,7 +659,7 @@ export default function RegisterPage() {
               </div>
 
               {/* Step 3 */}
-              <div className="space-y-5 px-10 pt-10 pb-8 flex flex-col gap-6">
+              <div className="px-10 pt-10 pb-8 flex flex-col gap-6">
                 <StepHeading step={3} title="Periksa & selesaikan" />
 
                 <div className="rounded-xl border border-slate-100 bg-slate-50 divide-y divide-slate-100 overflow-hidden text-sm">
@@ -712,6 +711,7 @@ export default function RegisterPage() {
                 </AnimatePresence>
               </div>
             </Stepper>
+            </form>
           </div>
 
           <p className="text-center text-sm text-slate-500 mt-6">
