@@ -19,6 +19,7 @@ import {
 } from "react-icons/fa";
 import { Line } from "react-chartjs-2";
 import { useMqttSensor, type MqttSensorPayload, type MqttStatus } from "@/hooks/useMqttSensor";
+import ControlPanel from "@/components/dashboard/ControlPanel";
 import { PHASE_MAP, getPhase, isTempSpike } from "@/lib/sensor";
 import {
   Chart as ChartJS,
@@ -57,6 +58,7 @@ interface SensorLog {
   age: number;
   vfd: number;
   dimmer: number;
+  manualOverride?: boolean;
   timestamp: string;
 }
 
@@ -582,28 +584,53 @@ function RingkasanKandangModal({
   open,
   onClose,
   devices,
-  totalActive,
-  totalStandby,
-  latestTemp,
-  latestHumid,
-  totalWarning,
-  latest,
-  latestVfd,
-  latestDimmer,
+  allLogs,
 }: {
   open: boolean;
   onClose: () => void;
   devices: Device[];
-  totalActive: number;
-  totalStandby: number;
-  latestTemp: number | null;
-  latestHumid: number | null;
-  totalWarning: number;
-  latest: SensorLog | null;
-  latestVfd: number | null;
-  latestDimmer: number | null;
+  allLogs: SensorLog[];
 }) {
   if (!open) return null;
+
+  const logs = devices
+    .map((d) => allLogs.findLast((l) => String(l.deviceId) === String(d._id)))
+    .filter((l): l is SensorLog => l !== null);
+
+  const n = logs.length;
+  const avgVfd = n ? Math.round(logs.reduce((s, l) => s + l.vfd, 0) / n / 255 * 100) : 0;
+  const avgDimmer = n ? Math.round(logs.reduce((s, l) => s + l.dimmer, 0) / n / 255 * 100) : 0;
+  const avgTemp = n ? logs.reduce((s, l) => s + l.temperature, 0) / n : 0;
+  const avgHum = n ? logs.reduce((s, l) => s + l.humidity, 0) / n : 0;
+  const manualCount = logs.filter((l) => l.manualOverride).length;
+  const warningCount = logs.filter((l) => isTempSpike(l.age, l.temperature)).length;
+  const activeCount = devices.filter((d) => d.active).length;
+  const standbyCount = devices.length - activeCount;
+  const currentAge = logs.length ? Math.max(...logs.map((l) => l.age)) : 0;
+
+  // Phase date predictions
+  const today = new Date();
+  const docDate = new Date(today);
+  docDate.setDate(docDate.getDate() - currentAge);
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+  const fmtDate = (d: Date) => `${d.getDate()}/${d.getMonth() + 1}`;
+  const fmtMonth = (d: Date) => `${d.getDate()} ${monthNames[d.getMonth()]}`;
+
+  const phaseData = PHASE_MAP.map((phase, i) => {
+    const prevMax = i === 0 ? 0 : PHASE_MAP[i - 1].maxAge;
+    const isActive = currentAge >= prevMax && currentAge <= phase.maxAge;
+    const isPast = currentAge > phase.maxAge;
+    const startDate = new Date(docDate);
+    startDate.setDate(startDate.getDate() + prevMax);
+    return { phase, prevMax, isActive, isPast, startDate };
+  });
+
+  const harvestDate = new Date(docDate);
+  harvestDate.setDate(harvestDate.getDate() + 45);
+
+  const sl = (label: string) =>
+    label === "Starter" ? "ST" : label === "Grower 1" ? "GR1" : label === "Grower 2" ? "GR2"
+    : label === "Finisher" ? "FIN" : "PN";
 
   return (
     <div
@@ -615,144 +642,99 @@ function RingkasanKandangModal({
         className="relative w-full max-w-xl rounded-3xl bg-white overflow-hidden"
         style={{ boxShadow: "0 32px 64px -12px rgba(15,23,42,0.35), 0 0 0 1px rgba(15,23,42,0.06)" }}
       >
-        <div className="h-1.5 w-full bg-gradient-to-r from-slate-700 via-slate-500 to-slate-400" />
+        <div className="h-1.5 w-full bg-gradient-to-r from-lime-400 via-lime-500 to-lime-600" />
         <div className="flex items-start justify-between px-6 pt-6 pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-slate-100 rounded-xl">
-              <FaServer className="text-slate-600 text-xl" />
+            <div className="p-3 bg-lime-50 rounded-xl">
+              <FaServer className="text-lime-600 text-xl" />
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-900">Ringkasan Lengkap</h2>
-              <p className="text-xs text-slate-400 mt-0.5">Data real-time semua kandang</p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {devices.length} kandang{currentAge > 0 ? ` · Fase ${getPhase(currentAge).label} · Panen: ${fmtMonth(harvestDate)}` : ""}
+              </p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"><FaTimes /></button>
         </div>
         <div className="h-px bg-slate-100 mx-6" />
-        <div className="px-6 pt-5 pb-6 max-h-[70vh] overflow-y-auto flex flex-col gap-5">
-          {/* Metrics */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="bg-slate-50 rounded-2xl p-4">
-              <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center mb-3">
-                <FaServer className="text-slate-500 text-sm" />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Kandang</p>
-              <p className="text-2xl font-bold text-slate-900">{devices.length}</p>
-              <p className="text-[11px] text-slate-500 mt-1">{totalActive} aktif · {totalStandby} standby</p>
-            </div>
-            <div className="bg-slate-50 rounded-2xl p-4">
-              <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center mb-3">
-                <FaThermometerHalf className={`text-sm ${latestTemp !== null && latest !== null && isTempSpike(latest.age, latestTemp) ? "text-red-500" : "text-emerald-500"}`} />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Suhu</p>
-              <p className="text-2xl font-bold text-slate-900">
-                {latestTemp !== null ? latestTemp.toFixed(1) : "—"}
-                <span className="text-sm text-slate-400 font-medium ml-0.5">°C</span>
-              </p>
-              <p className={`text-[11px] mt-1 font-medium ${latestTemp !== null && latest !== null ? (isTempSpike(latest.age, latestTemp) ? "text-red-500" : "text-emerald-500") : "text-slate-400"}`}>
-                {latestTemp !== null && latest !== null ? (isTempSpike(latest.age, latestTemp) ? "⚠ Di atas normal" : "✓ Normal") : "Menunggu data"}
-              </p>
-            </div>
-            <div className="bg-slate-50 rounded-2xl p-4">
-              <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center mb-3 text-blue-500">
-                <FaTint className="text-sm" />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Kelembapan</p>
-              <p className="text-2xl font-bold text-slate-900">
-                {latestHumid !== null ? latestHumid.toFixed(0) : "—"}
-                <span className="text-sm text-slate-400 font-medium ml-0.5">%</span>
-              </p>
-              <p className="text-[11px] text-slate-500 mt-1">Ideal: 60 – 70%</p>
-            </div>
-            <div className="bg-slate-50 rounded-2xl p-4">
-              <div className={`w-10 h-10 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center mb-3 ${totalWarning > 0 ? "text-orange-500" : "text-slate-300"}`}>
-                <FaExclamationTriangle className="text-sm" />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Peringatan</p>
-              <p className="text-2xl font-bold text-slate-900">{totalWarning}</p>
-              <p className={`text-[11px] mt-1 font-medium ${totalWarning > 0 ? "text-orange-500" : "text-slate-400"}`}>
-                {totalWarning > 0 ? "Cek kandang segera" : "Tidak ada masalah"}
-              </p>
-            </div>
-          </div>
-
-          {/* Phase Timeline Full */}
-          {latest && (
+        <div className="px-6 pt-5 pb-6 max-h-[75vh] overflow-y-auto flex flex-col gap-5">
+          {devices.length === 0 ? (
+            <p className="text-sm text-slate-400 py-8 text-center">Belum ada kandang terdaftar.</p>
+          ) : (
             <>
               <div>
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Fase Pertumbuhan</h3>
-                <div className="flex items-baseline gap-2 mb-4">
-                  <span className="text-2xl font-bold text-slate-900">{latest.age}</span>
-                  <span className="text-sm text-slate-400 font-medium">hr</span>
-                  <span className="text-xs text-slate-500 ml-1">
-                    · Fase: <span className="font-semibold text-slate-700">{getPhase(latest.age).label}</span>
-                  </span>
-                </div>
-                <div className="relative flex items-center justify-between mb-2 px-1">
-                  <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-0.5 bg-slate-200 rounded" />
-                  {PHASE_MAP.map((phase, i) => {
-                    const prevMax = i === 0 ? 0 : PHASE_MAP[i - 1].maxAge;
-                    const current = latest.age;
-                    const isActive = current >= prevMax && current <= phase.maxAge;
-                    const isPast = current > phase.maxAge;
-                    const isFuture = current < prevMax;
-                    return (
-                      <div key={i} className="flex flex-col items-center relative z-10">
-                        <div className={`rounded-full border-2 transition-all ${
-                          isActive
-                            ? "w-4 h-4 bg-slate-900 border-slate-900 shadow-sm"
-                            : isPast
-                            ? "w-3 h-3 bg-slate-400 border-slate-400"
-                            : "w-3 h-3 bg-white border-slate-300"
-                        }`} />
-                        <div className="mt-1.5 text-center">
-                          <p className={`text-[9px] font-bold tracking-wide ${isActive ? "text-slate-900" : isPast ? "text-slate-400" : "text-slate-300"}`}>
-                            {phase.label.split(" ")[0]}
-                          </p>
-                          <p className={`text-[8px] ${isActive ? "text-slate-500" : "text-slate-300"}`}>≤{phase.maxAge}</p>
+                <div className="flex items-center justify-between gap-0">
+                  {phaseData.map((pd, i) => (
+                    <React.Fragment key={i}>
+                      <div className="flex-1 flex flex-col items-center">
+                        <div className={`w-11 h-11 rounded-full flex flex-col items-center justify-center ${
+                          pd.isActive
+                            ? "bg-[#d6f14a] text-slate-900"
+                            : pd.isPast
+                            ? "bg-slate-100 text-slate-500"
+                            : "bg-slate-50 text-slate-400"
+                        }`}>
+                          <span className="text-[11px] font-medium leading-tight">{sl(pd.phase.label)}</span>
+                          <span className="text-[9px] leading-tight">{fmtDate(pd.startDate)}</span>
                         </div>
+                        <p className={`text-[9px] mt-1 ${
+                          pd.isActive ? "font-bold text-slate-900" : pd.isPast ? "text-slate-400" : "text-slate-300"
+                        }`}>
+                          {pd.prevMax + 1}–{pd.phase.maxAge}
+                        </p>
                       </div>
-                    );
-                  })}
+                      {i < phaseData.length - 1 && <div className="w-px h-8 self-center border-r border-dotted border-slate-200" />}
+                    </React.Fragment>
+                  ))}
                 </div>
-                <div className="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-100">
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <span className="text-slate-400 block text-[10px] font-medium">Target Suhu</span>
-                      <span className="font-bold text-slate-800">
-                        {getPhase(latest.age).tempLow}–{getPhase(latest.age).tempHigh}°C
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[10px] font-medium">Target RH</span>
-                      <span className="font-bold text-slate-800">
-                        {getPhase(latest.age).rhLow}–{getPhase(latest.age).rhHigh}%
-                      </span>
-                    </div>
+                {currentAge > 0 && (
+                  <div className="mt-3 text-center">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-lime-100 text-[10px] font-medium text-lime-700">
+                      ● Fase {getPhase(currentAge).label} — {currentAge} hr
+                    </span>
                   </div>
+                )}
+              </div>
+
+              <div>
+                <div className="space-y-2.5">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold text-emerald-600 w-9 shrink-0">VFD</span>
+                    <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-700"
+                        style={{ width: `${Math.min(avgVfd, 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-700 tabular-nums w-9 text-right">{avgVfd}%</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold text-amber-600 w-9 shrink-0">DIM</span>
+                    <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-amber-400 to-red-500 transition-all duration-700"
+                        style={{ width: `${Math.min(avgDimmer, 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-700 tabular-nums w-9 text-right">{avgDimmer}%</span>
+                  </div>
+                </div>
+                <div className="flex justify-between text-[9px] text-slate-400 mt-1.5">
+                  <span>0</span>
+                  <span>64</span>
+                  <span>128</span>
+                  <span>192</span>
+                  <span>255</span>
                 </div>
               </div>
 
-              {/* Output Aktuator */}
-              <div>
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Output Aktuator</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <OutputBar
-                    label="VFD"
-                    value={latestVfd}
-                    max={255}
-                    icon={<FaBolt className="text-emerald-500 text-xs" />}
-                    colorClass="bg-gradient-to-r from-emerald-400 to-emerald-500"
-                  />
-                  <OutputBar
-                    label="Dimmer"
-                    value={latestDimmer}
-                    max={255}
-                    icon={<FaFire className="text-orange-500 text-xs" />}
-                    colorClass="bg-gradient-to-r from-orange-400 to-red-500"
-                  />
-                </div>
-                <p className="text-[10px] text-slate-400 mt-2">VFD: kipas ventilasi · Dimmer: pemanas</p>
+              <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[10px] text-slate-500">
+                <span>Suhu: <span className="font-bold text-slate-700">{avgTemp > 0 ? avgTemp.toFixed(1) : "—"}°C</span></span>
+                <span>RH: <span className="font-bold text-slate-700">{avgHum > 0 ? avgHum.toFixed(0) : "—"}%</span></span>
+                <span>{activeCount} aktif / {standbyCount} standby</span>
+                {warningCount > 0 && <span className="text-red-500 font-medium">{warningCount} peringatan</span>}
+                {manualCount > 0 && <span className="text-amber-600 font-medium">{manualCount} manual</span>}
               </div>
             </>
           )}
@@ -791,6 +773,7 @@ export default function DashboardPage() {
       age: data.age,
       vfd: data.vfd,
       dimmer: data.dimmer,
+      manualOverride: data.manualOverride,
       timestamp: new Date().toISOString(),
     };
 
@@ -808,7 +791,7 @@ export default function DashboardPage() {
     setLastUpdated(new Date());
   }, [selectedDeviceId]);
 
-  const mqttStatus = useMqttSensor(handleMqttMessage);
+  const { status: mqttStatus, publish } = useMqttSensor(handleMqttMessage);
 
   const chartLabels = useMemo(
     () => logs.map((l) => new Date(l.timestamp).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })),
@@ -1019,6 +1002,7 @@ export default function DashboardPage() {
   const latestHumid = latest?.humidity ?? null;
   const latestVfd = latest?.vfd ?? null;
   const latestDimmer = latest?.dimmer ?? null;
+  const latestManualOverride = latest?.manualOverride ?? false;
 
   const emergencyStatus = useMemo<"emergency" | "caution" | "none">(() => {
     if (latestTemp === null) return "none";
@@ -1061,6 +1045,16 @@ export default function DashboardPage() {
     });
   }, [logs]);
 
+  const alertHistory = useMemo(() => {
+    const merged: AlertItem[] = [];
+    let ti = 0, ri = 0;
+    while (ti < tempSpikes.length || ri < rhSpikes.length) {
+      if (ti < tempSpikes.length) merged.push({ ...tempSpikes[ti], id: merged.length }), ti++;
+      if (ri < rhSpikes.length) merged.push({ ...rhSpikes[ri], id: merged.length }), ri++;
+    }
+    return merged.slice(0, 15);
+  }, [tempSpikes, rhSpikes]);
+
   const kandangRows: KandangRow[] = devices.map((d) => {
     const lastLog = allLogs.findLast((l) => String(l.deviceId) === String(d._id)) ?? null;
     const suhu = lastLog?.temperature ?? null;
@@ -1086,244 +1080,259 @@ export default function DashboardPage() {
   const selectedDevice = devices.find((d) => d._id === selectedDeviceId);
 
   return (
-    <div className="max-w-7xl mx-auto w-full space-y-6" suppressHydrationWarning>
+    <div className="max-w-7xl mx-auto w-full grid grid-cols-12 lg:grid-rows-10 gap-2 min-h-screen" suppressHydrationWarning>
 
-      {/* ── STATUS CARD ── */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-500 flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-sm tracking-wide">
+      {/* ── ZONE 1: STATUS + RINGKASAN (rows 1-2) ── */}
+      <div className="col-span-12 lg:row-start-1 lg:row-end-3 bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col">
+        {/* Greeting + badges row */}
+        <div className="flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-500 flex items-center justify-center text-white font-bold text-base shrink-0 shadow-sm">
               {userName.charAt(0)}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Halo, {userName}</h2>
-              <div className="text-xs text-slate-400 mt-0.5 flex items-center gap-1.5">
-                <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+              <h2 className="text-sm font-bold text-slate-900">Halo, {userName}</h2>
+              <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                <span className={`w-1 h-1 rounded-full animate-pulse ${
                   mqttStatus === "connected" ? "bg-emerald-400" : mqttStatus === "reconnecting" ? "bg-amber-400" : "bg-red-400"
                 }`} />
                 {mqttStatus === "connected" ? "Realtime" : mqttStatus === "reconnecting" ? "Menghubungkan kembali…" : "Terputus"}
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-wrap shrink-0">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full text-slate-600 bg-slate-100 border border-slate-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full text-slate-600 bg-slate-100 border border-slate-200">
+              <span className="w-1 h-1 rounded-full bg-emerald-400" />
               {totalActive} Online
             </span>
             {totalStandby > 0 && (
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full text-slate-400 bg-slate-50 border border-slate-200">
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full text-slate-400 bg-slate-50 border border-slate-200">
                 {totalStandby} Offline
               </span>
             )}
             {totalWarning > 0 ? (
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-orange-700 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-orange-700 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">
+                <span className="w-1 h-1 rounded-full bg-orange-400 animate-pulse" />
                 {totalWarning} Peringatan
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
                 Normal
               </span>
             )}
           </div>
         </div>
-        <div className="h-px bg-slate-100 my-4" />
-        <div className="flex items-center gap-6 text-xs text-slate-500">
-          <div className="flex items-center gap-1.5">
-            <FaServer className="text-slate-300 text-[11px]" />
-            <span className="font-semibold text-slate-700">{devices.length}</span> Kandang
+
+        {/* Emergency Banner */}
+        {selectedDeviceId && emergencyStatus !== "none" && !emergencyDismissed && (
+          <div className={`rounded-xl border-l-4 overflow-hidden mt-2 ${
+            emergencyStatus === "emergency"
+              ? "border-l-red-500 bg-gradient-to-r from-red-50 to-red-50/80"
+              : "border-l-amber-500 bg-gradient-to-r from-amber-50 to-amber-50/80"
+          }`}>
+            <div className="flex items-start gap-2 p-2">
+              <FaExclamationTriangle className={`text-xs shrink-0 mt-0.5 ${emergencyStatus === "emergency" ? "text-red-500" : "text-amber-500"}`} />
+              <div className="flex-1 min-w-0">
+                <p className={`font-bold text-[11px] ${emergencyStatus === "emergency" ? "text-red-800" : "text-amber-800"}`}>
+                  {emergencyStatus === "emergency" ? "DARURAT" : "PERHATIAN"}
+                </p>
+                <p className={`text-[10px] mt-0.5 ${emergencyStatus === "emergency" ? "text-red-600" : "text-amber-600"}`}>
+                  Suhu {latestTemp?.toFixed(1)}°C {emergencyStatus === "emergency" ? "di luar batas aman" : "mendekati batas aman"}
+                </p>
+              </div>
+              <button onClick={() => setEmergencyDismissed(true)} className="p-1 rounded-lg hover:bg-black/5 text-slate-400 hover:text-slate-600 transition-colors shrink-0">
+                <FaTimes className="text-[10px]" />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <FaThermometerHalf className="text-slate-300 text-[11px]" />
-            <span className="font-semibold text-slate-700">{latestTemp !== null ? latestTemp.toFixed(1) : "—"}°C</span> Rata-rata
+        )}
+
+        {/* 4 Mini Metrics + Timeline */}
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-slate-50 rounded-xl p-3">
+                <Shimmer className="h-2 w-10 mb-1" />
+                <Shimmer className="h-4 w-12 mb-1" />
+                <Shimmer className="h-2 w-8" />
+              </div>
+            ))}
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Realtime</span>
+        ) : (
+          <div className="flex items-stretch gap-2 mt-2 flex-1">
+            <div className="grid grid-cols-4 gap-2 flex-1">
+              <button onClick={() => setRingkasanOpen(true)} className="bg-slate-50 rounded-xl p-2.5 text-center hover:bg-slate-100 transition-colors cursor-pointer text-left">
+                <p className="text-[8px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Suhu</p>
+                <p className="text-base font-bold text-slate-900">
+                  {latestTemp !== null ? latestTemp.toFixed(1) : "—"}<span className="text-[10px] text-slate-400">°C</span>
+                </p>
+                <p className={`text-[9px] mt-0.5 font-medium ${latestTemp !== null && latest !== null ? (isTempSpike(latest.age, latestTemp) ? "text-red-500" : "text-emerald-500") : "text-slate-400"}`}>
+                  {latestTemp !== null && latest !== null ? (isTempSpike(latest.age, latestTemp) ? "⚠ Tinggi" : "✓ Normal") : "—"}
+                </p>
+              </button>
+              <button onClick={() => setRingkasanOpen(true)} className="bg-slate-50 rounded-xl p-2.5 text-center hover:bg-slate-100 transition-colors cursor-pointer text-left">
+                <p className="text-[8px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">RH</p>
+                <p className="text-base font-bold text-slate-900">
+                  {latestHumid !== null ? latestHumid.toFixed(0) : "—"}<span className="text-[10px] text-slate-400">%</span>
+                </p>
+                <p className="text-[9px] text-slate-500 mt-0.5">60–70%</p>
+              </button>
+              <button onClick={() => setRingkasanOpen(true)} className="bg-slate-50 rounded-xl p-2.5 text-center hover:bg-slate-100 transition-colors cursor-pointer text-left">
+                <p className="text-[8px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Umur</p>
+                <p className="text-base font-bold text-slate-900">
+                  {latest?.age != null ? latest.age : "—"}<span className="text-[10px] text-slate-400">hr</span>
+                </p>
+                <p className="text-[9px] text-slate-500 mt-0.5">
+                  {latest?.age != null ? getPhase(latest.age).label : "—"}
+                </p>
+              </button>
+              <button onClick={() => setRingkasanOpen(true)} className="bg-slate-50 rounded-xl p-2.5 text-center hover:bg-slate-100 transition-colors cursor-pointer text-left">
+                <p className="text-[8px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">⚠</p>
+                <p className="text-base font-bold text-slate-900">{totalWarning}</p>
+                <p className={`text-[9px] mt-0.5 font-medium ${totalWarning > 0 ? "text-orange-500" : "text-slate-400"}`}>
+                  {totalWarning > 0 ? "Aktif" : "Aman"}
+                </p>
+              </button>
+            </div>
+            {/* Timeline Mini */}
+            {selectedDeviceId && (
+              <button onClick={() => setRingkasanOpen(true)} className="shrink-0 flex items-center gap-2 px-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors cursor-pointer">
+                <div className="flex items-center gap-0.5">
+                  {PHASE_MAP.map((phase, i) => {
+                    const prevMax = i === 0 ? 0 : PHASE_MAP[i - 1].maxAge;
+                    const current = latest?.age ?? 0;
+                    const isActive = current >= prevMax && current <= phase.maxAge;
+                    const isPast = current > phase.maxAge;
+                    return (
+                      <div key={i} className={`rounded-full ${isActive ? "w-2 h-2 bg-slate-900" : isPast ? "w-1.5 h-1.5 bg-slate-400" : "w-1.5 h-1.5 bg-slate-200"}`} />
+                    );
+                  })}
+                </div>
+                <span className="text-[10px] text-slate-500 truncate">
+                  {latest?.age != null ? `${latest.age} hr · ${getPhase(latest.age).label}` : "—"}
+                </span>
+              </button>
+            )}
           </div>
-        </div>
+        )}
       </div>
 
-      {/* ── EMERGENCY BANNER (COLLAPSIBLE) ── */}
-      {selectedDeviceId && emergencyStatus !== "none" && !emergencyDismissed && (
-        <div className={`w-full rounded-2xl border-l-4 overflow-hidden ${
-          emergencyStatus === "emergency"
-            ? "border-l-red-500 bg-gradient-to-r from-red-50 to-red-50/80 shadow-[0_0_20px_-6px_rgba(239,68,68,0.35)]"
-            : "border-l-amber-500 bg-gradient-to-r from-amber-50 to-amber-50/80 shadow-[0_0_20px_-6px_rgba(245,158,11,0.3)]"
-        }`}>
-          <div className="flex items-start gap-3 p-4">
-            <div className={`p-2 rounded-xl shrink-0 ${
-              emergencyStatus === "emergency" ? "bg-red-100" : "bg-amber-100"
-            }`}>
-              <FaExclamationTriangle className={`text-base ${emergencyStatus === "emergency" ? "text-red-500" : "text-amber-500"}`} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className={`font-bold text-sm ${emergencyStatus === "emergency" ? "text-red-800" : "text-amber-800"}`}>
-                {emergencyStatus === "emergency" ? "DARURAT — Suhu di Luar Batas Aman" : "PERHATIAN — Suhu Mendekati Batas"}
-              </p>
-              <p className={`text-xs mt-1 leading-relaxed ${emergencyStatus === "emergency" ? "text-red-600" : "text-amber-600"}`}>
-                {emergencyStatus === "emergency"
-                  ? `Suhu ${latestTemp?.toFixed(1)}°C berada di luar rentang 15–43°C. Semua output otomatis dimatikan. Periksa kandang segera!`
-                  : `Suhu ${latestTemp?.toFixed(1)}°C mendekati batas aman. Pantau kondisi kandang lebih ketat.`}
-              </p>
-            </div>
-            <button onClick={() => setEmergencyDismissed(true)} className="p-1.5 rounded-lg hover:bg-black/5 text-slate-400 hover:text-slate-600 transition-colors shrink-0">
-              <FaTimes className="text-xs" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── RINGKASAN KANDANG ── */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
-        <PanelHeader>
-          <SectionTitle sub="Data real-time semua perangkat">Ringkasan Kandang</SectionTitle>
+      {/* ── ZONE 2: SUHU CHART (rows 3-5) ── */}
+      <div className="col-span-12 lg:col-span-9 lg:row-start-3 lg:row-end-6 bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col">
+        <PanelHeader
+          action={
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="select select-xs select-bordered rounded-full bg-slate-50 border-slate-200 text-slate-500 focus:outline-none w-28"
+            >
+              <option>Hari Ini</option>
+              <option>Kemarin</option>
+              <option>7 Hari</option>
+            </select>
+          }
+        >
+          <SectionTitle sub={selectedDeviceId && selectedDevice ? `Kandang: ${selectedDevice.name}` : "Semua kandang"}>
+            Suhu Kandang
+          </SectionTitle>
         </PanelHeader>
-        <div className="p-5">
-          {loading ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="bg-slate-50 rounded-xl p-3">
-                    <Shimmer className="h-2.5 w-12 mb-1 mx-auto" />
-                    <Shimmer className="h-5 w-16 mb-1 mx-auto" />
-                    <Shimmer className="h-2.5 w-10 mx-auto" />
-                  </div>
-                ))}
-              </div>
-              <Shimmer className="h-10 w-full rounded-xl" />
+        {logs.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center"><EmptyState type="no-data" /></div>
+        ) : (
+          <div className="p-4 flex-1 flex items-center">
+            <div className="h-36 w-full">
+              <Line data={chartDataSuhu} options={chartOptions} plugins={[gradientPlugin]} />
             </div>
-          ) : (
-            <>
-              {/* 4 Mini Metrics */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                <button onClick={() => setRingkasanOpen(true)} className="bg-slate-50 rounded-xl p-3 text-center hover:bg-slate-100 transition-colors cursor-pointer text-left">
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Suhu</p>
-                  <p className="text-lg font-bold text-slate-900">
-                    {latestTemp !== null ? latestTemp.toFixed(1) : "—"}<span className="text-xs text-slate-400">°C</span>
-                  </p>
-                  <p className={`text-[10px] mt-0.5 font-medium ${latestTemp !== null && latest !== null ? (isTempSpike(latest.age, latestTemp) ? "text-red-500" : "text-emerald-500") : "text-slate-400"}`}>
-                    {latestTemp !== null && latest !== null ? (isTempSpike(latest.age, latestTemp) ? "⚠ Tinggi" : "✓ Normal") : "—"}
-                  </p>
-                </button>
-                <button onClick={() => setRingkasanOpen(true)} className="bg-slate-50 rounded-xl p-3 text-center hover:bg-slate-100 transition-colors cursor-pointer text-left">
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">RH</p>
-                  <p className="text-lg font-bold text-slate-900">
-                    {latestHumid !== null ? latestHumid.toFixed(0) : "—"}<span className="text-xs text-slate-400">%</span>
-                  </p>
-                  <p className="text-[10px] text-slate-500 mt-0.5">60–70%</p>
-                </button>
-                <button onClick={() => setRingkasanOpen(true)} className="bg-slate-50 rounded-xl p-3 text-center hover:bg-slate-100 transition-colors cursor-pointer text-left">
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Umur</p>
-                  <p className="text-lg font-bold text-slate-900">
-                    {latest?.age != null ? latest.age : "—"}<span className="text-xs text-slate-400">hr</span>
-                  </p>
-                  <p className="text-[10px] text-slate-500 mt-0.5">
-                    {latest?.age != null ? getPhase(latest.age).label : "—"}
-                  </p>
-                </button>
-                <button onClick={() => setRingkasanOpen(true)} className="bg-slate-50 rounded-xl p-3 text-center hover:bg-slate-100 transition-colors cursor-pointer text-left">
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">⚠</p>
-                  <p className="text-lg font-bold text-slate-900">{totalWarning}</p>
-                  <p className={`text-[10px] mt-0.5 font-medium ${totalWarning > 0 ? "text-orange-500" : "text-slate-400"}`}>
-                    {totalWarning > 0 ? "Aktif" : "Aman"}
-                  </p>
-                </button>
-              </div>
-              {/* Timeline Mini */}
-              {selectedDeviceId && (
-                <button onClick={() => setRingkasanOpen(true)} className="w-full flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors cursor-pointer text-left">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex items-center gap-1">
-                      {PHASE_MAP.map((phase, i) => {
-                        const prevMax = i === 0 ? 0 : PHASE_MAP[i - 1].maxAge;
-                        const current = latest?.age ?? 0;
-                        const isActive = current >= prevMax && current <= phase.maxAge;
-                        const isPast = current > phase.maxAge;
-                        return (
-                          <div key={i} className={`rounded-full ${isActive ? "w-2.5 h-2.5 bg-slate-900" : isPast ? "w-2 h-2 bg-slate-400" : "w-2 h-2 bg-slate-200"}`} />
-                        );
-                      })}
-                    </div>
-                    <span className="text-xs text-slate-500 truncate">
-                      {latest?.age != null ? `${latest.age} hr · ${getPhase(latest.age).label}` : "—"}
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-semibold text-slate-600 shrink-0">Detail →</span>
-                </button>
-              )}
-            </>
+          </div>
+        )}
+        {logs.length > 0 && (
+          <SpikeChipStrip
+            spikes={tempSpikes}
+            icon={<FaFire className="text-[10px]" />}
+            chipColor="red"
+            emptyMessage="Tidak ada lonjakan suhu"
+            onShowAll={() => { setSpikeModalType("temp"); setSpikeModalOpen(true); }}
+          />
+        )}
+      </div>
+
+      {/* ── ZONE 3: KONTROL SIDEBAR (rows 3-8) ── */}
+      <div className="col-span-12 lg:col-span-3 lg:row-start-3 lg:row-end-9">
+        <ControlPanel
+          publish={publish}
+          deviceId={selectedDeviceId ?? ""}
+          currentVfd={latestVfd ?? 0}
+          currentDimmer={latestDimmer ?? 0}
+          manualOverride={latestManualOverride}
+          currentTemp={latestTemp ?? 0}
+          currentHum={latestHumid ?? 0}
+        />
+      </div>
+
+      {/* ── ZONE 4: RH CHART (rows 6-8) ── */}
+      <div className="col-span-12 lg:col-span-9 lg:row-start-6 lg:row-end-9 bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col">
+        <PanelHeader>
+          <SectionTitle sub={selectedDeviceId && selectedDevice ? `Kandang: ${selectedDevice.name}` : "Semua kandang"}>
+            Kelembapan Kandang
+          </SectionTitle>
+        </PanelHeader>
+        {logs.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center"><EmptyState type="no-data" /></div>
+        ) : (
+          <div className="p-4 flex-1 flex items-center">
+            <div className="h-32 w-full">
+              <Line data={chartDataRh} options={chartOptions} />
+            </div>
+          </div>
+        )}
+        {logs.length > 0 && (
+          <SpikeChipStrip
+            spikes={rhSpikes}
+            icon={<FaTint className="text-[10px]" />}
+            chipColor="blue"
+            emptyMessage="Kelembapan dalam rentang ideal"
+            onShowAll={() => { setSpikeModalType("rh"); setSpikeModalOpen(true); }}
+          />
+        )}
+      </div>
+
+      {/* ── ZONE 5: ALERT HISTORY TABLE (rows 9-10) ── */}
+      <div className="col-span-12 lg:row-start-9 lg:row-end-11 bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+        <div className="flex items-center justify-between mb-3">
+          <SectionTitle sub="Lonjakan suhu & kelembapan abnormal">Riwayat Alert</SectionTitle>
+          {alertHistory.length > 0 && (
+            <span className="text-[10px] text-slate-400">{alertHistory.length} kejadian</span>
           )}
         </div>
-        <hr className="border-t border-slate-100" />
-        <KandangTable data={kandangRows} selectedId={selectedDeviceId} onSelectDevice={setSelectedDeviceId} />
+        {alertHistory.length === 0 ? (
+          <p className="text-xs text-slate-400 text-center py-6">Belum ada lonjakan atau anomali dalam periode ini.</p>
+        ) : (
+          <div className="space-y-1.5 max-h-[calc(2*5rem)] overflow-y-auto">
+            {alertHistory.map((a) => (
+              <div key={a.id} className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-50">
+                <span className="shrink-0">{a.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-semibold text-slate-700">{a.title}</span>
+                    <span className="text-[9px] text-slate-400">{a.time}</span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 truncate">{a.message}</p>
+                </div>
+                {a.chipLabel && (
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                    a.variant === "red" ? "bg-red-50 text-red-600" : a.variant === "blue" ? "bg-blue-50 text-blue-600" : "bg-slate-100 text-slate-500"
+                  }`}>
+                    {a.chipLabel}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* ── CHARTS ── */}
-      {logs.length === 0 ? (
-        <div className="space-y-5">
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
-            <EmptyState type="no-data" />
-          </div>
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
-            <EmptyState type="no-data" />
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-5">
-          {/* Card Suhu */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
-            <PanelHeader
-              action={
-                <select
-                  value={timeRange}
-                  onChange={(e) => setTimeRange(e.target.value)}
-                  className="select select-xs select-bordered rounded-full bg-slate-50 border-slate-200 text-slate-500 focus:outline-none w-28"
-                >
-                  <option>Hari Ini</option>
-                  <option>Kemarin</option>
-                  <option>7 Hari</option>
-                </select>
-              }
-            >
-              <SectionTitle sub={`Kandang: ${selectedDevice?.name ?? "—"}`}>Suhu Kandang</SectionTitle>
-            </PanelHeader>
-            <div className="p-5">
-              <div className="h-56 w-full">
-                <Line data={chartDataSuhu} options={chartOptions} plugins={[gradientPlugin]} />
-              </div>
-            </div>
-            <SpikeChipStrip
-              spikes={tempSpikes}
-              icon={<FaFire className="text-[10px]" />}
-              chipColor="red"
-              emptyMessage="Tidak ada lonjakan suhu"
-              onShowAll={() => { setSpikeModalType("temp"); setSpikeModalOpen(true); }}
-            />
-          </div>
-
-          {/* Card RH */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
-            <PanelHeader>
-              <SectionTitle sub={`Kandang: ${selectedDevice?.name ?? "—"}`}>Kelembapan Kandang</SectionTitle>
-            </PanelHeader>
-            <div className="p-5">
-              <div className="h-48 w-full">
-                <Line data={chartDataRh} options={chartOptions} />
-              </div>
-            </div>
-            <SpikeChipStrip
-              spikes={rhSpikes}
-              icon={<FaTint className="text-[10px]" />}
-              chipColor="blue"
-              emptyMessage="Kelembapan dalam rentang ideal"
-              onShowAll={() => { setSpikeModalType("rh"); setSpikeModalOpen(true); }}
-            />
-          </div>
-        </div>
-      )}
-
+      {/* Modals */}
       <DetailsAlertModal
         open={spikeModalOpen}
         onClose={() => setSpikeModalOpen(false)}
@@ -1336,14 +1345,7 @@ export default function DashboardPage() {
         open={ringkasanOpen}
         onClose={() => setRingkasanOpen(false)}
         devices={devices}
-        totalActive={totalActive}
-        totalStandby={totalStandby}
-        latestTemp={latestTemp}
-        latestHumid={latestHumid}
-        totalWarning={totalWarning}
-        latest={latest}
-        latestVfd={latestVfd}
-        latestDimmer={latestDimmer}
+        allLogs={allLogs}
       />
 
       <TambahKandangModal

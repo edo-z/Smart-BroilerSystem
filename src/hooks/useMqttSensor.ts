@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import mqtt from "mqtt";
 
 export interface MqttSensorPayload {
@@ -10,6 +10,7 @@ export interface MqttSensorPayload {
   age: number;
   vfd: number;
   dimmer: number;
+  manualOverride?: boolean;
 }
 
 export type MqttStatus = "connected" | "reconnecting" | "disconnected";
@@ -17,6 +18,7 @@ export type MqttStatus = "connected" | "reconnecting" | "disconnected";
 export function useMqttSensor(onMessage: (data: MqttSensorPayload) => void) {
   const [status, setStatus] = useState<MqttStatus>("disconnected");
   const onMessageRef = useRef(onMessage);
+  const clientRef = useRef<mqtt.MqttClient | null>(null);
   onMessageRef.current = onMessage;
 
   useEffect(() => {
@@ -28,6 +30,8 @@ export function useMqttSensor(onMessage: (data: MqttSensorPayload) => void) {
       clean: true,
       reconnectPeriod: 5000,
     });
+
+    clientRef.current = client;
 
     client.on("connect", () => {
       setStatus("connected");
@@ -56,9 +60,16 @@ export function useMqttSensor(onMessage: (data: MqttSensorPayload) => void) {
     });
 
     return () => {
+      clientRef.current = null;
       client.end(true);
     };
   }, []);
 
-  return status;
+  const publish = useCallback((topic: string, payload: string) => {
+    if (clientRef.current?.connected) {
+      clientRef.current.publish(topic, payload);
+    }
+  }, []);
+
+  return { status, publish };
 }

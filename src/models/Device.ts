@@ -13,5 +13,6 @@ export interface IDevice {
   claimed: boolean;        // false = belum diklaim ESP32
   harvestTargetDate?: Date | null; // target tanggal panen
   harvestProcessed?: boolean; // sudah diproses saat panen?
+  docDate?: Date | null; // tanggal DOC (Day Old Chick)
   createdAt: Date;
 }

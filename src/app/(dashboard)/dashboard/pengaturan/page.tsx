@@ -12,6 +12,7 @@ import {
   FaExclamationTriangle,
 } from "react-icons/fa";
 import { QRCodeSVG } from "qrcode.react";
+import mqtt from "mqtt";
 
 // ─────────────────────────────────────────────
 // TYPES
@@ -26,6 +27,7 @@ interface Device {
   claimCode: string;
   harvestTargetDate?: string | null;
   harvestProcessed?: boolean;
+  docDate?: string | null;
   createdAt: string;
 }
 
@@ -60,11 +62,13 @@ function EditDeviceModal({
   capacity,
   population,
   harvestDate,
+  docDate,
   loading,
   onNameChange,
   onCapacityChange,
   onPopulationChange,
   onHarvestDateChange,
+  onDocDateChange,
   onConfirm,
   onClose,
 }: {
@@ -73,11 +77,13 @@ function EditDeviceModal({
   capacity: string;
   population: string;
   harvestDate: string;
+  docDate: string;
   loading: boolean;
   onNameChange: (v: string) => void;
   onCapacityChange: (v: string) => void;
   onPopulationChange: (v: string) => void;
   onHarvestDateChange: (v: string) => void;
+  onDocDateChange: (v: string) => void;
   onConfirm: () => void;
   onClose: () => void;
 }) {
@@ -155,6 +161,15 @@ function EditDeviceModal({
               type="date"
               value={harvestDate}
               onChange={(e) => onHarvestDateChange(e.target.value)}
+              className="input input-bordered w-full rounded-xl text-sm bg-slate-50 border-slate-200 focus:outline-none h-10"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Tanggal DOC</label>
+            <input
+              type="date"
+              value={docDate}
+              onChange={(e) => onDocDateChange(e.target.value)}
               className="input input-bordered w-full rounded-xl text-sm bg-slate-50 border-slate-200 focus:outline-none h-10"
             />
           </div>
@@ -294,6 +309,166 @@ function DeleteDeviceModal({
 }
 
 // ─────────────────────────────────────────────
+// LOG AKTIVITAS MODAL
+// ─────────────────────────────────────────────
+interface LogEntry {
+  _id: string;
+  action: string;
+  field?: string;
+  fieldLabel?: string;
+  oldValue?: string;
+  newValue?: string;
+  description: string;
+  version?: string;
+  notes?: string;
+  timestamp: string;
+}
+
+const filterLabels: Record<string, string> = {
+  all: "Semua",
+  config: "Konfigurasi",
+  ota: "OTA",
+};
+
+function LogAktivitasModal({
+  target,
+  onClose,
+}: {
+  target: Device | null;
+  onClose: () => void;
+}) {
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState<"all" | "config" | "ota">("all");
+
+  useEffect(() => {
+    if (!target) return;
+    setLoading(true);
+    setLogs([]);
+    fetch(`/api/devices/${target._id}/logs`)
+      .then((r) => r.json())
+      .then((data) => setLogs(data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [target]);
+
+  if (!target) return null;
+
+  const filteredLogs = logs.filter((l) => {
+    if (filter === "all") return true;
+    if (filter === "config") return l.action === "update";
+    if (filter === "ota") return l.action === "ota";
+    return true;
+  });
+
+  const fmtDate = (ts: string) => {
+    const d = new Date(ts);
+    const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: "rgba(15,23,42,0.45)", backdropFilter: "blur(4px)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="relative w-full max-w-lg rounded-3xl bg-white overflow-hidden"
+        style={{ boxShadow: "0 32px 64px -12px rgba(15,23,42,0.35), 0 0 0 1px rgba(15,23,42,0.06)" }}
+      >
+        <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-blue-400 to-blue-300" />
+        <div className="flex items-start justify-between px-6 pt-6 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-blue-50 rounded-xl">
+              <FaCog className="text-blue-400 text-lg" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Aktivitas Kandang</h3>
+              <p className="text-xs text-slate-400 mt-0.5">{target.name}</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="btn btn-ghost btn-xs w-8 h-8 min-h-0 rounded-lg text-slate-400 hover:text-slate-700"
+          >
+            <FaTimes />
+          </button>
+        </div>
+        <div className="h-px bg-slate-100 mx-6" />
+
+        {/* Filter tabs */}
+        <div className="flex gap-1 px-6 pt-4 pb-2">
+          {(["all", "config", "ota"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                filter === f
+                  ? "bg-slate-900 text-white"
+                  : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+              }`}
+            >
+              {filterLabels[f]}
+            </button>
+          ))}
+        </div>
+
+        <div className="px-6 pt-2 pb-6 max-h-[55vh] overflow-y-auto">
+          {loading ? (
+            <div className="space-y-3 py-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex gap-3 animate-pulse">
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 shrink-0" />
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3 w-40 bg-slate-100 rounded" />
+                    <div className="h-2 w-24 bg-slate-100 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredLogs.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-8">
+              {filter === "all" ? "Belum ada aktivitas untuk kandang ini." : "Tidak ada aktivitas dengan filter ini."}
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {filteredLogs.map((log) => (
+                <div key={log._id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                    log.action === "ota" ? "bg-purple-100 text-purple-600" : "bg-blue-100 text-blue-600"
+                  }`}>
+                    {log.action === "ota" ? "⬆" : "✎"}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-slate-700">{log.description}</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">{fmtDate(log.timestamp)}</p>
+                  </div>
+                  {log.action === "ota" && log.version && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 shrink-0">
+                      v{log.version}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="px-6 pb-6">
+          <button
+            onClick={onClose}
+            className="btn btn-sm bg-slate-900 hover:bg-slate-800 border-none text-white rounded-xl w-full"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // MAIN PAGE
 // ─────────────────────────────────────────────
 export default function SettingsPage() {
@@ -312,10 +487,12 @@ export default function SettingsPage() {
   const [editCapacity, setEditCapacity] = useState("");
   const [editPopulation, setEditPopulation] = useState("");
   const [editHarvestDate, setEditHarvestDate] = useState("");
+  const [editDocDate, setEditDocDate] = useState("");
   const [editLoading, setEditLoading] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<Device | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [logTarget, setLogTarget] = useState<Device | null>(null);
 
   // ── Fetch devices
   useEffect(() => {
@@ -381,6 +558,7 @@ export default function SettingsPage() {
     setEditCapacity(String(device.capacity));
     setEditPopulation(device.currentPopulation != null ? String(device.currentPopulation) : "");
     setEditHarvestDate(device.harvestTargetDate ? device.harvestTargetDate.slice(0, 10) : "");
+    setEditDocDate(device.docDate ? device.docDate.slice(0, 10) : "");
   };
 
   const handleConfirmEdit = async () => {
@@ -394,6 +572,8 @@ export default function SettingsPage() {
       if (editPopulation) body.currentPopulation = Number(editPopulation);
       if (editHarvestDate) body.harvestTargetDate = editHarvestDate;
       else body.harvestTargetDate = null;
+      if (editDocDate) body.docDate = editDocDate;
+      else body.docDate = null;
 
       await fetch(`/api/devices/${editTarget._id}`, {
         method: "PATCH",
@@ -409,11 +589,32 @@ export default function SettingsPage() {
                 capacity: Number(editCapacity),
                 currentPopulation: editPopulation ? Number(editPopulation) : 0,
                 harvestTargetDate: editHarvestDate || null,
+                docDate: editDocDate || null,
               }
             : d
         )
       );
       setEditTarget(null);
+
+      // ── Kirim DOC date ke ESP32 via MQTT ──
+      if (editDocDate) {
+        const [y, m, d] = editDocDate.split("-").map(Number);
+        const mqttClient = mqtt.connect("wss://mqtt.aldozeno.my.id:443/mqtt", {
+          username: "admin",
+          password: "ewaldo12345",
+          clientId: "pengaturan-" + Math.random().toString(36).substring(2, 10),
+          clean: true,
+        });
+        mqttClient.on("connect", () => {
+          mqttClient.publish(
+            `device/${editTarget._id}/cmd`,
+            JSON.stringify({ type: "setdoc", year: y, month: m, day: d }),
+            { qos: 1 },
+            () => mqttClient.end()
+          );
+        });
+        mqttClient.on("error", () => mqttClient.end());
+      }
     } catch (err) {
       console.error("Gagal update device:", err);
     } finally {
@@ -642,6 +843,13 @@ export default function SettingsPage() {
                     <FaPencilAlt className="text-xs" />
                   </button>
                   <button
+                    onClick={() => setLogTarget(device)}
+                    className="text-slate-400 hover:text-slate-600 transition-colors p-1"
+                    title="Aktivitas kandang"
+                  >
+                    <FaCog className="text-xs" />
+                  </button>
+                  <button
                     onClick={() => handleClickDelete(device)}
                     className="text-red-400 hover:text-red-600 transition-colors p-1"
                     title="Hapus kandang"
@@ -661,11 +869,13 @@ export default function SettingsPage() {
         capacity={editCapacity}
         population={editPopulation}
         harvestDate={editHarvestDate}
+        docDate={editDocDate}
         loading={editLoading}
         onNameChange={setEditName}
         onCapacityChange={setEditCapacity}
         onPopulationChange={setEditPopulation}
         onHarvestDateChange={setEditHarvestDate}
+        onDocDateChange={setEditDocDate}
         onConfirm={handleConfirmEdit}
         onClose={() => setEditTarget(null)}
       />
@@ -674,6 +884,10 @@ export default function SettingsPage() {
         loading={deleteLoading}
         onConfirm={handleConfirmDelete}
         onClose={() => setDeleteTarget(null)}
+      />
+      <LogAktivitasModal
+        target={logTarget}
+        onClose={() => setLogTarget(null)}
       />
     </div>
   );
