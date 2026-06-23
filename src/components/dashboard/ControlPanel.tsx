@@ -21,6 +21,7 @@ interface ControlPanelProps {
   currentVfd: number;
   currentDimmer: number;
   manualOverride: boolean;
+  emergencyMode: boolean;
   currentTemp: number;
   currentHum: number;
 }
@@ -31,6 +32,7 @@ export default function ControlPanel({
   currentVfd,
   currentDimmer,
   manualOverride,
+  emergencyMode,
   currentTemp,
   currentHum,
 }: ControlPanelProps) {
@@ -44,6 +46,7 @@ export default function ControlPanel({
   const [sending, setSending] = useState(false);
   const [rebootConfirm, setRebootConfirm] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [localEmergency, setLocalEmergency] = useState(emergencyMode);
 
   useEffect(() => {
     setMode(manualOverride ? "manual" : "auto");
@@ -55,6 +58,10 @@ export default function ControlPanel({
       setDimmerValue(currentDimmer);
     }
   }, [currentVfd, currentDimmer, mode]);
+
+  useEffect(() => {
+    if (!emergencyMode) setLocalEmergency(false);
+  }, [emergencyMode]);
 
   const sendCommand = (payload: Record<string, unknown>) => {
     if (!deviceId || !publish) return;
@@ -94,10 +101,12 @@ export default function ControlPanel({
 
   const handleEmergencyStop = () => {
     sendCommand({ type: "emergency", action: "stop" });
+    setLocalEmergency(true);
   };
 
   const handleEmergencyResume = () => {
     sendCommand({ type: "emergency", action: "resume" });
+    setLocalEmergency(false);
   };
 
   const handleReboot = () => {
@@ -303,19 +312,19 @@ export default function ControlPanel({
 
         {/* Emergency + Reboot */}
         <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-          {!manualOverride ? (
-            <button
-              onClick={handleEmergencyStop}
-              className="flex items-center gap-1 px-2.5 py-1.5 bg-red-50 text-red-600 rounded-xl text-[10px] font-medium hover:bg-red-100 transition-colors"
-            >
-              <FaStopCircle className="text-[10px]" /> Emergency Stop
-            </button>
-          ) : (
+          {(localEmergency || emergencyMode) ? (
             <button
               onClick={handleEmergencyResume}
               className="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-medium hover:bg-emerald-100 transition-colors"
             >
               <FaPlayCircle className="text-[10px]" /> Resume
+            </button>
+          ) : (
+            <button
+              onClick={handleEmergencyStop}
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-red-50 text-red-600 rounded-xl text-[10px] font-medium hover:bg-red-100 transition-colors"
+            >
+              <FaStopCircle className="text-[10px]" /> Emergency Stop
             </button>
           )}
 

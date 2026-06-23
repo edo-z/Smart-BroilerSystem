@@ -15,6 +15,7 @@ import {
   FaServer,
   FaChartArea,
   FaBolt,
+  FaPlayCircle,
   FaChevronRight,
 } from "react-icons/fa";
 import { Line } from "react-chartjs-2";
@@ -47,6 +48,7 @@ interface Device {
   capacity: number;
   active: boolean;
   claimed: boolean;
+  docDate?: string;
   createdAt: string;
 }
 
@@ -59,6 +61,11 @@ interface SensorLog {
   vfd: number;
   dimmer: number;
   manualOverride?: boolean;
+  emergency?: boolean;
+  tempMin?: number;
+  tempMax?: number;
+  humMin?: number;
+  humMax?: number;
   timestamp: string;
 }
 
@@ -610,8 +617,10 @@ function RingkasanKandangModal({
 
   // Phase date predictions
   const today = new Date();
-  const docDate = new Date(today);
-  docDate.setDate(docDate.getDate() - currentAge);
+  const activeDevice = devices.find((d) => d.active);
+  const docDate = activeDevice?.docDate
+    ? new Date(activeDevice.docDate)
+    : new Date(today.getTime() - currentAge * 86400000);
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
   const fmtDate = (d: Date) => `${d.getDate()}/${d.getMonth() + 1}`;
   const fmtMonth = (d: Date) => `${d.getDate()} ${monthNames[d.getMonth()]}`;
@@ -774,6 +783,10 @@ export default function DashboardPage() {
       vfd: data.vfd,
       dimmer: data.dimmer,
       manualOverride: data.manualOverride,
+      tempMin: data.tempMin,
+      tempMax: data.tempMax,
+      humMin: data.humMin,
+      humMax: data.humMax,
       timestamp: new Date().toISOString(),
     };
 
@@ -799,8 +812,8 @@ export default function DashboardPage() {
   );
 
   const chartDataSuhu = useMemo<ChartData<"line">>(() => {
-    const targetLow = logs.map((l) => getPhase(l.age).tempLow);
-    const targetHigh = logs.map((l) => getPhase(l.age).tempHigh);
+    const targetLow = logs.map((l) => l.tempMin ?? getPhase(l.age).tempLow);
+    const targetHigh = logs.map((l) => l.tempMax ?? getPhase(l.age).tempHigh);
     return {
       labels: chartLabels,
       datasets: [
@@ -862,8 +875,8 @@ export default function DashboardPage() {
   }, [logs, chartLabels]);
 
   const chartDataRh = useMemo<ChartData<"line">>(() => {
-    const targetLow = logs.map((l) => getPhase(l.age).rhLow);
-    const targetHigh = logs.map((l) => getPhase(l.age).rhHigh);
+    const targetLow = logs.map((l) => l.humMin ?? getPhase(l.age).rhLow);
+    const targetHigh = logs.map((l) => l.humMax ?? getPhase(l.age).rhHigh);
     return {
       labels: chartLabels,
       datasets: [
@@ -1003,13 +1016,7 @@ export default function DashboardPage() {
   const latestVfd = latest?.vfd ?? null;
   const latestDimmer = latest?.dimmer ?? null;
   const latestManualOverride = latest?.manualOverride ?? false;
-
-  const emergencyStatus = useMemo<"emergency" | "caution" | "none">(() => {
-    if (latestTemp === null) return "none";
-    if (latestTemp < 15 || latestTemp > 43) return "emergency";
-    if (latestTemp < 18 || latestTemp > 40) return "caution";
-    return "none";
-  }, [latestTemp]);
+  const latestEmergency = latest?.emergency ?? false;
   const totalActive = devices.filter((d) => d.active).length;
   const totalStandby = devices.filter((d) => !d.active).length;
   const totalWarning = devices.filter((d) => {
@@ -1125,22 +1132,27 @@ export default function DashboardPage() {
         </div>
 
         {/* Emergency Banner */}
-        {selectedDeviceId && emergencyStatus !== "none" && !emergencyDismissed && (
-          <div className={`rounded-xl border-l-4 overflow-hidden mt-2 ${
-            emergencyStatus === "emergency"
-              ? "border-l-red-500 bg-gradient-to-r from-red-50 to-red-50/80"
-              : "border-l-amber-500 bg-gradient-to-r from-amber-50 to-amber-50/80"
-          }`}>
+        {selectedDeviceId && latestEmergency && !emergencyDismissed && (
+          <div className="rounded-xl border-l-4 border-l-red-500 bg-gradient-to-r from-red-50 to-red-50/80 overflow-hidden mt-2">
             <div className="flex items-start gap-2 p-2">
-              <FaExclamationTriangle className={`text-xs shrink-0 mt-0.5 ${emergencyStatus === "emergency" ? "text-red-500" : "text-amber-500"}`} />
+              <FaExclamationTriangle className="text-xs shrink-0 mt-0.5 text-red-500" />
               <div className="flex-1 min-w-0">
-                <p className={`font-bold text-[11px] ${emergencyStatus === "emergency" ? "text-red-800" : "text-amber-800"}`}>
-                  {emergencyStatus === "emergency" ? "DARURAT" : "PERHATIAN"}
+                <p className="font-bold text-[11px] text-red-800">
+                  DARURAT — SYSTEM STOPPED
                 </p>
-                <p className={`text-[10px] mt-0.5 ${emergencyStatus === "emergency" ? "text-red-600" : "text-amber-600"}`}>
-                  Suhu {latestTemp?.toFixed(1)}°C {emergencyStatus === "emergency" ? "di luar batas aman" : "mendekati batas aman"}
+                <p className="text-[10px] mt-0.5 text-red-600">
+                  Suhu {latestTemp?.toFixed(1)}°C — perangkat dalam mode darurat
                 </p>
               </div>
+              <button
+                onClick={() => {
+                  publish(`device/${selectedDeviceId}/cmd`, JSON.stringify({ type: "emergency", action: "resume" }));
+                  setEmergencyDismissed(true);
+                }}
+                className="flex items-center gap-1 px-2 py-1 bg-emerald-500 text-white rounded-lg text-[10px] font-medium hover:bg-emerald-600 transition-colors shrink-0"
+              >
+                <FaPlayCircle className="text-[10px]" /> Resume
+              </button>
               <button onClick={() => setEmergencyDismissed(true)} className="p-1 rounded-lg hover:bg-black/5 text-slate-400 hover:text-slate-600 transition-colors shrink-0">
                 <FaTimes className="text-[10px]" />
               </button>
@@ -1265,6 +1277,7 @@ export default function DashboardPage() {
           currentVfd={latestVfd ?? 0}
           currentDimmer={latestDimmer ?? 0}
           manualOverride={latestManualOverride}
+          emergencyMode={latestEmergency}
           currentTemp={latestTemp ?? 0}
           currentHum={latestHumid ?? 0}
         />

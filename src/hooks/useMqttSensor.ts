@@ -11,6 +11,11 @@ export interface MqttSensorPayload {
   vfd: number;
   dimmer: number;
   manualOverride?: boolean;
+  emergency?: boolean;
+  tempMin?: number;
+  tempMax?: number;
+  humMin?: number;
+  humMax?: number;
 }
 
 export type MqttStatus = "connected" | "reconnecting" | "disconnected";
