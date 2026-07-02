@@ -989,13 +989,24 @@ export default function DashboardPage() {
     if (!selectedDeviceId) return;
     const fetchHistorical = async () => {
       try {
+        const todayStart = new Date(new Date().setHours(0,0,0,0));
+        const yesterdayStart = new Date(todayStart.getTime() - 86400000);
         const fromMap: Record<string, string> = {
-          "Hari Ini": new Date(new Date().setHours(0,0,0,0)).toISOString(),
-          "Kemarin": new Date(Date.now() - 86400000).toISOString(),
+          "Hari Ini": todayStart.toISOString(),
+          "Kemarin": yesterdayStart.toISOString(),
+          "3 Hari": new Date(Date.now() - 3*86400000).toISOString(),
           "7 Hari": new Date(Date.now() - 7*86400000).toISOString(),
+          "14 Hari": new Date(Date.now() - 14*86400000).toISOString(),
+          "21 Hari": new Date(Date.now() - 21*86400000).toISOString(),
+          "30 Hari": new Date(Date.now() - 30*86400000).toISOString(),
+        };
+        const toMap: Record<string, string> = {
+          "Kemarin": new Date(yesterdayStart.getTime() + 86399999).toISOString(),
         };
         const from = fromMap[timeRange] || "";
-        const url = `/api/logs?deviceId=${selectedDeviceId}&limit=50&from=${from}&t=${Date.now()}`;
+        const to = toMap[timeRange] || "";
+        const url = `/api/logs?deviceId=${selectedDeviceId}&limit=50&from=${from}` +
+          (to ? `&to=${to}` : "") + `&t=${Date.now()}`;
         const res = await fetch(url);
         const data = await res.json();
         const logsData: SensorLog[] = data.logs || [];
@@ -1010,7 +1021,9 @@ export default function DashboardPage() {
 
   const { data: session } = useSession();
   const userName = session?.user?.name ?? "Peternak Cerdas";
-  const latest = logs[logs.length - 1] ?? null;
+  const latest = selectedDeviceId
+    ? allLogs.find((l) => String(l.deviceId) === selectedDeviceId) ?? null
+    : logs[logs.length - 1] ?? null;
   const latestTemp = latest?.temperature ?? null;
   const latestHumid = latest?.humidity ?? null;
   const latestVfd = latest?.vfd ?? null;
@@ -1241,7 +1254,11 @@ export default function DashboardPage() {
             >
               <option>Hari Ini</option>
               <option>Kemarin</option>
+              <option>3 Hari</option>
               <option>7 Hari</option>
+              <option>14 Hari</option>
+              <option>21 Hari</option>
+              <option>30 Hari</option>
             </select>
           }
         >

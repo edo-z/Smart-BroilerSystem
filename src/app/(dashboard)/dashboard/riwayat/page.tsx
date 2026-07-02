@@ -375,7 +375,7 @@ export default function RiwayatPage() {
     const header = ["Waktu", "Device", "Suhu (°C)", "Kelembapan (%)", "Umur (hari)", "VFD (%)", "Dimmer (%)", "Status"];
     const rows = logs.map((l) => [
       formatDate(l.timestamp),
-      l.deviceId,
+      deviceMap.get(l.deviceId) ?? l.deviceId,
       l.temperature,
       l.humidity,
       l.age,
@@ -383,7 +383,7 @@ export default function RiwayatPage() {
       l.dimmer,
       getTempStatus(l.temperature, l.age).label,
     ]);
-    const csv = [header, ...rows].map((r) => r.join(",")).join("\n");
+    const csv = [header, ...rows].map((r) => r.map(v => `"${v}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

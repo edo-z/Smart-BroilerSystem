@@ -37,8 +37,6 @@ export default function ControlPanel({
   currentHum,
 }: ControlPanelProps) {
   const [mode, setMode] = useState<"auto" | "manual">(manualOverride ? "manual" : "auto");
-  const [vfdValue, setVfdValue] = useState(currentVfd);
-  const [dimmerValue, setDimmerValue] = useState(currentDimmer);
   const [tempMin, setTempMin] = useState("");
   const [tempMax, setTempMax] = useState("");
   const [humMin, setHumMin] = useState("");
@@ -51,13 +49,6 @@ export default function ControlPanel({
   useEffect(() => {
     setMode(manualOverride ? "manual" : "auto");
   }, [manualOverride]);
-
-  useEffect(() => {
-    if (mode === "auto") {
-      setVfdValue(currentVfd);
-      setDimmerValue(currentDimmer);
-    }
-  }, [currentVfd, currentDimmer, mode]);
 
   useEffect(() => {
     if (!emergencyMode) setLocalEmergency(false);
@@ -74,15 +65,6 @@ export default function ControlPanel({
       setFeedback("Terkirim");
       setTimeout(() => setFeedback(null), 2000);
     }, 500);
-  };
-
-  const handleSendControl = () => {
-    sendCommand({
-      type: "control",
-      vfd: Math.round(vfdValue),
-      dimmer: Math.round(dimmerValue),
-      mode,
-    });
   };
 
   const handleSendSetpoint = () => {
@@ -116,9 +98,7 @@ export default function ControlPanel({
 
   const handleModeToggle = (newMode: "auto" | "manual") => {
     setMode(newMode);
-    if (newMode === "auto") {
-      sendCommand({ type: "control", mode: "auto" });
-    }
+    sendCommand({ type: "control", mode: newMode });
   };
 
   return (
@@ -130,6 +110,11 @@ export default function ControlPanel({
           {manualOverride && (
             <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
               Manual
+            </span>
+          )}
+          {mode === "manual" && (
+            <span className="text-[10px] font-medium text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full">
+              Threshold ON/OFF
             </span>
           )}
         </div>
@@ -164,63 +149,83 @@ export default function ControlPanel({
           </button>
         </div>
 
-        {/* VFD Slider */}
-        <div>
-          <label className="flex items-center justify-between text-xs font-medium text-slate-500 mb-1">
-            <span className="flex items-center gap-1.5">
+        {mode === "manual" && (
+          <p className="text-[10px] text-slate-400 leading-relaxed">
+            VFD/Dimmer dikontrol otomatis berdasarkan Rentang Suhu/RH di bawah. 
+            Slider di bawah hanya menampilkan nilai aktual.
+          </p>
+        )}
+
+        {/* VFD */}
+        {mode === "auto" ? (
+          <div>
+            <label className="flex items-center justify-between text-xs font-medium text-slate-500 mb-1">
+              <span className="flex items-center gap-1.5">
+                <FaFan className="text-blue-400 text-[10px]" /> VFD
+              </span>
+              <span>{Math.round(currentVfd)}/255 ({Math.round((currentVfd / 255) * 100)}%)</span>
+            </label>
+            <input
+              type="range" min={0} max={255} value={currentVfd} disabled
+              className="w-full h-1.5 rounded-full appearance-none cursor-pointer
+                accent-slate-300 disabled:accent-slate-300
+                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5
+                [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-slate-300
+                [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
+            />
+          </div>
+        ) : (
+          <div className="flex items-center justify-between py-2">
+            <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
               <FaFan className="text-blue-400 text-[10px]" /> VFD
             </span>
-            <span>{Math.round(vfdValue)}/255 ({Math.round((vfdValue / 255) * 100)}%)</span>
-          </label>
-          <input
-            type="range"
-            min={0}
-            max={255}
-            value={vfdValue}
-            onChange={(e) => setVfdValue(Number(e.target.value))}
-            disabled={mode === "auto"}
-            className="w-full h-1.5 rounded-full appearance-none cursor-pointer
-              accent-slate-900 disabled:accent-slate-300
-              [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5
-              [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-slate-900
-              [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer
-              disabled:[&::-webkit-slider-thumb]:bg-slate-300"
-          />
-        </div>
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+              currentVfd > 0
+                ? "bg-green-50 text-green-700"
+                : "bg-slate-100 text-slate-400"
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${
+                currentVfd > 0 ? "bg-green-500" : "bg-slate-300"
+              }`} />
+              {currentVfd > 0 ? "ON" : "OFF"} ({Math.round((currentVfd / 255) * 100)}%)
+            </span>
+          </div>
+        )}
 
-        {/* Dimmer Slider */}
-        <div>
-          <label className="flex items-center justify-between text-xs font-medium text-slate-500 mb-1">
-            <span className="flex items-center gap-1.5">
+        {/* Dimmer */}
+        {mode === "auto" ? (
+          <div>
+            <label className="flex items-center justify-between text-xs font-medium text-slate-500 mb-1">
+              <span className="flex items-center gap-1.5">
+                <FaFire className="text-red-400 text-[10px]" /> Dimmer
+              </span>
+              <span>{Math.round(currentDimmer)}/255 ({Math.round((currentDimmer / 255) * 100)}%)</span>
+            </label>
+            <input
+              type="range" min={0} max={255} value={currentDimmer} disabled
+              className="w-full h-1.5 rounded-full appearance-none cursor-pointer
+                accent-slate-300 disabled:accent-slate-300
+                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5
+                [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-slate-300
+                [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
+            />
+          </div>
+        ) : (
+          <div className="flex items-center justify-between py-2">
+            <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
               <FaFire className="text-red-400 text-[10px]" /> Dimmer
             </span>
-            <span>{Math.round(dimmerValue)}/255 ({Math.round((dimmerValue / 255) * 100)}%)</span>
-          </label>
-          <input
-            type="range"
-            min={0}
-            max={255}
-            value={dimmerValue}
-            onChange={(e) => setDimmerValue(Number(e.target.value))}
-            disabled={mode === "auto"}
-            className="w-full h-1.5 rounded-full appearance-none cursor-pointer
-              accent-slate-900 disabled:accent-slate-300
-              [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5
-              [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-slate-900
-              [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer
-              disabled:[&::-webkit-slider-thumb]:bg-slate-300"
-          />
-        </div>
-
-        {mode === "manual" && (
-          <button
-            onClick={handleSendControl}
-            disabled={sending}
-            className="w-full flex items-center justify-center gap-1.5 py-2 bg-slate-900 text-white rounded-xl text-xs font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors"
-          >
-            <FaPaperPlane className="text-[10px]" />
-            {sending ? "Mengirim..." : "Kirim Kontrol"}
-          </button>
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+              currentDimmer > 0
+                ? "bg-red-50 text-red-700"
+                : "bg-slate-100 text-slate-400"
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${
+                currentDimmer > 0 ? "bg-red-500" : "bg-slate-300"
+              }`} />
+              {currentDimmer > 0 ? "ON" : "OFF"} ({Math.round((currentDimmer / 255) * 100)}%)
+            </span>
+          </div>
         )}
 
         {/* Setpoint Suhu — min/max */}
